@@ -106,6 +106,7 @@ app.use("/countingUnit", countingUnitRoute);
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server starting at port ${process.env.PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server starting at port :${port}`);
 });

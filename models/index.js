@@ -2,15 +2,15 @@ const { Sequelize } = require("sequelize");
 
 //อันนี้เป็นส่วนที่ใช้ในการบอก Sequelize ว่าเราจะ connect ไปที่ไหน
 const sequelize = new Sequelize(
-  "asset-management", // นี่เป็นชื่อ DB ของเรานะครับ
-  "Nanine", // user ที่ใช้สรการเข้าไปยัง db
-  "123123", // password
+  process.env.DB_NAME, // นี่เป็นชื่อ DB ของเรานะครับ
+  process.env.DB_USERNAME, // user ที่ใช้สรการเข้าไปยัง db
+  process.env.DB_PASSWORD, // password
   {
-    host: "localhost", // host ของ db ที่เราสร้างเอาไว้
+    host: process.env.DB_HOST, // host ของ db ที่เราสร้างเอาไว้
     dialect: "mssql", // 'mysql' | 'mariadb' | 'postgres' | 'mssql'   พวกนี้ใช่ก็ใช้ได้นะจ๊ะ
     define: {
-      timestamps: true, //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
-    },
+      timestamps: true //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
+    }
   }
 );
 
@@ -66,23 +66,23 @@ db.type = require("./typeModel")(sequelize, Sequelize);
 //ส่วนนี้เป็นการตั้งต่า relation นะครับ โดยเป็นการบอกว่าใน 1 team มีได้หลาย player ง่ายๆ ก็คือ relation แบบ 1:M
 db.floor.hasMany(db.room, {
   foreignKey: { name: "floorId", field: "floorId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.building.hasMany(db.floor, {
   foreignKey: { name: "buildingId", field: "buildingId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.subComponentAsset, {
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.assetDocument, {
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.assetImage, {
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
