@@ -1,3 +1,7 @@
+// const { sequelize } = require("./models");
+// sequelize.sync({ force: true });
+// sequelize.sync({ alter: true });
+
 const express = require("express");
 const dotenv = require("dotenv").config();
 const helmet = require("helmet");

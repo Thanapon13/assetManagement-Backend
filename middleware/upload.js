@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
       cb(null, "public/arrayImage");
     } // console.log(file, "filemulter");
     else if (file.fieldname === "arrayDocument") {
-      cb(null);
+      cb(null, "public/arrayDocument");
     }
   },
   filename: (req, file, cb) => {
