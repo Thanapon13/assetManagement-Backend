@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const asset = sequelize.define(
-    "TB_ASSETS",
+  const pkAsset = sequelize.define(
+    "TB_PACKAGE_ASSETS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -22,26 +22,13 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "assetNumber",
       },
-      serialNumber: {
-        type: Sequelize.STRING(100),
-        allowNull: true,
-        field: "serialNumber",
-      },
+
       productName: {
         type: Sequelize.STRING(100),
         allowNull: true,
         field: "productName",
       },
-      model: {
-        type: Sequelize.STRING(100),
-        allowNull: true,
-        field: "model",
-      },
-      engProductName: {
-        type: Sequelize.STRING(100),
-        allowNull: true,
-        field: "engProductName",
-      },
+
       status: {
         type: Sequelize.STRING(100),
         allowNull: false,
@@ -61,6 +48,26 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(100),
         allowNull: true,
         field: "acquiredType",
+      },
+      pricePerUnit: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "pricePerUnit",
+      },
+      model: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "model",
+      },
+      engProductName: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "engProductName",
+      },
+      assetGroupNumber: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "assetGroupNumber",
       },
       type: {
         type: Sequelize.STRING(100),
@@ -102,6 +109,11 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "allSector",
       },
+      source: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "source",
+      },
       department: {
         type: Sequelize.STRING(100),
         allowNull: true,
@@ -137,10 +149,60 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "size",
       },
-      assetGroupNumber: {
+      responsiblePerson: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "assetGroupNumber",
+        field: "responsiblePerson",
+      },
+      salePerson: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "salePerson",
+      },
+      phoneNumber: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "phoneNumber",
+      },
+      price: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "price",
+      },
+      billNumber: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "billNumber",
+      },
+      yearPurchase: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "yearPurchase",
+      },
+      paidDate: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "paidDate",
+      },
+      distributedDocument: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "distributedDocument",
+      },
+      documentDate: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "documentDate",
+      },
+      approvalDate: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "approvalDate",
+      },
+      note: {
+        type: Sequelize.STRING(1000),
+        allowNull: true,
+        field: "note",
       },
       asset01: {
         type: Sequelize.STRING(100),
@@ -152,26 +214,27 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "replacedAssetNumber",
       },
-      pricePerUnit: {
-        type: Sequelize.INTEGER(50),
+      distributeToSector: {
+        type: Sequelize.STRING(100),
         allowNull: true,
-        field: "pricePerUnit",
+        field: "distributeToSector",
       },
+
       //ค่าเสื่อม
-      depreciationStartDate: {
+      insuranceExpiredDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationStartDate",
+        field: "insuranceExpiredDate",
       },
-      depreciationRegisterDate: {
+      insuranceExpiredDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationRegisterDate",
+        field: "insuranceExpiredDate",
       },
-      depreciationReceivedDate: {
+      insuranceExpiredDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationReceivedDate",
+        field: "insuranceExpiredDate",
       },
       depreciationPrice: {
         type: Sequelize.INTEGER(50),
@@ -279,21 +342,23 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "accumulateDepreciationBookValue",
       },
-      // // assetPic
-      // imageArray: [{ image: String }],
+      type4: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "type4",
+      },
+      type8: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "type8",
+      },
 
-      // // document
-      // documentArray: [{ document: String }],
-      // //genData for draft
-      // genDataArray: [
-      //   {
-      //     assetNumber: String,
-      //     serialNumber: String,
-      //     replacedAssetNumber: String,
-      //     asset01: String,
-      //     sector: String,
-      //   },
-      // ],
+      type13: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "type13",
+      },
+
       reserved: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
@@ -402,9 +467,9 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     {
-      tableName: "TB_ASSETS",
+      tableName: "TB_PACKAGE_ASSETS",
     }
   );
 
-  return asset;
+  return pkAsset;
 };

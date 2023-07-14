@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const floor = sequelize.define(
-    "TBM_FLOORS",
+  const borrowHasAsset = sequelize.define(
+    "TB_BORROW_HAS_ASSETS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -12,29 +12,26 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         field: "_id",
       },
-      name: {
+      reason: {
+        type: Sequelize.STRING(1000),
+        allowNull: false,
+        field: "reason",
+      },
+      return: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "name",
+        field: "return",
+      },
+      returnDate: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        field: "returnDate",
       },
     },
     {
-      tableName: "TBM_FLOORS",
+      tableName: "TB_BORROW_HAS_ASSETS",
     }
   );
 
-  // floorSchema.pre("remove", async function (next) {
-  //   try {
-  //     let room = await Room.deleteMany({
-  //       floorId: {
-  //         $in: this.id,
-  //       },
-  //     });
-  //     console.log(room, "delete room");
-  //     next();
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // });
-  return floor;
+  return borrowHasAsset;
 };
