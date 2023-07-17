@@ -162,6 +162,8 @@ db.pkAsset.hasMany(db.bottomSubComponentDataPkAsset, {
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
+
+////  feat : transfer
 db.transfer.hasMany(db.subComponentTransfer, {
   as: "subComponentTransfers",
   foreignKey: { name: "transferId", field: "transferId" },
@@ -177,7 +179,16 @@ db.transfer.hasMany(db.transferHasPkAsset, {
   foreignKey: { name: "transferId", field: "transferId" },
   onDelete: "cascade",
 });
-
+db.asset.hasMany(db.transferHasAsset, {
+  as: "transferHasAssets",
+  foreignKey: { name: "assetId", field: "assetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.transferHasPkAsset, {
+  as: "transferHasPkAssets",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -198,14 +209,20 @@ db.subComponentPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
-db.subComponentTransfer.belongsTo(db.pkAsset, {
+db.subComponentTransfer.belongsTo(db.transfer, {
   foreignKey: "transferId",
 });
-db.transferHasAsset.belongsTo(db.pkAsset, {
+db.transferHasAsset.belongsTo(db.transfer, {
+  foreignKey: "transferId",
+});
+db.transferHasAsset.belongsTo(db.asset, {
+  foreignKey: "assetId",
+});
+db.transferHasPkAsset.belongsTo(db.transfer, {
   foreignKey: "transferId",
 });
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
-  foreignKey: "transferId",
+  foreignKey: "packageAssetId",
 });
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");
