@@ -9,8 +9,8 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST, // host ของ db ที่เราสร้างเอาไว้
     dialect: "mssql", // 'mysql' | 'mariadb' | 'postgres' | 'mssql'   พวกนี้ใช่ก็ใช้ได้นะจ๊ะ
     define: {
-      timestamps: true, //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
-    },
+      timestamps: true //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
+    }
   }
 );
 
@@ -59,7 +59,7 @@ db.repairSector = require("./repairSectorModel")(sequelize, Sequelize);
 db.room = require("./roomModel")(sequelize, Sequelize);
 db.sector = require("./sectorModel")(sequelize, Sequelize);
 db.source = require("./sourceModel")(sequelize, Sequelize);
-db.subComponentTransfer = require("./subCompomentTransferModel")(
+db.subComponentTransfer = require("./subComponentTransferModel")(
   sequelize,
   Sequelize
 );
@@ -94,100 +94,100 @@ db.type = require("./typeModel")(sequelize, Sequelize);
 db.floor.hasMany(db.room, {
   as: "rooms",
   foreignKey: { name: "floorId", field: "floorId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.building.hasMany(db.floor, {
   as: "floors",
   foreignKey: { name: "buildingId", field: "buildingId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.subComponentAsset, {
   as: "subComponentAssets",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.assetDocument, {
   as: "assetDocuments",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.assetImage, {
   as: "assetImages",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.borrow.hasMany(db.borrowHasAsset, {
   as: "borrowHasAssets",
   foreignKey: { name: "borrowId", field: "borrowId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.borrow.hasMany(db.borrowHasPkAsset, {
   as: "borrowHasPkAssets",
   foreignKey: { name: "borrowId", field: "borrowId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.borrow.hasMany(db.borrowImage, {
   as: "borrowImages",
   foreignKey: { name: "borrowId", field: "borrowId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.borrow.hasMany(db.subComponentBorrow, {
   as: "subComponentBorrows",
   foreignKey: { name: "borrowId", field: "borrowId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 
 db.pkAsset.hasMany(db.asset, {
   as: "packageAssets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetDocument, {
   as: "packageDocuments",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetImage, {
   as: "packageImages",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.subComponentPkAsset, {
   as: "subComponentPackageAssets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.bottomSubComponentDataPkAsset, {
   as: "bottomSubComponentDataPackageAssets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 
 ////  feat : transfer
 db.transfer.hasMany(db.subComponentTransfer, {
   as: "subComponentTransfers",
   foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.transfer.hasMany(db.transferHasAsset, {
   as: "transferHasAssets",
   foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.transfer.hasMany(db.transferHasPkAsset, {
   as: "transferHasPkAssets",
   foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.asset.hasMany(db.transferHasAsset, {
   as: "transferHasAssets",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.transferHasPkAsset, {
   as: "transferHasPkAssets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade",
+  onDelete: "cascade"
 });
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
@@ -207,23 +207,37 @@ db.pkAssetDocument.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.pkAssetImage.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.subComponentPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
-  foreignKey: "packageAssetId",
+  foreignKey: "packageAssetId"
 });
 db.subComponentTransfer.belongsTo(db.transfer, {
-  foreignKey: "transferId",
+  foreignKey: "transferId"
 });
 db.transferHasAsset.belongsTo(db.transfer, {
-  foreignKey: "transferId",
+  foreignKey: "transferId"
 });
 db.transferHasAsset.belongsTo(db.asset, {
-  foreignKey: "assetId",
+  foreignKey: "assetId"
 });
 db.transferHasPkAsset.belongsTo(db.transfer, {
-  foreignKey: "transferId",
+  foreignKey: "transferId"
 });
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
-  foreignKey: "packageAssetId",
+  foreignKey: "packageAssetId"
 });
+
+module.exports = db;
+
 // sequelize.sync({ force: true });
-// console.log("All models were synchronized successfully.");
+
+// db.sequelize
+//   .sync({ alter: true })
+//   .then(() => {
+//     console.log("Database synchronized successfully");
+//     // เริ่มทำสิ่งที่ต้องการหลังจากการซิงค์ฐานข้อมูล
+//   })
+//   .catch(error => {
+//     console.error("Error synchronizing database:", error);
+//   });
+// // console.log("All models were synchronized successfully.");
+
 module.exports = db;

@@ -1,7 +1,4 @@
 // const { sequelize } = require("./models");
-// sequelize.sync({ force: true });
-// sequelize.sync({ alter: true });
-
 const express = require("express");
 const dotenv = require("dotenv").config();
 const helmet = require("helmet");
@@ -15,7 +12,7 @@ const packageAssetRoute = require("./route/packageAssetRoute");
 const assetRoute = require("./route/assetRoute");
 // const borrowRoute = require("./route/borrowRoute");
 // const withdrawRoute = require("./route/withdrawRoute");
-// const transferRoute = require("./route/transferRoute");
+const transferRoute = require("./route/transferRoute");
 // const repairRoute = require("./route/repairRoute");
 // const merchantRoute = require("./route/merchantRoute");
 // const roleRoute = require("./route/roleRoute");
@@ -70,7 +67,7 @@ app.use("/asset", assetRoute);
 app.use("/packageAsset", packageAssetRoute);
 // app.use("/borrow", borrowRoute);
 // app.use("/withdraw", withdrawRoute);
-// app.use("/transfer", transferRoute);
+app.use("/transfer", transferRoute);
 // app.use("/repair", repairRoute);
 // app.use("/merchant", merchantRoute);
 // app.use("/role", roleRoute);

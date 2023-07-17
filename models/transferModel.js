@@ -10,88 +10,93 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
+      },
+      transferDocumentNumber: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "transferDocumentNumber"
       },
       transferSector: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "transferSector",
+        field: "transferSector"
       },
       subSector: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "subSector",
+        field: "subSector"
       },
       transfereeSector: {
         type: Sequelize.STRING(50),
         allowNull: true,
         unique: true,
-        field: "transfereeSector",
+        field: "transfereeSector"
       },
       building: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "building",
+        field: "building"
       },
       floor: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "floor",
+        field: "floor"
       },
       room: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "room",
+        field: "room"
       },
       name_recorder: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "name_recorder",
+        field: "name_recorder"
       },
       dateTime_recorder: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "dateTime_recorder",
+        field: "dateTime_recorder"
       },
       name_courier: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "name_courier",
+        field: "name_courier"
       },
       dateTime_courier: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "dateTime_courier",
+        field: "dateTime_courier"
       },
       name_approver: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "name_approver",
+        field: "name_approver"
       },
       dateTime_approver: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "name_approver",
+        field: "dateTime_approver"
       },
       status: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "status",
+        field: "status"
       },
-     
+
       reason: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "reason",
+        field: "reason"
       },
       deletedAt: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "deletedAt",
-      },
+        field: "deletedAt"
+      }
     },
     {
-      tableName: "TB_TRANSFERS",
+      tableName: "TB_TRANSFERS"
     }
   );
 

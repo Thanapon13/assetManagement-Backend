@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const subComponentTranfer = sequelize.define(
-    "TB_SUB_COMPONENT_TRANSFERS ",
+    "TB_SUB_COMPONENT_TRANSFERS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -10,28 +10,28 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       assetNumber: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "assetNumber",
+        field: "assetNumber"
       },
       isPackage: {
         type: Sequelize.BOOLEAN,
         allowNull: true,
-        field: "isPackage",
+        field: "isPackage"
       },
       productName: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        field: "productName",
+        field: "productName"
       },
       amount: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        field: "amount",
-      },
+        field: "amount"
+      }
 
       // floorId: {
       //   type: mongoose.Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ module.exports = (sequelize, Sequelize) => {
       // },
     },
     {
-      tableName: "TB_SUB_COMPONENT_TRANSFERS ",
+      tableName: "TB_SUB_COMPONENT_TRANSFERS"
     }
   );
 
