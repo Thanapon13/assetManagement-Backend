@@ -10,21 +10,19 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       name: {
         type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
-        field: "name",
-      },
+        field: "name"
+      }
     },
     {
-      tableName: "TBM_ACQUIRED_TYPES",
+      tableName: "TBM_ACQUIRED_TYPES"
     }
   );
 
   return acquiredType;
 };
-
-

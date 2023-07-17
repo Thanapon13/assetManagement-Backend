@@ -10,16 +10,17 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       document: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "document",
-      },
+        field: "document"
+      }
     },
     {
       tableName: "TB_ASSET_DOCUMENTS",
+
     }
   );
 

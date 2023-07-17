@@ -2,11 +2,11 @@ const { Sequelize } = require("sequelize");
 
 //อันนี้เป็นส่วนที่ใช้ในการบอก Sequelize ว่าเราจะ connect ไปที่ไหน
 const sequelize = new Sequelize(
-  "asset-management", // นี่เป็นชื่อ DB ของเรานะครับ
-  "Nanine", // user ที่ใช้สรการเข้าไปยัง db
-  "123123", // password
+  process.env.DB_NAME, // นี่เป็นชื่อ DB ของเรานะครับ
+  process.env.DB_USERNAME, // user ที่ใช้สรการเข้าไปยัง db
+  process.env.DB_PASSWORD, // password
   {
-    host: "localhost", // host ของ db ที่เราสร้างเอาไว้
+    host: process.env.DB_HOST, // host ของ db ที่เราสร้างเอาไว้
     dialect: "mssql", // 'mysql' | 'mariadb' | 'postgres' | 'mssql'   พวกนี้ใช่ก็ใช้ได้นะจ๊ะ
     define: {
       timestamps: true, //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
@@ -92,14 +92,17 @@ db.building.hasMany(db.floor, {
   onDelete: "cascade",
 });
 db.asset.hasMany(db.subComponentAsset, {
+  as: "subComponentAssets",
   foreignKey: { name: "assetId", field: "assetId" },
   onDelete: "cascade",
 });
 db.asset.hasMany(db.assetDocument, {
+  as: "assetDocuments",
   foreignKey: { name: "assetId", field: "assetId" },
   onDelete: "cascade",
 });
 db.asset.hasMany(db.assetImage, {
+  as: "assetImages",
   foreignKey: { name: "assetId", field: "assetId" },
   onDelete: "cascade",
 });

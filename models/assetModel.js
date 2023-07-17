@@ -32,6 +32,11 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "productName",
       },
+      source: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "source",
+      },
       model: {
         type: Sequelize.STRING(100),
         allowNull: true,
@@ -157,21 +162,22 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "pricePerUnit",
       },
+
       //ค่าเสื่อม
       depreciationStartDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationStartDate",
+        field: "insuranceExpiredDate",
       },
       depreciationRegisterDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationRegisterDate",
+        field: "insuranceExpiredDate",
       },
       depreciationReceivedDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "depreciationReceivedDate",
+        field: "insuranceExpiredDate",
       },
       depreciationPrice: {
         type: Sequelize.INTEGER(50),

@@ -10,16 +10,16 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       image: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "image",
-      },
+        field: "image"
+      }
     },
     {
-      tableName: "TB_ASSET_IMAGES",
+      tableName: "TB_ASSET_IMAGES"
     }
   );
 

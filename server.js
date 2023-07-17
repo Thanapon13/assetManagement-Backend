@@ -1,3 +1,7 @@
+// const { sequelize } = require("./models");
+// sequelize.sync({ force: true });
+// sequelize.sync({ alter: true });
+
 const express = require("express");
 const dotenv = require("dotenv").config();
 const helmet = require("helmet");
@@ -7,8 +11,8 @@ const errorHandler = require("./middleware/errorMiddleware");
 const app = express();
 
 // const authRoute = require("./route/authRoutes");
-// const assetRoute = require("./route/assetRoute");
 const packageAssetRoute = require("./route/packageAssetRoute");
+const assetRoute = require("./route/assetRoute");
 // const borrowRoute = require("./route/borrowRoute");
 // const withdrawRoute = require("./route/withdrawRoute");
 // const transferRoute = require("./route/transferRoute");
@@ -62,7 +66,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use("/images", express.static("public/pics"));
 // app.use("/documents", express.static("public/documents"));
 // app.use("/user", require("./route/userRoute"));
-// app.use("/asset", assetRoute);
+app.use("/asset", assetRoute);
 app.use("/packageAsset", packageAssetRoute);
 // app.use("/borrow", borrowRoute);
 // app.use("/withdraw", withdrawRoute);
@@ -106,6 +110,7 @@ app.use("/countingUnit", countingUnitRoute);
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server starting at port ${process.env.PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server starting at port :${port}`);
 });
