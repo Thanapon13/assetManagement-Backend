@@ -239,8 +239,6 @@ exports.deleteSubComponentAsset = async (req, res, next) => {
 exports.getAllAsset = async (req, res, next) => {
   try {
     const getAllAsset = await asset.findAll({});
-    console.log("getAllAsset:", getAllAsset);
-    console.log("-------------------------------------------------");
     const puregetAllAssetData = JSON.parse(JSON.stringify(getAllAsset));
     console.log("puregetAllAssetData:", puregetAllAssetData);
 
