@@ -1,11 +1,12 @@
 const Building = require("../models").building;
 const Floor = require("../models").floor;
+const Room = require("../models").room;
 
 exports.createFloor = async (req, res, next) => {
   try {
     const { floorArray } = req.body;
     const resFloor = [];
-
+    console.log();
     for (el of floorArray) {
       let building = await Building.findByPk(el.buildingId);
 
@@ -48,17 +49,19 @@ exports.updateFloor = async (req, res, next) => {
 
 exports.getAllFloor = async (req, res, next) => {
   try {
-    // const floor = await Floor.aggregate([
-    //   {
-    //     $lookup: {
-    //       from: "rooms",
-    //       localField: "_id",
-    //       foreignField: "floorId",
-    //       as: "roomArray",
-    //     },
-    //   },
-    // ]);
-    // res.json({ floor });
+    const floors = await Floor.findAll({
+      include: [
+        {
+          model: Room,
+          // require: false,
+          as: "rooms",
+          attributes: ["_id", "name"],
+        },
+      ],
+      attributes: ["_id", "name"],
+    });
+
+    res.json({ floors });
   } catch (err) {
     next(err);
   }

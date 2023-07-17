@@ -3,6 +3,7 @@
 const Building = require("../models").building;
 const Floor = require("../models").floor;
 const Room = require("../models").room;
+const { floor } = require("../models");
 const createError = require("../utils/createError");
 const { ObjectID } = require("bson");
 
@@ -30,7 +31,7 @@ exports.updateBuilding = async (req, res, next) => {
     const resBuilding = [];
 
     for (el of buildingArray) {
-      let building = await Building.findById(el.id);
+      let building = await Building.findByPk(el.id);
       building.name = el.name;
       await building.save();
       resBuilding.push(building);
@@ -44,56 +45,68 @@ exports.updateBuilding = async (req, res, next) => {
 
 exports.getAllBuilding = async (req, res, next) => {
   try {
-    const buildings = await Building.aggregate([
-      {
-        $lookup: {
-          from: "floors",
-          localField: "_id",
-          foreignField: "buildingId",
+    const buildings = await Building.findAll({
+      include: [
+        {
+          model: Floor,
+          require: false,
           as: "floors",
+          include: [{ model: Room, as: "rooms", attributes: ["_id", "name"] }],
+          attributes: ["_id", "name"],
         },
-      },
-      {
-        $unwind: "$floors",
-      },
-      {
-        $lookup: {
-          from: "rooms",
-          localField: "floors._id",
-          foreignField: "floorId",
-          as: "floors.rooms",
-        },
-      },
+      ],
+      attributes: ["_id", "name"],
+    });
+    // const buildings = await Building.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: "floors",
+    //       localField: "_id",
+    //       foreignField: "buildingId",
+    //       as: "floors",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$floors",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "rooms",
+    //       localField: "floors._id",
+    //       foreignField: "floorId",
+    //       as: "floors.rooms",
+    //     },
+    //   },
 
-      {
-        $group: {
-          _id: "$_id",
-          name: { $first: "$name" },
-          createdAt: { $first: "$createdAt" },
-          floors: { $push: "$floors" },
-        },
-      },
-      {
-        $sort: {
-          createdAt: 1,
-        },
-      },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       name: { $first: "$name" },
+    //       createdAt: { $first: "$createdAt" },
+    //       floors: { $push: "$floors" },
+    //     },
+    //   },
+    //   {
+    //     $sort: {
+    //       createdAt: 1,
+    //     },
+    //   },
 
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          floors: {
-            _id: 1,
-            name: 1,
-            rooms: {
-              name: 1,
-              _id: 1,
-            },
-          },
-        },
-      },
-    ]);
+    //   {
+    //     $project: {
+    //       _id: 1,
+    //       name: 1,
+    //       floors: {
+    //         _id: 1,
+    //         name: 1,
+    //         rooms: {
+    //           name: 1,
+    //           _id: 1,
+    //         },
+    //       },
+    //     },
+    //   },
+    // ]);
 
     res.json(buildings);
   } catch (err) {
@@ -125,7 +138,7 @@ exports.createOrUpdateBuilding = async (req, res, next) => {
       const building = await Building.update(
         { name: buildingObj.name },
 
-        { _id: buildingObj._id }
+        { where: { _id: buildingObj._id } }
       );
       console.log(141, building);
 
@@ -137,11 +150,7 @@ exports.createOrUpdateBuilding = async (req, res, next) => {
 
         if (floorId) {
           // update floor
-          await Floor.update(
-            { name: floorName },
-            { _id: floorId },
-           
-          );
+          await Floor.update({ name: floorName }, { where: { _id: floorId } });
 
           // room sector ________________________________________________________
 
@@ -152,11 +161,10 @@ exports.createOrUpdateBuilding = async (req, res, next) => {
 
             if (roomId) {
               // update room
-              await Room.findOneAndUpdate(
+              await Room.update(
                 { name: roomName },
 
-                { _id: roomId },
-               
+                { where: { _id: roomId } }
               );
               console.log(192, room);
             } else {
@@ -182,12 +190,9 @@ exports.createOrUpdateBuilding = async (req, res, next) => {
 
             if (roomId) {
               // update room
-              await Room.findOneAndUpdate(
-                { _id: roomId },
+              await Room.update(
                 { name: roomName },
-                {
-                  returnOriginal: false,
-                }
+                { where:  { _id: roomId }},
               );
             } else {
               // create room
@@ -233,19 +238,19 @@ exports.createOrUpdateBuilding = async (req, res, next) => {
 exports.deleteBuilding = async (req, res, next) => {
   try {
     const buildingId = req.params.buildingId;
-    await Building.deleteMany({ _id: buildingId });
+    await Building.destroy({ where: { _id: buildingId } });
 
-    let floorIdArray = await Floor.find({
-      buildingId,
-    }).select("_id");
+    // let floorIdArray = await Floor.find({
+    //   buildingId,
+    // }).select("_id");
 
-    await Floor.deleteMany({ buildingId });
+    // await Floor.deleteMany({ buildingId });
 
-    await Room.deleteMany({
-      floorId: {
-        $in: floorIdArray,
-      },
-    });
+    // await Room.deleteMany({
+    //   floorId: {
+    //     $in: floorIdArray,
+    //   },
+    // });
 
     res.json(`delete buildingId: ${buildingId} successfully`);
   } catch (err) {
@@ -258,11 +263,7 @@ exports.deleteFloor = async (req, res, next) => {
     const floorId = req.params.floorId;
     console.log(floorId);
 
-    await Floor.deleteOne({ _id: floorId });
-
-    await Room.deleteMany({
-      floorId,
-    });
+    await Floor.destroy({ where: { _id: floorId } });
 
     res.json(`delete floorId: ${floorId} successfully`);
   } catch (err) {
@@ -273,7 +274,7 @@ exports.deleteFloor = async (req, res, next) => {
 exports.deleteRoom = async (req, res, next) => {
   try {
     const roomId = req.params.roomId;
-    await Room.deleteOne({ _id: roomId });
+    await Room.destroy({ where: { _id: roomId } });
 
     res.json(`delete roomId: ${roomId} successfully`);
   } catch (err) {

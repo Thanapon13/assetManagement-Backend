@@ -12,11 +12,11 @@ router.post(
   assetController.createAsset
 );
 
-// router.patch(
-//   "/update/:assetId",
-//   upload.fields([{ name: "arrayImage" }, { name: "arrayDocument" }]),
-//   assetController.updateAsset
-// );
+router.patch(
+  "/update/:assetId",
+  upload.fields([{ name: "arrayImage" }, { name: "arrayDocument" }]),
+  assetController.updateAsset
+);
 
 router.patch("/deleteAsset/:assetId", assetController.deleteAsset);
 
@@ -29,26 +29,26 @@ router.get("/", assetController.getAllAsset);
 
 // router.get("/repairDropdown", assetController.getAllAssetForRepairDropdown);
 
-// // router.get("/building", assetController.getAllBuilding);
+// router.get("/building", assetController.getAllBuilding);
 
 // // router.get("/department", assetController.getAllDepartment);
 
 // router.get("/sector", assetController.getAllSector);
 
-// router.get("/sectorForSearch", assetController.getSectorForSearch);
+router.get("/sectorForSearch", assetController.getSectorForSearch);
 
-// router.get("/search", assetController.getBySearch);
+router.get("/search", assetController.getBySearch);
 
-// router.get("/searchProductSelector", assetController.getByProductSelector);
+router.get("/searchProductSelector", assetController.getByProductSelector);
 
-// // ใช้คู่กัน
-// router.get(
-//   "/searchAssetNumberSelector",
-//   assetController.getByAssetNumberSelector
-// );
+// ใช้คู่กัน
+router.get(
+  "/searchAssetNumberSelector",
+  assetController.getByAssetNumberSelector
+);
 
-// router.get("/searchQuantitySelector", assetController.getQuantitySelector);
+router.get("/searchQuantitySelector", assetController.getQuantitySelector);
 
-// router.get("/:assetId", assetController.getAssetById);
+router.get("/:assetId", assetController.getAssetById);
 
 module.exports = router;

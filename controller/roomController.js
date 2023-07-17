@@ -8,7 +8,7 @@ exports.createRoom = async (req, res, next) => {
     const resRoom = [];
 
     for (el of roomArray) {
-      let floor = await Floor.findById(el.floorId);
+      let floor = await Floor.findByPk(el.floorId);
 
       if (floor == null) {
         throw new Error(`Some floor doesn't exist,Please try agian.`);
@@ -49,10 +49,11 @@ exports.updateRoom = async (req, res, next) => {
 
 exports.getAllRoom = async (req, res, next) => {
   try {
-    const Room = await Room.findAll({
+    const rooms = await Room.findAll({
       attributes: ["_id", "name"],
     });
-    res.json({ Room });
+    console.log(rooms);
+    res.json({ rooms });
   } catch (err) {
     next(err);
   }

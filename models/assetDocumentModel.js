@@ -19,7 +19,8 @@ module.exports = (sequelize, Sequelize) => {
       }
     },
     {
-      tableName: "TB_ASSET_DOCUMENTS"
+      tableName: "TB_ASSET_DOCUMENTS",
+
     }
   );
 

@@ -15,7 +15,6 @@ module.exports = (sequelize, Sequelize) => {
       name: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        unique: true,
         field: "name",
       },
       // floorId: {

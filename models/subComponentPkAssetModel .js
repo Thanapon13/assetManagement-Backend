@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const floor = sequelize.define(
-    "TBM_FLOORS",
+  const subComponentPkAsset = sequelize.define(
+    "TB_SUB_COMPONENT_PACKAGE_ASSETS ",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -12,29 +12,41 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         field: "_id",
       },
-      name: {
+      assetNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        field: "name",
+        allowNull: true,
+        field: "assetNumber",
       },
+      serialNumber: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "serialNumber",
+      },
+      replacedAssetNumber: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "replacedAssetNumber",
+      },
+      asset01: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "asset01",
+      },
+      sector: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "sector",
+      },
+      // floorId: {
+      //   type: mongoose.Schema.Types.ObjectId,
+      //   ref: "Floor",
+      //   required: true,
+      // },
     },
     {
-      tableName: "TBM_FLOORS",
+      tableName: "TB_SUB_COMPONENT_PACKAGE_ASSETS",
     }
   );
 
-  // floorSchema.pre("remove", async function (next) {
-  //   try {
-  //     let room = await Room.deleteMany({
-  //       floorId: {
-  //         $in: this.id,
-  //       },
-  //     });
-  //     console.log(room, "delete room");
-  //     next();
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // });
-  return floor;
+  return subComponentPkAsset;
 };

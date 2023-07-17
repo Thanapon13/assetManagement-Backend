@@ -24,7 +24,6 @@ module.exports = (sequelize, Sequelize) => {
         unique: true,
         field: "order"
       },
-      mmmml
     },
     {
       tableName: "TBM_ACCESS_SCREENS"

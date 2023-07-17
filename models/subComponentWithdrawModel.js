@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const subComponentWithdraw = sequelize.define(
-    "TB_SUB_COMPONENT_WITHDRAWS ",
+  const subComponentBorrow = sequelize.define(
+    "TB_SUB_COMPONENT_BORROWS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -14,40 +14,40 @@ module.exports = (sequelize, Sequelize) => {
       },
       inventoryNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "inventoryNumber",
       },
       productName: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "productName",
       },
       brand: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "brand",
       },
       serialNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "serialNumber",
       },
       supplier: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "supplier",
       },
       amount: {
         type: Sequelize.INTEGER(50),
-        allowNull: false,
+        allowNull: true,
         field: "amount",
       },
       price: {
         type: Sequelize.INTEGER(50),
-        allowNull: false,
+        allowNull: true,
         field: "price",
       },
-      
+
       // withdrawId: {
       //   type: mongoose.Schema.Types.ObjectId,
       //   ref: "Withdraw",
@@ -59,11 +59,11 @@ module.exports = (sequelize, Sequelize) => {
       //   required: true,
       // },
     },
-   
+
     {
-      tableName: "TB_SUB_COMPONENT_WITHDRAWS ",
+      tableName: "TB_SUB_COMPONENT_BORROWS ",
     }
   );
 
-  return subComponentWithdraw;
+  return subComponentBorrow;
 };

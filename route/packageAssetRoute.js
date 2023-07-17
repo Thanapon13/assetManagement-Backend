@@ -1,5 +1,5 @@
 const express = require("express");
-const packageAssetController = require("../controller/packageAssetController");
+const packageAssetController = require("../controller/pkAssetController");
 const upload = require("../middleware/upload");
 
 const router = express.Router();

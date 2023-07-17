@@ -9,8 +9,8 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST, // host ของ db ที่เราสร้างเอาไว้
     dialect: "mssql", // 'mysql' | 'mariadb' | 'postgres' | 'mssql'   พวกนี้ใช่ก็ใช้ได้นะจ๊ะ
     define: {
-      timestamps: true //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
-    }
+      timestamps: true, //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
+    },
   }
 );
 
@@ -30,6 +30,12 @@ db.acquisitionMethod = require("./acquisitionMethodModel")(
 db.assetDocument = require("./assetDocumentModel")(sequelize, Sequelize);
 db.assetImage = require("./assetImageModel")(sequelize, Sequelize);
 db.asset = require("./assetModel")(sequelize, Sequelize);
+db.borrowHasAsset = require("./borrowHasAssetModel")(sequelize, Sequelize);
+db.borrowHasPkAsset = require("./borrowHasPkAssetModel")(sequelize, Sequelize);
+db.borrowImage = require("./borrowImageModel")(sequelize, Sequelize);
+db.borrow = require("./borrowModel")(sequelize, Sequelize);
+db.bottomSubComponentDataPkAsset =
+  require("./bottomSubComponentDataPkAssetModel")(sequelize, Sequelize);
 db.borrowPurpose = require("./borrowPurposeModel")(sequelize, Sequelize);
 db.brand = require("./brandModel")(sequelize, Sequelize);
 db.building = require("./buildingModel")(sequelize, Sequelize);
@@ -45,12 +51,23 @@ db.personnelTypeCode = require("./personnelTypeCodeModel")(
   sequelize,
   Sequelize
 );
+db.pkAssetDocument = require("./pkAssetDocumentModel")(sequelize, Sequelize);
+db.pkAssetImage = require("./pkAssetImageModel")(sequelize, Sequelize);
+db.pkAsset = require("./pkAssetModel")(sequelize, Sequelize);
 db.purposeOfUse = require("./purposeOfUseModel")(sequelize, Sequelize);
 db.repairSector = require("./repairSectorModel")(sequelize, Sequelize);
 db.room = require("./roomModel")(sequelize, Sequelize);
 db.sector = require("./sectorModel")(sequelize, Sequelize);
 db.source = require("./sourceModel")(sequelize, Sequelize);
 db.subComponentAsset = require("./subComponentAssetModel")(
+  sequelize,
+  Sequelize
+);
+db.subComponentPkAsset = require("./subComponentPkAssetModel ")(
+  sequelize,
+  Sequelize
+);
+db.subComponentBorrow = require("./subComponentBorrowModel")(
   sequelize,
   Sequelize
 );
@@ -65,24 +82,75 @@ db.type = require("./typeModel")(sequelize, Sequelize);
 //   db.team = require("./model/team")( sequelize , Sequelize );
 //ส่วนนี้เป็นการตั้งต่า relation นะครับ โดยเป็นการบอกว่าใน 1 team มีได้หลาย player ง่ายๆ ก็คือ relation แบบ 1:M
 db.floor.hasMany(db.room, {
+  as: "rooms",
   foreignKey: { name: "floorId", field: "floorId" },
-  onDelete: "cascade"
+  onDelete: "cascade",
 });
 db.building.hasMany(db.floor, {
+  as: "floors",
   foreignKey: { name: "buildingId", field: "buildingId" },
-  onDelete: "cascade"
+  onDelete: "cascade",
 });
 db.asset.hasMany(db.subComponentAsset, {
+  as: "subComponentAssets",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade"
+  onDelete: "cascade",
 });
 db.asset.hasMany(db.assetDocument, {
+  as: "assetDocuments",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade"
+  onDelete: "cascade",
 });
 db.asset.hasMany(db.assetImage, {
+  as: "assetImages",
   foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade"
+  onDelete: "cascade",
+});
+db.borrow.hasMany(db.borrowHasAsset, {
+  as: "borrowHasAssets",
+  foreignKey: { name: "borrowId", field: "borrowId" },
+  onDelete: "cascade",
+});
+db.borrow.hasMany(db.borrowHasPkAsset, {
+  as: "borrowHasPkAssets",
+  foreignKey: { name: "borrowId", field: "borrowId" },
+  onDelete: "cascade",
+});
+db.borrow.hasMany(db.borrowImage, {
+  as: "borrowImages",
+  foreignKey: { name: "borrowId", field: "borrowId" },
+  onDelete: "cascade",
+});
+db.borrow.hasMany(db.subComponentBorrow, {
+  as: "subComponentBorrows",
+  foreignKey: { name: "borrowId", field: "borrowId" },
+  onDelete: "cascade",
+});
+
+db.pkAsset.hasMany(db.asset, {
+  as: "packageAssets",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.pkAssetDocument, {
+  as: "packageDocuments",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.pkAssetImage, {
+  as: "packageImages",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.subComponentPkAsset, {
+  as: "subComponentPackageAssets",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.bottomSubComponentDataPkAsset, {
+  as: "bottomSubComponentDataPackageAssets",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
 });
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
@@ -93,5 +161,17 @@ db.room.belongsTo(db.floor, { foreignKey: "floorId" });
 db.subComponentAsset.belongsTo(db.asset, { foreignKey: "assetId" });
 db.assetDocument.belongsTo(db.asset, { foreignKey: "assetId" });
 db.assetImage.belongsTo(db.asset, { foreignKey: "assetId" });
-
+db.asset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
+db.borrowHasAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
+db.borrowHasPkAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
+db.borrowImage.belongsTo(db.borrow, { foreignKey: "borrowId" });
+db.subComponentBorrow.belongsTo(db.borrow, { foreignKey: "borrowId" });
+db.pkAssetDocument.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
+db.pkAssetImage.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
+db.subComponentPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
+db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
+  foreignKey: "packageAssetId",
+});
+// sequelize.sync({ force: true });
+// console.log("All models were synchronized successfully.");
 module.exports = db;
