@@ -59,6 +59,10 @@ db.repairSector = require("./repairSectorModel")(sequelize, Sequelize);
 db.room = require("./roomModel")(sequelize, Sequelize);
 db.sector = require("./sectorModel")(sequelize, Sequelize);
 db.source = require("./sourceModel")(sequelize, Sequelize);
+db.subComponentTransfer = require("./subCompomentTransferModel")(
+  sequelize,
+  Sequelize
+);
 db.subComponentAsset = require("./subComponentAssetModel")(
   sequelize,
   Sequelize
@@ -73,6 +77,12 @@ db.subComponentBorrow = require("./subComponentBorrowModel")(
 );
 db.subSecter = require("./subSectorModel")(sequelize, Sequelize);
 db.thaiPrefix = require("./thaiPrefixModel")(sequelize, Sequelize);
+db.transferHasAsset = require("./transferHasAssetModel")(sequelize, Sequelize);
+db.transferHasPkAsset = require("./transferHasPkAssetModel")(
+  sequelize,
+  Sequelize
+);
+db.transfer = require("./transferModel")(sequelize, Sequelize);
 db.type4 = require("./type4Model")(sequelize, Sequelize);
 db.type8 = require("./type8Model")(sequelize, Sequelize);
 db.type13 = require("./type13Model")(sequelize, Sequelize);
@@ -152,6 +162,33 @@ db.pkAsset.hasMany(db.bottomSubComponentDataPkAsset, {
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
+
+////  feat : transfer
+db.transfer.hasMany(db.subComponentTransfer, {
+  as: "subComponentTransfers",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade",
+});
+db.transfer.hasMany(db.transferHasAsset, {
+  as: "transferHasAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade",
+});
+db.transfer.hasMany(db.transferHasPkAsset, {
+  as: "transferHasPkAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade",
+});
+db.asset.hasMany(db.transferHasAsset, {
+  as: "transferHasAssets",
+  foreignKey: { name: "assetId", field: "assetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.transferHasPkAsset, {
+  as: "transferHasPkAssets",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -170,6 +207,21 @@ db.pkAssetDocument.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.pkAssetImage.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.subComponentPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
+  foreignKey: "packageAssetId",
+});
+db.subComponentTransfer.belongsTo(db.transfer, {
+  foreignKey: "transferId",
+});
+db.transferHasAsset.belongsTo(db.transfer, {
+  foreignKey: "transferId",
+});
+db.transferHasAsset.belongsTo(db.asset, {
+  foreignKey: "assetId",
+});
+db.transferHasPkAsset.belongsTo(db.transfer, {
+  foreignKey: "transferId",
+});
+db.transferHasPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
 // sequelize.sync({ force: true });
