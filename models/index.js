@@ -139,7 +139,7 @@ db.borrow.hasMany(db.subComponentBorrow, {
 
 db.pkAsset.hasMany(db.asset, {
   as: "packageAssets",
-  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  foreignKey: { name: "packageAssetId", field: "  " },
   onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetDocument, {
@@ -227,8 +227,6 @@ db.transferHasPkAsset.belongsTo(db.pkAsset, {
 
 module.exports = db;
 
-// sequelize.sync({ force: true });
-
 // db.sequelize
 //   .sync({ alter: true })
 //   .then(() => {
@@ -238,6 +236,5 @@ module.exports = db;
 //   .catch(error => {
 //     console.error("Error synchronizing database:", error);
 //   });
-// // console.log("All models were synchronized successfully.");
 
 module.exports = db;

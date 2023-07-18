@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const subComponentTranfer = sequelize.define(
+  const subComponentTransfer = sequelize.define(
     "TB_SUB_COMPONENT_TRANSFERS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
@@ -44,5 +44,5 @@ module.exports = (sequelize, Sequelize) => {
     }
   );
 
-  return subComponentTranfer;
+  return subComponentTransfer;
 };

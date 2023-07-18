@@ -6,13 +6,18 @@ const router = express.Router();
 router.post("/create", transferController.createTransfer);
 
 // router.patch("/update/:transferId", transferController.updateTransfer);
-// router.patch("/delete/:transferId", transferController.deleteTransfer);
+
+router.patch("/delete/:transferId", transferController.deleteTransfer);
+
 // router.get("/searchAssetTransfer", transferController.getBySearch);
-// router.get("/all", transferController.getAllTransfer);
-// router.get(
-//   "/transferSectorForSearch",
-//   transferController.getTransferSectorForSearch
-// );
+
+router.get("/all", transferController.getAllTransfer);
+
+router.get(
+  "/transferSectorForSearch",
+  transferController.getTransferSectorForSearch
+);
+
 // router.get(
 //   "/transfereeSectorForSearch",
 //   transferController.getTransfereeSectorForSearch

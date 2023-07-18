@@ -116,52 +116,6 @@ exports.createAsset = async (req, res, next) => {
 
     const baseArrayImageObj = JSON.parse(baseArrayImage);
     const baseArrayDocumentObj = JSON.parse(baseArrayDocument);
-    // const inputAssetObject = {
-    //   //create ข้อมูลครุภัณฑ์
-    //   productName: req.body.productName, // ชื่อไทย
-    //   engProductName: req.body.engProductName, // ชื่อภาษาอังกฤษ
-    //   type: req.body.type, // ประเภท
-    //   kind: req.body.kind,
-    //   assetNumber: req.body.assetNumber, //
-    //   quantity: req.body.quantity, // จำนวน
-    //   unit: req.body.unit, // หน่อยนับ
-    //   brand: req.body.brand, // ยี่ห้อ
-    //   model: req.body.model, //รุ่น
-    //   size: req.body.size, // ขนาด
-    //   category: req.body.category, // หมวดหมู่
-    //   group: req.body.group, // กลุ่ม
-    //   acquiredType: req.body.acquiredType, // ประเภททีได้มา
-    //   source: req.body.source, // แหล่งที่ได้มา
-    //   purposeOfUse: req.body.purposeOfUse, // วัตถุประสงค์ของการใช้งาน
-    //   pricePerUnit: req.body.pricePerUnit, // ราคาต่อหน่วย
-    //   guaranteedMonth: req.body.guaranteedMonth, // จำนวนเงินที่เดือนรับประกัน
-    //   insuranceStartDate: req.body.insuranceStartDate, // วันที่เริ่มประกัน
-    //   insuranceExpiredDate: req.body.insuranceExpiredDate, // วันสิ้นสุดประกัน
-
-    //   //สัญญาการจัดซื้อ
-    //   acquisitionMethod: req.body.acquisitionMethod, //วิธีการได้มา
-    //   moneyType: req.body.moneyType, //ประเภทของเงิน
-    //   contractNumber: req.body.contractNumber, // เลขที่สัญญา
-    //   documentDate: req.body.documentDate, // เอกสารใบส่งของ
-    //   billNumber: req.body.billNumber, // เลขที่ใบเบิก
-    //   receivedDate: req.body.receivedDate, // วันที่รับมอบ
-    //   seller: req.body.seller, //ผู้ขาย
-    //   price: req.body.price, // ราคาซื้อ
-    //   purchaseYear: req.body.purchaseYear, // ปีที่ซื้อ
-    //   purchaseDate: req.body.purchaseDate, //วันที่ซื้อ
-    //   deliveryDocument: req.body.deliveryDocument, //เอกสารจัดส่ง
-
-    //   // การจำหน่าย
-    //   salesDocument: req.body.salesDocument, // เอกสารจำหน่าย
-    //   distributeDocumentDate: req.body.distributeDocumentDate, // เอกสารลงวันที่
-    //   distributeApprovalReleaseDate: req.body.distributeApprovalReleaseDate, // วันอนุมติจำหน่าย
-    //   distributeStatus: req.body.distributeStatus, // สถานะ
-    //   distributionNote: req.body.distributionNote, // หมายเหตุ
-
-    //   //status
-    //   status: req.body.status,
-    // };
-    // console.log("inputAssetObject:", inputAssetObject);
 
     // subComponentAsset
     console.log("genDataJSON:", genDataJSON);
@@ -339,7 +293,6 @@ exports.createAsset = async (req, res, next) => {
           accumulateDepreciationBookValue: accumulateDepreciationBookValue,
           realAssetId: newestRealAssetId + 1
         });
-
         const newAssetId = createdAsset.dataValues._id;
         console.log("newAssetId:", newAssetId);
 
