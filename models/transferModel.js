@@ -76,7 +76,11 @@ module.exports = (sequelize, Sequelize) => {
       dateTime_approver: {
         type: Sequelize.DATE,
         allowNull: true,
+<<<<<<< HEAD
         field: "dateTime_approver"
+=======
+        field: "dateTime_approver",
+>>>>>>> d4ceff17cd9a561f253f511f3ca22b2778274f93
       },
       status: {
         type: Sequelize.STRING(50),

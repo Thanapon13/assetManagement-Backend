@@ -133,11 +133,11 @@ exports.createAsset = async (req, res, next) => {
       newestRealAssetId = newestAsset.realAssetId;
     }
 
-    if (req.body.status != "saveDraft") {
-      req.body.status = "inStock";
+    if (status != "saveDraft") {
+      status = "inStock";
     }
 
-    if (req.body.status == "saveDraft") {
+    if (status == "saveDraft") {
       const createdAsset = await asset.create({
         ...inputObject,
         insuranceStartDate: insuranceStartDate,
@@ -1022,20 +1022,20 @@ exports.updateAsset = async (req, res, next) => {
     existArrayImageArray = JSON.parse(existArrayImage);
     existArrayDocumentArray = JSON.parse(existArrayDocument);
     // }
-    let newestTransferDocumentNumber;
-    let newestTransfer = await Transfer.findOne({
-      order: [["createdAt", "DESC"]],
-      attributes: ["_id", "transferDocumentNumber"]
-    });
+    // let newestTransferDocumentNumber;
+    // let newestTransfer = await Transfer.findOne({
+    //   order: [["createdAt", "DESC"]],
+    //   attributes: ["_id", "transferDocumentNumber"],
+    // });
 
-    console.log("newestTransfer", newestTransfer);
-    if (newestTransfer == null) {
-      newestTransferDocumentNumber = 0;
-    } else {
-      newestTransferDocumentNumber = parseInt(
-        newestTransfer.transferDocumentNumber
-      );
-    }
+    // console.log("newestTransfer", newestTransfer);
+    // if (newestTransfer == null) {
+    //   newestTransferDocumentNumber = 0;
+    // } else {
+    //   newestTransferDocumentNumber = parseInt(
+    //     newestTransfer.transferDocumentNumber
+    //   );
+    // }
     if (assetById.status == "saveDraft" && status == "inStock") {
       //flow like create but delete old
       let lengthOfBaseImageArray = arrayImage.legth / quantity;
@@ -1105,7 +1105,7 @@ exports.updateAsset = async (req, res, next) => {
           });
         }
         newestRealAssetId = newestRealAssetId + 1;
-        const asset = await Asset.create({
+        const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
           assetNumber: genDataArray[i].assetNumber,
           serialNumber: genDataArray[i].serialNumber,
@@ -1194,27 +1194,27 @@ exports.updateAsset = async (req, res, next) => {
           documentArray: saveDocumentArray,
           reserved: false
         });
-        await Transfer.create({
-          transferDocumentNumber: newestTransferDocumentNumber + 1,
-          transferSector: genDataArray[i].sector,
-          subSector,
-          handler,
-          transfereeSector: genDataArray[i].sector,
-          building,
-          floor,
-          room,
+        // await Transfer.create({
+        //   transferDocumentNumber: newestTransferDocumentNumber + 1,
+        //   transferSector: genDataArray[i].sector,
+        //   subSector,
+        //   handler,
+        //   transfereeSector: genDataArray[i].sector,
+        //   building,
+        //   floor,
+        //   room,
 
-          name_recorder,
-          dateTime_recorder: new Date(),
-          name_courier,
-          dateTime_courier: new Date(),
-          name_approver,
-          dateTime_approver: new Date(),
-          status: "done",
-          assetIdArray: [{ assetId: asset._id }]
-        });
+        //   name_recorder,
+        //   dateTime_recorder: new Date(),
+        //   name_courier,
+        //   dateTime_courier: new Date(),
+        //   name_approver,
+        //   dateTime_approver: new Date(),
+        //   status: "done",
+        //   assetIdArray: [{ assetId: asset._id }],
+        // });
       }
-      await Asset.deleteOne({ _id: assetId });
+      await asset.deleteOne({ _id: assetId });
       return res
         .status(200)
         .json({ message: "This asset id updated successfully" });
@@ -1226,7 +1226,7 @@ exports.updateAsset = async (req, res, next) => {
     console.log("oldImageArray", oldImageArray);
     if (arrayImage.length > 0) {
       for (el of arrayImage) {
-        await Asset.updateOne(
+        await asset.updateOne(
           { _id: assetId },
           { $push: { imageArray: { image: el.filename } } }
         );
@@ -1235,7 +1235,7 @@ exports.updateAsset = async (req, res, next) => {
 
     if (arrayDocument.length > 0) {
       for (el of arrayDocument) {
-        await Asset.updateOne(
+        await asset.updateOne(
           { _id: assetId },
           { $push: { documentArray: { document: el.filename } } }
         );
