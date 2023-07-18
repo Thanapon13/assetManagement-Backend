@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const borrowController = require("../controller/borrowController");
-const protect = require("../middleware/authMiddleware");
+// const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
 router.post("/create", borrowController.createBorrow);
-router.patch("/update/:borrowId", borrowController.updateBorrow);
+// router.patch("/update/:borrowId", borrowController.updateBorrow);
 
 // router
 //   .route('/')
@@ -47,48 +47,48 @@ router.get(
 );
 
 // borrowHistory page
-router.get("/searchBorrowHistory", borrowController.getBySearchBorrowHistory);
-router.get("/BorrowHistorySector", borrowController.getBorrowHistorySector);
+// router.get("/searchBorrowHistory", borrowController.getBySearchBorrowHistory);
+// router.get("/BorrowHistorySector", borrowController.getBorrowHistorySector);
 
 // borrowCheck page
-router.get("/searchBorrowCheck", borrowController.getBySearchBorrowCheck);
-router.get("/borrowCheckSector", borrowController.getBorrowCheckSector);
-router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
-router.patch(
-  "/borrowCheckSaving/:borrowId",
-  borrowController.updateBorrowCheckSavingById
-);
-router.patch(
-  "/borrowCheckReturnApprove/:borrowId",
-  upload.fields([{ name: "arrayImage" }]),
-  borrowController.updateBorrowCheckReturnApproveById
-);
+// router.get("/searchBorrowCheck", borrowController.getBySearchBorrowCheck);
+// router.get("/borrowCheckSector", borrowController.getBorrowCheckSector);
+// router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
+// router.patch(
+//   "/borrowCheckSaving/:borrowId",
+//   borrowController.updateBorrowCheckSavingById
+// );
+// router.patch(
+//   "/borrowCheckReturnApprove/:borrowId",
+//   upload.fields([{ name: "arrayImage" }]),
+//   borrowController.updateBorrowCheckReturnApproveById
+// );
 
 // status first fetch
-router.get(
-  "/allFirstFetchBorrowApprove",
-  borrowController.getAllFirstFetchBorrowApprove
-);
-// dropdown
-router.get(
-  "/dropdownAllSectorFromBorrow",
-  borrowController.getAllSectorFromBorrow
-);
+// router.get(
+//   "/allFirstFetchBorrowApprove",
+//   borrowController.getAllFirstFetchBorrowApprove
+// );
+// // dropdown
+// router.get(
+//   "/dropdownAllSectorFromBorrow",
+//   borrowController.getAllSectorFromBorrow
+// );
 
-router.get(
-  "/viewBorrowApproveDetailById/:borrowId",
-  borrowController.getViewBorrowApproveDetailById
-);
+// router.get(
+//   "/viewBorrowApproveDetailById/:borrowId",
+//   borrowController.getViewBorrowApproveDetailById
+// );
 
-router.get(
-  "/viewBorrowHistoryByAssetId/:assetId",
-  borrowController.getViewBorrowHistoryByAssetId
-);
+// router.get(
+//   "/viewBorrowHistoryByAssetId/:assetId",
+//   borrowController.getViewBorrowHistoryByAssetId
+// );
 
-router.get(
-  "/viewBorrowHistoryByPackageAssetId/:packageAssetId",
-  borrowController.getViewBorrowHistoryByPackageAssetId
-);
+// router.get(
+//   "/viewBorrowHistoryByPackageAssetId/:packageAssetId",
+//   borrowController.getViewBorrowHistoryByPackageAssetId
+// );
 
 router.get("/:borrowId", borrowController.getBorrowById);
 

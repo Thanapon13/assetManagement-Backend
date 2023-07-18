@@ -1403,7 +1403,6 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
       // dateToObj.setHours(dateToObj.getHours() - 7);
       modifiedDateTo = dateToObj.toString();
     }
-    
 
     let queryArray = [];
     if (textSearch !== "") {
@@ -1579,6 +1578,7 @@ exports.getAllPackageAsset = async (req, res, next) => {
           as: "subComponentPackageAssets",
         },
       ],
+      order: [["updatedAt", "DESC"]],
     });
     //   .sort({ updatedAt: -1 })
     //   .skip(page * limit)

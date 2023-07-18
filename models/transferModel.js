@@ -71,7 +71,7 @@ module.exports = (sequelize, Sequelize) => {
       dateTime_approver: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "name_approver",
+        field: "dateTime_approver",
       },
       status: {
         type: Sequelize.STRING(50),
