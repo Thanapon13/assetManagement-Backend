@@ -139,7 +139,7 @@ db.borrow.hasMany(db.subComponentBorrow, {
 
 db.pkAsset.hasMany(db.asset, {
   as: "packageAssets",
-  foreignKey: { name: "packageAssetId", field: "  " },
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetDocument, {

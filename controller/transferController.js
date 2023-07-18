@@ -107,7 +107,7 @@ exports.createTransfer = async (req, res, next) => {
         // if have specific assetNumber
         if (saveTransferTableArrayObject[i].assetNumber !== "") {
           // isPackage === true
-          if (saveTransferTableArrayObject[i].isPackage) {
+          if (saveTransferTableArrayObject[i].isPackage === true) {
             console.log("----------------------");
             console.log(
               "assetNumber[I]:",
@@ -123,213 +123,28 @@ exports.createTransfer = async (req, res, next) => {
                 reserved: false,
                 status: "inStock"
               },
-              attributes: [],
-              include: {
-                model: asset,
-                as: "packageAssets",
-                attributes: ["_id"],
-                where: sequelize.literal(
-                  "`asset`.`packageAssetId` = `PackageAsset`.`_id`"
-                )
-              },
-              raw: true
+              include: [
+                {
+                  model: asset,
+                  as: "packageAssets",
+                  required: true,
+                  where: {
+                    packageAssetId: Sequelize.col("TB_PACKAGE_ASSETS._id")
+                  },
+                  attributes: ["_id"]
+                }
+              ]
             });
+
             console.log("packageAssetData:", packageAssetData);
-
-            // packageAssetIdHasAssetNumberArray.push(packageAssetData);
-
-            // packageAssetIdHasAssetNumberArray.push(
-            //   packageAssetData[0]._id.toString()
-            // );
-
-            // await pkAsset.update(
-            //   {
-            //     assetNumber: saveTransferTableArrayObject[i].assetNumber
-            //   },
-            //   { reserved: true },
-            //   {
-            //     returnOriginal: false
-            //   }
-            // );
-
-            // const packageAssetId = packageAssetData[0]._id;
-            // packageAssetIdArray.push({ packageAssetId });
-
-            // if (packageAssetData[0].asset.length > 0) {
-            //   for (let k = 0; k < packageAssetData[0].asset.length; k++) {
-            //     let assetId = packageAssetData[0].asset[k]._id;
-            //     console.log("assetId", assetId);
-            //     let a = await asset.update(
-            //       {
-            //         _id: assetId
-            //       },
-            //       { reserved: true }
-            //     );
-            //     console.log("a:", a);
-            //     console.log("asset:", asset);
-            //   }
-            // }
-            // console.log("packageAssetId:", packageAssetId);
+            packageAssetIdHasAssetNumberArray.push(packageAssetData);
+            console.log(
+              "packageAssetIdHasAssetNumberArray:",
+              packageAssetIdHasAssetNumberArray
+            );
           }
-          // else {
-          //   const assetUpdate = await asset.update(
-          //     { reserved: true },
-          //     {
-          //       where: {
-          //         assetNumber: saveTransferTableArrayObject[i].assetNumber
-          //       },
-          //       returning: true
-          //     }
-          //   );
-          //   console.log("assetUpdate:", 136);
-          //   assetIdHasAssetNumberArray.push(assetUpdate._id);
-          //   console.log("assetUpdate:", assetUpdate);
-          //   const assetId = assetUpdate._id;
-          //   assetIdArray.push({ assetId });
-          //   console.log("assetId:".assetId);
-          //   // assetIdHasAssetNumberArray.push(assetUpdate[1][0]._id.toString());
-          //   // assetIdArray.push({ assetId: assetUpdate[1][0]._id.toString() });
-          // }
         }
-
-        // else {
-        //   //  else not have specific assetNumber
-        //   if (saveTransferTableArrayObject[i].isPackage) {
-        //     // isPackage === true
-
-        //     // console.log(
-        //     //   "saveTransferTableArrayObject[i].isPackage):",
-        //     //   saveTransferTableArrayObject[i].isPackage
-        //     // );
-
-        //     let packageAssetData = await pkAsset.findAll({
-        //       where: {
-        //         productName: saveTransferTableArrayObject[i].productName,
-        //         reserved: false,
-        //         status: "inStock",
-        //         _id: {
-        //           [Op.notIn]: packageAssetIdHasAssetNumberArray
-        //         }
-        //       },
-        //       attributes: [],
-        //       include: {
-        //         model: asset,
-        //         as: "packageAssets",
-        //         attributes: ["_id"],
-        //         where: sequelize.literal(
-        //           "`asset`.`packageAssetId` = `PackageAsset`.`_id`"
-        //         )
-        //       },
-        //       limit: +saveTransferTableArrayObject[i].amount,
-        //       raw: true
-        //     });
-        //     console.log("packageAssetData:", packageAssetData);
-        //     console.log("packageAssetData.lenght:", packageAssetData.length);
-
-        //     // loop packageAsset Array and update all child reserved:true
-        //     for (let j = 0; j < packageAssetData.length; j++) {
-        //       let eachPackageAsset = packageAssetData[j];
-        //       let packageAssetId = eachPackageAsset._id;
-        //       // let packageAssetId = eachPackageAsset._id.toString();
-
-        //       // packageAssetIdArray.push({ packageAssetId });
-
-        //       await pkAsset.update(
-        //         { reserved: true },
-        //         {
-        //           where: {
-        //             _id: packageAssetId
-        //           }
-        //         }
-        //       );
-
-        //       console.log("packageAssetId:", packageAssetId);
-        //       // console.log(pkAsset[j].asset
-        //       packageAssetIdArray.push({ packageAssetId });
-
-        //       if (eachPackageAsset.asset.length > 0) {
-        //         for (let k = 0; k < eachPackageAsset.asset.length; k++) {
-        //           // console.log(assetId)
-        //           let assetId = eachPackageAsset.asset[k]._id;
-        //           // let assetId = eachPackageAsset.asset[k]._id.toString();
-
-        //           console.log("assetId:", assetId);
-        //           let a = await asset.update(
-        //             { reserved: true },
-        //             {
-        //               where: {
-        //                 _id: assetId
-        //               }
-        //             }
-        //           );
-        //           console.log("a:", a);
-        //           // console.log(asset)
-        //         }
-        //       }
-        //     }
-        //     // console.log(pkAsset.asset);
-        //     // console.log(packageAssetId);
-        //   } else {
-        //     // isPackage === false
-        //     // console.log(
-        //     //   "assetIdHasAssetNumberArray",
-        //     //   assetIdHasAssetNumberArray
-        //     // );
-
-        //     let assetData = await asset.findAll({
-        //       where: {
-        //         productName: saveTransferTableArrayObject[i].productName,
-        //         reserved: false,
-        //         status: "inStock",
-        //         _id: {
-        //           [Op.notIn]: assetIdHasAssetNumberArray
-        //         }
-        //       },
-        //       limit: +saveTransferTableArrayObject[i].amount
-        //     });
-        //     console.log("assetData:", assetData);
-
-        //     for (let j = 0; j < asset.length; j++) {
-        //       let eachAsset = asset[j];
-        //       let assetId = eachAsset._id;
-
-        //       await asset.update(
-        //         { reserved: true },
-        //         {
-        //           where: {
-        //             _id: assetId
-        //           }
-        //         }
-        //       );
-
-        //       assetIdArray.push({ assetId });
-        //       // console.log("eachAsset",eachAsset)
-        //     }
-        //   }
-        // }
       }
-      // console.log("assetIdArray", assetIdArray);
-      // console.log("packageAssetIdArray", packageAssetIdArray);
-      // transfer = await transfer.create({
-      //   transferDocumentNumber: newestTransferDocumentNumber + 1,
-      //   transferSector,
-      //   subSector,
-      //   handler,
-      //   transfereeSector,
-      //   building,
-      //   floor,
-      //   room,
-
-      //   name_recorder: name_recorder,
-      //   // dateTime_recorder: new Date(),
-      //   name_courier: name_recorder,
-      //   dateTime_courier: new Date(),
-      //   name_approver: name_approver,
-      //   dateTime_approver: dateTime_approver,
-      //   status: status,
-      //   assetIdArray,
-      //   packageAssetIdArray
-      // });
     }
     res.status(200).json({ transfer });
   } catch (err) {
@@ -448,6 +263,7 @@ exports.getAllTransfer = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getTransferSectorForSearch = async (req, res, next) => {
   try {
     const transferSector = await transfer.findAll({

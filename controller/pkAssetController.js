@@ -1575,16 +1575,10 @@ exports.getAllPackageAsset = async (req, res, next) => {
       include: [
         {
           model: SubComponentPkAsset,
-<<<<<<< HEAD
           as: "subComponentPackageAssets"
         }
-      ]
-=======
-          as: "subComponentPackageAssets",
-        },
       ],
-      order: [["updatedAt", "DESC"]],
->>>>>>> d4ceff17cd9a561f253f511f3ca22b2778274f93
+      order: [["updatedAt", "DESC"]]
     });
     //   .sort({ updatedAt: -1 })
     //   .skip(page * limit)
