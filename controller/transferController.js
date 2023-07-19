@@ -1,11 +1,5 @@
 const { Sequelize, Op } = require("sequelize");
-const {
-  transfer,
-  subComponentTransfer,
-  pkAsset,
-  asset,
-  sequelize
-} = require("../models");
+const { transfer, subComponentTransfer, pkAsset, asset } = require("../models");
 
 // หรือใช้การดึงมาทั้ง
 
@@ -16,7 +10,7 @@ exports.createTransfer = async (req, res, next) => {
     // console.log("inputObject:", inputObject);
 
     const saveTransferTableArrayObject = saveTransferTableArray;
-    console.log("saveTransferTableArrayObject", saveTransferTableArrayObject);
+    // console.log("saveTransferTableArrayObject", saveTransferTableArrayObject);
 
     let {
       transferDocumentNumber, // เลขที่เอกสารการโอนย้าย
@@ -106,45 +100,229 @@ exports.createTransfer = async (req, res, next) => {
       for (let i = 0; i < saveTransferTableArrayObject.length; i++) {
         // if have specific assetNumber
         if (saveTransferTableArrayObject[i].assetNumber !== "") {
+          console.log(
+            "assetNumber[i]:",
+            saveTransferTableArrayObject[i].assetNumber
+          );
+
+          console.log("index I", i);
           // isPackage === true
           if (saveTransferTableArrayObject[i].isPackage === true) {
-            console.log("----------------------");
-            console.log(
-              "assetNumber[I]:",
-              saveTransferTableArrayObject[i].assetNumber
-            );
-            console.log("index I", i);
-            console.log("----------------------");
+            console.log("isPackage[i]:", saveTransferTableArrayObject[i]);
 
-            // ตั้งแต่นี้ยังไม่ได้ test postman
             let packageAssetData = await pkAsset.findAll({
               where: {
                 assetNumber: saveTransferTableArrayObject[i].assetNumber,
                 reserved: false,
                 status: "inStock"
+              }
+              // include: [
+              //   {
+              //     model: asset,
+              //     as: "packageAssets",
+              //     required: true,
+              //     attributes: ["_id"]
+              //   }
+              // ]
+            });
+
+            console.log("packageAssetData:", packageAssetData);
+
+            // let pkAssetData = await pkAsset.findAll({
+            //   attributes: ["realAssetId", "assetNumber", "reserved"]
+            // });
+            // console.log("pkAssetData:", pkAssetData);
+
+            // let assetData = await asset.findAll({
+            //   attributes: ["realAssetId", "assetNumber", "reserved"]
+            // });
+            // console.log("assetData:", assetData);
+
+            // packageAssetIdHasAssetNumberArray.push(packageAssetData);
+
+            // packageAssetIdHasAssetNumberArray.push(
+            //   packageAssetData.map((data) => data._id)
+            // );
+
+            // console.log(
+            //   "packageAssetIdHasAssetNumberArray:",
+            //   packageAssetIdHasAssetNumberArray
+            // );
+
+            // await pkAsset.update(
+            //   {
+            //     assetNumber: saveTransferTableArrayObject[i].assetNumber
+            //   },
+            //   { reserved: true },
+            //   {
+            //     returnOriginal: false
+            //   }
+            // );
+
+            // const packageAssetId = packageAssetData[0]._id;
+            // packageAssetIdArray.push({ packageAssetId });
+
+            // if (packageAssetData[0].asset.length > 0) {
+            //   for (let k = 0; k < packageAssetData[0].asset.length; k++) {
+            //     let assetId = packageAssetData[0].asset[k]._id;
+            //     console.log("assetId", assetId);
+            //     let a = await asset.update(
+            //       {
+            //         _id: assetId
+            //       },
+            //       { reserved: true }
+            //     );
+            //     console.log("a:", a);
+            //     console.log("asset:", asset);
+            //   }
+            // }
+            // console.log("packageAssetId:", packageAssetId);
+          } else {
+            // isPackage === false
+            const assetUpdate = await asset.update(
+              { reserved: true },
+              {
+                where: {
+                  assetNumber: saveTransferTableArrayObject[i].assetNumber
+                },
+                returning: true
+              }
+            );
+            console.log("assetUpdate:", assetUpdate);
+            console.log("-------------------------------");
+            assetIdHasAssetNumberArray.push(assetUpdate._id);
+            console.log("assetUpdate:", assetUpdate);
+            console.log("-------------------------------");
+            const assetId = assetUpdate[1][0].dataValues._id;
+            console.log("assetId:", assetId);
+
+            assetIdArray.push({ assetId });
+            console.log("assetIdArray:", assetIdArray);
+            console.log("-------------------------------");
+          }
+        } else {
+          //  else not have specific assetNumber
+          if (saveTransferTableArrayObject[i].isPackage === true) {
+            // isPackage === true
+            console.log("isPackage[i]:", saveTransferTableArrayObject[i]);
+
+            let packageAssetData = await pkAsset.findAll({
+              where: {
+                productName: saveTransferTableArrayObject[i].productName,
+                reserved: false,
+                status: "inStock",
+                _id: {
+                  [Op.notIn]: packageAssetIdHasAssetNumberArray
+                }
               },
               include: [
                 {
                   model: asset,
                   as: "packageAssets",
                   required: true,
-                  where: {
-                    packageAssetId: Sequelize.col("TB_PACKAGE_ASSETS._id")
-                  },
                   attributes: ["_id"]
                 }
-              ]
+              ],
+              limit: +saveTransferTableArrayObject[i].amount
             });
-
             console.log("packageAssetData:", packageAssetData);
-            packageAssetIdHasAssetNumberArray.push(packageAssetData);
-            console.log(
-              "packageAssetIdHasAssetNumberArray:",
-              packageAssetIdHasAssetNumberArray
-            );
+            //  loop packageAsset Array and update all child reserved:true
+
+            for (let j = 0; j < packageAssetData.length; j++) {
+              let eachPackageAsset = packageAssetData[j];
+              let packageAssetId = eachPackageAsset._id;
+
+              packageAssetIdArray.push({ packageAssetId });
+
+              await pkAsset.update(
+                { reserved: true },
+                {
+                  where: {
+                    _id: packageAssetId
+                  }
+                }
+              );
+
+              console.log("packageAssetId:", packageAssetId);
+              // console.log(pkAsset[j].asset
+
+              if (eachPackageAsset.assset.length > 0) {
+                for (let k = 0; k < eachPackageAsset.asset.length; k++) {
+                  let assetId = eachPackageAsset.asset[k]._id;
+                  console.log("assetId", assetId);
+
+                  let assetUpdate = await asset.findOneAndUpdate(
+                    {
+                      _id: assetId
+                    },
+                    { reserved: true },
+                    {
+                      returnOriginal: false
+                    }
+                  );
+                  console.log("assetUpdate:", assetUpdate);
+                }
+              }
+            }
+          } else {
+            // isPackage === false
+            console.log("isPackage[i]:", saveTransferTableArrayObject[i]);
+
+            let assetData = await asset.findAll({
+              where: {
+                productName: saveTransferTableArrayObject[i].productName,
+                reserved: false,
+                status: "inStock",
+                _id: {
+                  [Op.notIn]: assetIdHasAssetNumberArray
+                }
+              },
+              limit: +saveTransferTableArrayObject[i].amount
+            });
+            console.log("assetData:", assetData);
+
+            for (let j = 0; j < asset.length; j++) {
+              let eachAsset = asset[j];
+              let assetId = eachAsset._id;
+
+              await asset.update(
+                { reserved: true },
+                {
+                  where: {
+                    _id: assetId
+                  }
+                }
+              );
+              console.log("assetId:", assetId);
+              console.log("eachAsset", eachAsset);
+              // assetIdArray.push({ assetId });
+            }
           }
         }
       }
+
+      // console.log("assetIdArray", assetIdArray);
+      // console.log("packageAssetIdArray", packageAssetIdArray);
+      // transfer = await transfer.create({
+      //   transferDocumentNumber: newestTransferDocumentNumber + 1,
+      //   transferSector,
+      //   subSector,
+      //   handler,
+      //   transfereeSector,
+      //   building,
+      //   floor,
+      //   room,
+
+      //   name_recorder: name_recorder,
+      //   // dateTime_recorder: new Date(),
+      //   name_courier: name_recorder,
+      //   dateTime_courier: new Date(),
+      //   name_approver: name_approver,
+      //   dateTime_approver: dateTime_approver,
+      //   status: status,
+      //   assetIdArray,
+      //   packageAssetIdArray
+      // });
     }
     res.status(200).json({ transfer });
   } catch (err) {
@@ -247,7 +425,82 @@ exports.deleteTransfer = async (req, res, next) => {
 
 exports.getBySearch = async (req, res, next) => {
   try {
-    console.log("getBySearch");
+    const typeTextSearch = req.query.typeTextSearch || "";
+    const textSearch = req.query.textSearch || "";
+    const status = req.query.status || "";
+    const dateFrom = req.query.dateFrom || "";
+    const dateTo = req.query.dateTo || "";
+    const transferSector = req.query.transferSector || "";
+    const transfereeSector = req.query.transfereeSector || "";
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 10;
+
+    let modifiedDateFrom = "";
+    if (dateFrom) {
+      const dateFromObj = new Date(dateFrom);
+      modifiedDateFrom = dateFromObj.toISOString();
+    }
+
+    let modifiedDateTo = "";
+    if (dateTo) {
+      const dateToObj = new Date(dateTo);
+      modifiedDateTo = dateToObj.toISOString();
+    }
+
+    let whereCondition = {};
+
+    if (textSearch !== "") {
+      whereCondition[typeTextSearch] = {
+        [Sequelize.Op.iLike]: `%${textSearch}%`
+      };
+    }
+
+    if (status !== "") {
+      if (status === "all") {
+      } else {
+        whereCondition["status"] = status;
+      }
+    }
+
+    if (dateFrom !== "") {
+      whereCondition["createdAt"] = {
+        [Sequelize.Op.gte]: modifiedDateFrom,
+        [Sequelize.Op.lte]: Sequelize.literal("CONVERT(date, GETDATE())") // เปรียบเทียบวันที่ที่เป็นเวลา 00:00:00
+      };
+    }
+    if (dateTo !== "") {
+      whereCondition["createdAt"] = {
+        [Sequelize.Op.lte]: modifiedDateTo
+      };
+    }
+    if (dateFrom !== "" && dateTo !== "") {
+      whereCondition["createdAt"] = {
+        [Sequelize.Op.gte]: modifiedDateFrom,
+        [Sequelize.Op.lte]: modifiedDateTo
+      };
+    }
+    if (transferSector !== "") {
+      whereCondition["transferSector"] = transferSector;
+    }
+    if (transfereeSector !== "") {
+      whereCondition["transfereeSector"] = transfereeSector;
+    }
+    whereCondition["deletedAt"] = null;
+
+    console.log(whereCondition, "whereCondition");
+
+    const transfer = await Transfer.findAll({
+      where: whereCondition,
+      order: [["updatedAt", "DESC"]],
+      offset: page * limit,
+      limit: limit
+    });
+
+    const total = await Transfer.count({
+      where: whereCondition
+    });
+
+    res.json({ transfer, page: page + 1, limit, total });
   } catch (err) {
     next(err);
   }
@@ -287,6 +540,452 @@ exports.getTransferSectorForSearch = async (req, res, next) => {
     });
 
     res.status(200).json({ transferSector });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTransfereeSectorForSearch = async (req, res, next) => {
+  try {
+    const transfereeSector = await transfer.findAll(
+      {
+        attributes: ["transfereeSector"]
+      },
+
+      "COUNT",
+      {
+        where: {
+          deletedAt: null,
+          transfereeSector: {
+            [Op.not]: null,
+            [Op.not]: ""
+          }
+        },
+        group: ["transfereeSector"],
+        attributes: [
+          "transfereeSector",
+          [
+            Sequelize.fn("COUNT", Sequelize.col("transfereeSector")),
+            "numberOfzipcodes"
+          ]
+        ],
+        raw: true,
+        order: [["transfereeSector", "ASC"]]
+      }
+    );
+    console.log("transfereeSector:", transfereeSector);
+    res.status(200).json({ transfereeSector });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBySearchTopTransferApprove = async (req, res, next) => {
+  try {
+    const { Op } = require("sequelize");
+
+    const listStatus =
+      req.query.listStatus || "approve,reject,partiallyApprove";
+    const dateFrom = req.query.dateFrom || "";
+    const dateTo = req.query.dateTo || "";
+    const transferSector = req.query.transferSector || "";
+
+    const splitList = listStatus?.split(",");
+
+    let modifiedDateFrom = "";
+    if (dateFrom) {
+      const dateFromObj = new Date(dateFrom);
+      modifiedDateFrom = dateFromObj.toISOString();
+    }
+
+    let modifiedDateTo = "";
+    if (dateTo) {
+      const dateToObj = new Date(dateTo);
+      modifiedDateTo = dateToObj.toISOString();
+    }
+
+    let query = {};
+
+    if (dateFrom !== "") {
+      query.createdAt = {
+        [Op.gte]: dateFrom,
+        [Op.lte]: new Date().toISOString()
+      };
+    }
+    if (dateTo !== "") {
+      query.createdAt = {
+        [Op.lte]: new Date(dateTo).toISOString()
+      };
+    }
+    if (dateFrom !== "" && dateTo !== "") {
+      query.createdAt = {
+        [Op.gte]: dateFrom,
+        [Op.lte]: dateTo
+      };
+    }
+    if (transferSector !== "") {
+      query.transferSector = transferSector;
+    }
+
+    query.deletedAt = { [Op.eq]: null };
+    query.status = "waiting";
+
+    const topApproveList = await transfer.findAll({
+      where: query,
+      order: [["updatedAt", "DESC"]]
+    });
+
+    query.status = { [Op.in]: splitList };
+
+    const bottomApproveList = await transfer.findAll({
+      where: query,
+      order: [["dateTime_approver", "DESC"]]
+    });
+
+    const totalWaiting = await transfer.count({
+      where: { status: "waiting" }
+    });
+    const totalApprove = await transfer.count({
+      where: { status: "approve" }
+    });
+    const totalReject = await transfer.count({
+      where: { status: "reject" }
+    });
+    const totalAll = totalWaiting + totalApprove + totalReject;
+
+    res.json({
+      topApproveList,
+      bottomApproveList,
+      totalAll,
+      totalWaiting,
+      totalApprove,
+      totalReject
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// approveAllWaitingTransfer  ยังไม่มีข้อมูล transfer//
+exports.approveAllWaitingTransfer = async (req, res, next) => {
+  try {
+    const { topApproveList } = req.body;
+    console.log("topApproveList:", topApproveList);
+
+    for (let i = 0; i < topApproveList.length; i++) {
+      if (topApproveList[i].checked) {
+        let transferId = topApproveList[i]._id;
+        let assetIdArray = topApproveList[i].assetIdArray;
+        let packageAssetIdArray = topApproveList[i].packageAssetIdArray;
+
+        let transferData = await transfer.update(
+          { status: "approve", dateTime_approver: new Date() },
+          {
+            where: {
+              _id: transferId
+            }
+          }
+        );
+        console.log("transferData:", transferData);
+
+        if (assetIdArray.length > 0) {
+          for (let j = 0; j < assetIdArray.length; j++) {
+            let assetId = assetIdArray[j].assetId;
+
+            let asset = await asset.update(
+              { status: "transfered", reserved: false },
+              {
+                where: {
+                  _id: assetId
+                }
+              }
+            );
+          }
+        }
+
+        if (packageAssetIdArray.length > 0) {
+          for (let k = 0; k < packageAssetIdArray.length; k++) {
+            let packageAssetId = packageAssetIdArray[k].packageAssetId;
+
+            let packageAsset = await pkAsset.update(
+              { status: "transfered", reserved: false },
+              {
+                where: {
+                  _id: packageAssetId
+                }
+              }
+            );
+            console.log("packageAsset:", packageAsset);
+
+            let assetArray = await asset.findAll({
+              where: {
+                packageAssetId
+              }
+            });
+
+            for (let l = 0; l < assetArray.length; l++) {
+              let assetId = assetArray[l]._id;
+
+              let assetData = await asset.update(
+                { status: "transfered", reserved: false },
+                {
+                  where: {
+                    _id: assetId
+                  }
+                }
+              );
+              console.log("assetData:", assetData);
+            }
+          }
+        }
+      }
+    }
+
+    res.json({ message: "All transferings have been successfully approved." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rejectAllWaitingTransfer = async (req, res, next) => {
+  try {
+    const { topApproveList } = req.body;
+    console.log("topApproveList:", topApproveList);
+
+    for (let i = 0; i < topApproveList.length; i++) {
+      if (topApproveList[i].checked) {
+        let transferId = topApproveList[i]._id;
+        let assetIdArray = topApproveList[i].assetIdArray;
+        let packageAssetIdArray = topApproveList[i].packageAssetIdArray;
+
+        await transfer.update(
+          {
+            status: "reject",
+            dateTime_approver: new Date(),
+            reason: topApproveList[i].reason,
+            assetIdArray,
+            packageAssetIdArray
+          },
+          {
+            where: { _id: transferId },
+            returning: true
+          }
+        );
+
+        if (assetIdArray.length > 0) {
+          for (let j = 0; j < assetIdArray.length; j++) {
+            let assetId = assetIdArray[j].assetId;
+
+            await asset.update(
+              { status: "inStock", reserved: false },
+              { where: { _id: assetId }, returning: true }
+            );
+          }
+        }
+
+        if (packageAssetIdArray.length > 0) {
+          for (let k = 0; k < packageAssetIdArray.length; k++) {
+            let packageAssetId = packageAssetIdArray[k].packageAssetId;
+
+            await pkAsset.update(
+              { status: "inStock", reserved: false },
+              { where: { _id: packageAssetId }, returning: true }
+            );
+
+            let assetArray = await asset.findAll({
+              where: { packageAssetId },
+              returning: true
+            });
+
+            for (let l = 0; l < assetArray.length; l++) {
+              let assetId = assetArray[l]._id;
+
+              await asset.update(
+                { status: "inStock", reserved: false },
+                { where: { _id: assetId }, returning: true }
+              );
+            }
+          }
+        }
+      }
+    }
+
+    res.json({ message: "All transferings have been successfully rejected." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
+  try {
+    const { topApproveList } = req.body;
+    console.log("topApproveList:", topApproveList);
+
+    let transferId = topApproveList._id;
+    let assetIdArray = topApproveList.assetIdArray;
+    let packageAssetIdArray = topApproveList.packageAssetIdArray;
+
+    await transfer.update(
+      {
+        status: "reject",
+        dateTime_approver: new Date(),
+        reason: topApproveList.reason,
+        assetIdArray,
+        packageAssetIdArray
+      },
+      {
+        where: { _id: transferId },
+        returning: true
+      }
+    );
+
+    if (assetIdArray.length > 0) {
+      for (let j = 0; j < assetIdArray.length; j++) {
+        let assetId = assetIdArray[j].assetId;
+
+        await asset.update(
+          { status: "inStock", reserved: false },
+          { where: { _id: assetId }, returning: true }
+        );
+      }
+    }
+
+    if (packageAssetIdArray.length > 0) {
+      for (let k = 0; k < packageAssetIdArray.length; k++) {
+        let packageAssetId = packageAssetIdArray[k].packageAssetId;
+
+        await pkAsset.update(
+          { status: "inStock", reserved: false },
+          { where: { _id: packageAssetId }, returning: true }
+        );
+
+        let assetArray = await Asset.findAll({
+          where: { packageAssetId },
+          returning: true
+        });
+
+        for (let l = 0; l < assetArray.length; l++) {
+          let assetId = assetArray[l]._id;
+
+          await asset.update(
+            { status: "inStock", reserved: false },
+            { where: { _id: assetId }, returning: true }
+          );
+        }
+      }
+    }
+
+    res.json({ message: "This transferings has been successfully rejected." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
+  try {
+    console.log("partiallyApproveTransferApproveDetail");
+  } catch (err) {
+    next(err);
+  }
+};
+
+//  postman no api body
+exports.rejectAllTransferApproveDetail = async (req, res, next) => {
+  try {
+    const transferId = req.param.transferId;
+    const { input } = req.body;
+
+    console.log("input:", input);
+
+    const assetIdArray = input.assetIdArray;
+    const packageAssetIdArray = input.packageAssetIdArray;
+
+    console.log("transferId:", transferId);
+    console.log("assetIdArray:", assetIdArray);
+    console.log("packageAssetIdArray:", packageAssetIdArray);
+
+    await transfer.update(
+      {
+        status: "reject",
+        dateTime_approver: new Date(),
+        note: input.note,
+        reason: input.reason,
+        assetIdArray,
+        packageAssetIdArray
+      },
+      {
+        where: { _id: transferId },
+        returning: true
+      }
+    );
+
+    if (assetIdArray.length > 0) {
+      for (let j = 0; j < assetIdArray.length; j++) {
+        let assetId = assetIdArray[j].assetId;
+        console.log("assetId:", assetId);
+        await asset.update(
+          {
+            status: "inStock",
+            reserved: false
+          },
+          {
+            where: { _id: assetId },
+            returning: true
+          }
+        );
+      }
+    }
+
+    if (packageAssetIdArray.length > 0) {
+      for (let k = 0; k < packageAssetIdArray.length; k++) {
+        let packageAssetId = packageAssetIdArray[k].packageAssetId;
+
+        await pkAsset.update(
+          {
+            status: "inStock",
+            reserved: false
+          },
+          {
+            where: { _id: packageAssetId },
+            returning: true
+          }
+        );
+
+        let assetArray = await asset.findAll({ where: { packageAssetId } });
+        for (let l = 0; l < assetArray.length; l++) {
+          let assetId = assetArray[l]._id;
+          await asset.update(
+            {
+              status: "inStock",
+              reserved: false
+            },
+            {
+              where: { _id: assetId },
+              returning: true
+            }
+          );
+        }
+      }
+    }
+    res
+      .status(200)
+      .json({ message: "This transferings has been successfully rejected." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getViewTransferApproveDetailById = async (req, res, next) => {
+  try {
+    console.log("getViewTransferApproveDetailById;");
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBySearchTransferHistory = async (req, res, next) => {
+  try {
+    console.log("getBySearchTransferHistory;");
   } catch (err) {
     next(err);
   }

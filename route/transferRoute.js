@@ -9,7 +9,7 @@ router.post("/create", transferController.createTransfer);
 
 router.patch("/delete/:transferId", transferController.deleteTransfer);
 
-// router.get("/searchAssetTransfer", transferController.getBySearch);
+router.get("/searchAssetTransfer", transferController.getBySearch);
 
 router.get("/all", transferController.getAllTransfer);
 
@@ -18,49 +18,56 @@ router.get(
   transferController.getTransferSectorForSearch
 );
 
-// router.get(
-//   "/transfereeSectorForSearch",
-//   transferController.getTransfereeSectorForSearch
-// );
+router.get(
+  "/transfereeSectorForSearch",
+  transferController.getTransfereeSectorForSearch
+);
+
 // // transferApprove page
-// router.get(
-//   "/searchTopTransferApprove",
-//   transferController.getBySearchTopTransferApprove
-// );
-// router.patch(
-//   "/approveAllWaitingTransfer",
-//   transferController.approveAllWaitingTransfer
-// );
-// router.patch(
-//   "/rejectAllWaitingTransfer",
-//   transferController.rejectAllWaitingTransfer
-// );
-// router.patch(
-//   "/rejectIndividualWaitingTransfer",
-//   transferController.rejectIndividualWaitingTransfer
-// );
 
-// // transferApproveDetail page
-// router.patch(
-//   "/partiallyApproveTransferApproveDetail/:transferId",
-//   transferController.partiallyApproveTransferApproveDetail
-// );
+router.get(
+  "/searchTopTransferApprove",
+  transferController.getBySearchTopTransferApprove
+);
 
-// router.patch(
-//   "/rejectAllTransferApproveDetail/:transferId",
-//   transferController.rejectAllTransferApproveDetail
-// );
+// ยังไม่ test
+router.patch(
+  "/approveAllWaitingTransfer",
+  transferController.approveAllWaitingTransfer
+);
 
-// router.get(
-//   "/viewTransferApproveDetailById/:transferId",
-//   transferController.getViewTransferApproveDetailById
-// );
+router.patch(
+  "/rejectAllWaitingTransfer",
+  transferController.rejectAllWaitingTransfer
+);
+
+router.patch(
+  "/rejectIndividualWaitingTransfer",
+  transferController.rejectIndividualWaitingTransfer
+);
+
+// transferApproveDetail page
+router.patch(
+  "/partiallyApproveTransferApproveDetail/:transferId",
+  transferController.partiallyApproveTransferApproveDetail
+);
+
+router.patch(
+  "/rejectAllTransferApproveDetail/:transferId",
+  transferController.rejectAllTransferApproveDetail
+);
+
+router.get(
+  "/viewTransferApproveDetailById/:transferId",
+  transferController.getViewTransferApproveDetailById
+);
 
 // // transferHistory page
-// router.get(
-//   "/searchTransferHistory",
-//   transferController.getBySearchTransferHistory
-// );
+
+router.get(
+  "/searchTransferHistory",
+  transferController.getBySearchTransferHistory
+);
 // router.get(
 //   "/transferHistorySector",
 //   transferController.getTransferHistorySector
