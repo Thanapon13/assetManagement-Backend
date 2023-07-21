@@ -179,6 +179,12 @@ db.transfer.hasMany(db.transferHasPkAsset, {
   foreignKey: { name: "transferId", field: "transferId" },
   onDelete: "cascade"
 });
+db.transfer.hasMany(db.asset, {
+  as: "transferAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade"
+});
+
 db.asset.hasMany(db.transferHasAsset, {
   as: "transferHasAssets",
   foreignKey: { name: "assetId", field: "assetId" },
@@ -189,6 +195,7 @@ db.pkAsset.hasMany(db.transferHasPkAsset, {
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade"
 });
+
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -224,6 +231,7 @@ db.transferHasPkAsset.belongsTo(db.transfer, {
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId"
 });
+db.asset.belongsTo(db.transfer, { foreignKey: "transferId" });
 
 module.exports = db;
 

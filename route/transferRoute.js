@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/create", transferController.createTransfer);
 
-// router.patch("/update/:transferId", transferController.updateTransfer);
+router.patch("/update/:transferId", transferController.updateTransfer);
 
 router.patch("/delete/:transferId", transferController.deleteTransfer);
 
@@ -68,11 +68,11 @@ router.get(
   "/searchTransferHistory",
   transferController.getBySearchTransferHistory
 );
-// router.get(
-//   "/transferHistorySector",
-//   transferController.getTransferHistorySector
-// );
+router.get(
+  "/transferHistorySector",
+  transferController.getTransferHistorySector
+);
 
-// router.get("/:transferId", transferController.getTransferById);
+router.get("/:transferId", transferController.getTransferById);
 
 module.exports = router;

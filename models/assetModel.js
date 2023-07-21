@@ -407,6 +407,12 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(500),
         allowNull: true,
         field: "distributionNote"
+      },
+
+      transferId: {
+        type: Sequelize.INTEGER(11),
+        allowNull: true,
+        field: "transferId"
       }
     },
     {
