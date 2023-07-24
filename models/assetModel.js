@@ -285,21 +285,6 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "accumulateDepreciationBookValue"
       },
-      // // assetPic
-      // imageArray: [{ image: String }],
-
-      // // document
-      // documentArray: [{ document: String }],
-      // //genData for draft
-      // genDataArray: [
-      //   {
-      //     assetNumber: String,
-      //     serialNumber: String,
-      //     replacedAssetNumber: String,
-      //     asset01: String,
-      //     sector: String,
-      //   },
-      // ],
       reserved: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
@@ -407,12 +392,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(500),
         allowNull: true,
         field: "distributionNote"
-      },
-
-      transferId: {
-        type: Sequelize.INTEGER(11),
-        allowNull: true,
-        field: "transferId"
       }
     },
     {

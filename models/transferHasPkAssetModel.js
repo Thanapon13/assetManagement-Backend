@@ -10,11 +10,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
-      },
+        field: "_id"
+      }
     },
     {
-      tableName: "TB_TRANSFER_HAS_PACKAGE_ASSETS",
+      tableName: "TB_TRANSFER_HAS_PACKAGE_ASSETS"
     }
   );
 

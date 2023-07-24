@@ -169,32 +169,30 @@ db.transfer.hasMany(db.subComponentTransfer, {
   foreignKey: { name: "transferId", field: "transferId" },
   onDelete: "cascade"
 });
-db.transfer.hasMany(db.transferHasAsset, {
-  as: "transferHasAssets",
-  foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade"
-});
-db.transfer.hasMany(db.transferHasPkAsset, {
-  as: "transferHasPkAssets",
-  foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade"
-});
-db.transfer.hasMany(db.asset, {
-  as: "transferAssets",
-  foreignKey: { name: "transferId", field: "transferId" },
-  onDelete: "cascade"
-});
 
-db.asset.hasMany(db.transferHasAsset, {
-  as: "transferHasAssets",
-  foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade"
-});
-db.pkAsset.hasMany(db.transferHasPkAsset, {
-  as: "transferHasPkAssets",
-  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-  onDelete: "cascade"
-});
+// db.transfer.hasMany(db.transferHasAsset, {
+//   as: "transferHasAssets",
+//   foreignKey: { name: "transferId", field: "transferId" },
+//   onDelete: "cascade"
+// });
+
+// db.transfer.hasMany(db.transferHasPkAsset, {
+//   as: "transferHasPkAssets",
+//   foreignKey: { name: "transferId", field: "transferId" },
+//   onDelete: "cascade"
+// });
+
+// db.asset.hasMany(db.transferHasAsset, {
+//   as: "transferHasAssetsDataAsset",
+//   foreignKey: { name: "assetId", field: "assetId" },
+//   onDelete: "cascade"
+// });
+
+// db.pkAsset.hasMany(db.transferHasPkAsset, {
+//   as: "transferHasPkAssetsDataPkAsset",
+//   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+//   onDelete: "cascade"
+// });
 
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
@@ -219,30 +217,39 @@ db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
 db.subComponentTransfer.belongsTo(db.transfer, {
   foreignKey: "transferId"
 });
-db.transferHasAsset.belongsTo(db.transfer, {
+
+db.transfer.belongsToMany(db.asset, {
+  through: db.transferHasAsset,
   foreignKey: "transferId"
 });
-db.transferHasAsset.belongsTo(db.asset, {
+db.asset.belongsToMany(db.transfer, {
+  through: db.transferHasAsset,
   foreignKey: "assetId"
 });
-db.transferHasPkAsset.belongsTo(db.transfer, {
-  foreignKey: "transferId"
-});
-db.transferHasPkAsset.belongsTo(db.pkAsset, {
+
+// Define associations for db.pkAsset and db.transferHasPkAsset
+db.pkAsset.belongsToMany(db.transfer, {
+  through: db.transferHasPkAsset,
   foreignKey: "packageAssetId"
 });
-db.asset.belongsTo(db.transfer, { foreignKey: "transferId" });
+db.transfer.belongsToMany(db.pkAsset, {
+  through: db.transferHasPkAsset,
+  foreignKey: "transferId"
+});
 
-module.exports = db;
+// db.transferHasAsset.belongsTo(db.transfer, {
+//   foreignKey: "transferId"
+// });
+// db.transferHasAsset.belongsToMany(db.asset, {
+//   foreignKey: "assetId"
+// });
+// db.transferHasPkAsset.belongsTo(db.transfer, {
+//   foreignKey: "transferId"
+// });
+// db.transferHasPkAsset.belongsToMany(db.pkAsset, {
+//   foreignKey: "packageAssetId"
+// });
 
-// db.sequelize
-//   .sync({ alter: true })
-//   .then(() => {
-//     console.log("Database synchronized successfully");
-//     // เริ่มทำสิ่งที่ต้องการหลังจากการซิงค์ฐานข้อมูล
-//   })
-//   .catch(error => {
-//     console.error("Error synchronizing database:", error);
-//   });
-
+// sequelize.sync({ force: true });
+// console.log("All models were synchronized successfully.");
 module.exports = db;
