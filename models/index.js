@@ -87,6 +87,9 @@ db.type4 = require("./type4Model")(sequelize, Sequelize);
 db.type8 = require("./type8Model")(sequelize, Sequelize);
 db.type13 = require("./type13Model")(sequelize, Sequelize);
 db.type = require("./typeModel")(sequelize, Sequelize);
+db.merchant = require("./merchantModel")(sequelize, Sequelize);
+db.merchantAddress = require("./merchantAddressModel")(sequelize, Sequelize);
+db.merchantRelation = require("./merchantRelationModel")(sequelize, Sequelize);
 
 // db.room = require("./roomModel")(sequelize, Sequelize);
 //   db.team = require("./model/team")( sequelize , Sequelize );
@@ -138,17 +141,17 @@ db.borrow.hasMany(db.subComponentBorrow, {
 });
 
 db.pkAsset.hasMany(db.asset, {
-  as: "packageAssets",
+  as: "assets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetDocument, {
-  as: "packageDocuments",
+  as: "packageAssetDocuments",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade"
 });
 db.pkAsset.hasMany(db.pkAssetImage, {
-  as: "packageImages",
+  as: "packageAssetImages",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade"
 });
@@ -169,30 +172,38 @@ db.transfer.hasMany(db.subComponentTransfer, {
   foreignKey: { name: "transferId", field: "transferId" },
   onDelete: "cascade"
 });
+db.transfer.hasMany(db.transferHasAsset, {
+  as: "transferHasAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade"
+});
+db.transfer.hasMany(db.transferHasPkAsset, {
+  as: "transferHasPkAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade"
+});
+db.asset.hasMany(db.transferHasAsset, {
+  as: "transferHasAssets",
+  foreignKey: { name: "assetId", field: "assetId" },
+  onDelete: "cascade"
+});
+db.pkAsset.hasMany(db.transferHasPkAsset, {
+  as: "transferHasPkAssetsData",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade"
+});
 
-// db.transfer.hasMany(db.transferHasAsset, {
-//   as: "transferHasAssets",
-//   foreignKey: { name: "transferId", field: "transferId" },
-//   onDelete: "cascade"
-// });
-
-// db.transfer.hasMany(db.transferHasPkAsset, {
-//   as: "transferHasPkAssets",
-//   foreignKey: { name: "transferId", field: "transferId" },
-//   onDelete: "cascade"
-// });
-
-// db.asset.hasMany(db.transferHasAsset, {
-//   as: "transferHasAssetsDataAsset",
-//   foreignKey: { name: "assetId", field: "assetId" },
-//   onDelete: "cascade"
-// });
-
-// db.pkAsset.hasMany(db.transferHasPkAsset, {
-//   as: "transferHasPkAssetsDataPkAsset",
-//   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
-//   onDelete: "cascade"
-// });
+// feat : merchant
+db.merchant.hasMany(db.merchantAddress, {
+  as: "merchantAddress",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade"
+});
+db.merchant.hasMany(db.merchantRelation, {
+  as: "merchantRelation",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade"
+});
 
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
@@ -217,38 +228,24 @@ db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
 db.subComponentTransfer.belongsTo(db.transfer, {
   foreignKey: "transferId"
 });
-
-db.transfer.belongsToMany(db.asset, {
-  through: db.transferHasAsset,
+db.transferHasAsset.belongsTo(db.transfer, {
   foreignKey: "transferId"
 });
-db.asset.belongsToMany(db.transfer, {
-  through: db.transferHasAsset,
+db.transferHasAsset.belongsTo(db.asset, {
   foreignKey: "assetId"
 });
-
-// Define associations for db.pkAsset and db.transferHasPkAsset
-db.pkAsset.belongsToMany(db.transfer, {
-  through: db.transferHasPkAsset,
-  foreignKey: "packageAssetId"
-});
-db.transfer.belongsToMany(db.pkAsset, {
-  through: db.transferHasPkAsset,
+db.transferHasPkAsset.belongsTo(db.transfer, {
   foreignKey: "transferId"
 });
-
-// db.transferHasAsset.belongsTo(db.transfer, {
-//   foreignKey: "transferId"
-// });
-// db.transferHasAsset.belongsToMany(db.asset, {
-//   foreignKey: "assetId"
-// });
-// db.transferHasPkAsset.belongsTo(db.transfer, {
-//   foreignKey: "transferId"
-// });
-// db.transferHasPkAsset.belongsToMany(db.pkAsset, {
-//   foreignKey: "packageAssetId"
-// });
+db.transferHasPkAsset.belongsTo(db.pkAsset, {
+  foreignKey: "packageAssetId"
+});
+db.merchantAddress.belongsTo(db.merchant, {
+  foreignKey: "merchantId"
+});
+db.merchantRelation.belongsTo(db.merchant, {
+  foreignKey: "merchantId"
+});
 
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");

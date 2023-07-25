@@ -11,6 +11,22 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true,
         autoIncrement: true,
         field: "_id"
+      },
+      reason: {
+        type: Sequelize.STRING(1000),
+        allowNull: true,
+        default: "",
+        field: "reason"
+      },
+      return: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "return"
+      },
+      returnDate: {
+        type: Sequelize.DATE,
+        allowNull: true,
+        field: "returnDate"
       }
     },
     {

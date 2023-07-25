@@ -7,9 +7,6 @@ const {
   transferHasAsset,
   transferHasPkAsset
 } = require("../models");
-const { json } = require("express");
-
-// หรือใช้การดึงมาทั้ง
 
 exports.createTransfer = async (req, res, next) => {
   try {
@@ -127,7 +124,7 @@ exports.createTransfer = async (req, res, next) => {
               include: [
                 {
                   model: asset,
-                  as: "packageAssets",
+                  as: "assets",
                   required: true,
                   attributes: ["_id"]
                 }
@@ -159,13 +156,9 @@ exports.createTransfer = async (req, res, next) => {
             packageAssetIdArray.push({ packageAssetId });
             console.log("packageAssetIdArray:", packageAssetIdArray);
 
-            if (packageAssetData[0].packageAssets.length > 0) {
-              for (
-                let k = 0;
-                k < packageAssetData[0].packageAssets.length;
-                k++
-              ) {
-                let assetId = packageAssetData[0].packageAssets[k]._id;
+            if (packageAssetData[0].assets.length > 0) {
+              for (let k = 0; k < packageAssetData[0].assets.length; k++) {
+                let assetId = packageAssetData[0].assets[k]._id;
                 console.log("assetId:", assetId);
                 let a = await asset.update(
                   { reserved: true },
@@ -1037,11 +1030,8 @@ exports.getTransfereeSectorForSearch = async (req, res, next) => {
   }
 };
 
-// ค่า packageAssetIdArray assetTransferTableArrayไม่แสดง
 exports.getBySearchTopTransferApprove = async (req, res, next) => {
   try {
-    const { Op } = require("sequelize");
-
     const listStatus =
       req.query.listStatus || "approve,reject,partiallyApprove";
     const dateFrom = req.query.dateFrom || "";
@@ -1049,51 +1039,67 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
     const transferSector = req.query.transferSector || "";
 
     const splitList = listStatus?.split(",");
+    console.log("splitList", splitList);
 
     let modifiedDateFrom = "";
     if (dateFrom) {
       const dateFromObj = new Date(dateFrom);
-      modifiedDateFrom = dateFromObj.toISOString();
+      modifiedDateFrom = dateFromObj.toString();
+      console.log(modifiedDateFrom);
     }
 
     let modifiedDateTo = "";
     if (dateTo) {
       const dateToObj = new Date(dateTo);
-      modifiedDateTo = dateToObj.toISOString();
+      modifiedDateTo = dateToObj.toString();
     }
 
     let query = {};
 
     if (dateFrom !== "") {
-      query.createdAt = {
+      query["createdAt"] = {
         [Op.gte]: dateFrom,
-        [Op.lte]: new Date().toISOString()
+        [Op.lte]: new Date()
       };
     }
     if (dateTo !== "") {
-      query.createdAt = {
-        [Op.lte]: new Date(dateTo).toISOString()
+      query["createdAt"] = {
+        [Op.lte]: new Date(dateTo)
       };
     }
     if (dateFrom !== "" && dateTo !== "") {
-      query.createdAt = {
+      query["createdAt"] = {
         [Op.gte]: dateFrom,
         [Op.lte]: dateTo
       };
     }
     if (transferSector !== "") {
-      query.transferSector = transferSector;
+      query["transferSector"] = transferSector;
     }
 
-    query.deletedAt = { [Op.eq]: null };
-    query.status = "waiting";
+    query["deletedAt"] = { [Op.eq]: null };
+    query["status"] = "waiting";
+    console.log(query, "query");
 
     const topApproveList = await transfer.findAll({
       where: query,
-      order: [["updatedAt", "DESC"]]
+      order: [["updatedAt", "DESC"]],
+      include: [
+        {
+          model: transferHasAsset,
+          as: "transferHasAssets",
+          attributes: ["assetId", "reason", "return", "_id"]
+        },
+        {
+          model: transferHasPkAsset,
+          as: "transferHasPkAssets",
+          attributes: ["packageAssetId", "reason", "return", "_id"]
+        }
+      ]
     });
 
-    query.status = { [Op.in]: splitList };
+    query["status"] = { [Op.in]: splitList };
+    console.log("bottom", query);
 
     const bottomApproveList = await transfer.findAll({
       where: query,
@@ -1149,7 +1155,7 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
           for (let j = 0; j < assetIdArray.length; j++) {
             let assetId = assetIdArray[j].assetId;
 
-            let asset = await asset.update(
+            await asset.update(
               { status: "transfered", reserved: false },
               {
                 where: {
@@ -1596,7 +1602,6 @@ exports.rejectAllTransferApproveDetail = async (req, res, next) => {
   }
 };
 
-// ติดที่ ที่ sync ข้อมูล FK ไม่ได้
 exports.getViewTransferApproveDetailById = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
@@ -1606,31 +1611,44 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
       where: { _id: transferId },
       include: [
         {
-          model: transferHasAsset
-          // as: "transferHasAssetsDataAsset"
-          // include: [{ model: asset, as: "assetId" }]
-        },
-        {
-          model: transferHasPkAsset,
-          // as: "transferHasPkAssets",
+          model: transferHasAsset,
+          as: "transferHasAssets",
           include: [
             {
-              model: pkAsset,
-              // as: "transferHasPkAssetsDataPkAsset",
+              model: asset,
+              as: "TB_ASSET",
               attributes: [
                 "_id",
                 "assetNumber",
                 "productName",
-                "serialNumber",
-                "sector",
-                "imageArray"
+                // "serialNumber",
+                "sector"
+                // "imageArray"
+              ]
+            }
+          ]
+        },
+        {
+          model: transferHasPkAsset,
+          as: "transferHasPkAssets",
+          include: [
+            {
+              model: pkAsset,
+              as: "TB_PACKAGE_ASSET",
+
+              attributes: [
+                "_id",
+                "assetNumber",
+                "productName",
+                // "serialNumber",
+                "sector"
+                // "imageArray"
               ]
             }
           ]
         }
       ]
     });
-    console.log("transferArray:", transferArray);
 
     res.json({ transferArray });
   } catch (err) {
@@ -1649,7 +1667,6 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
     const page = parseInt(req.query.page) - 1 || 0;
     const limit = parseInt(req.query.limit) || 10;
 
-    // ไม่ต้องแปลงเป็น Date Object เพราะ Sequelize รองรับให้ใช้วันที่ในรูปแบบ String
     let modifiedDateFrom = "";
     if (dateFrom) {
       modifiedDateFrom = moment(dateFrom).format("YYYY-MM-DD");
@@ -1741,20 +1758,14 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
   }
 };
 
-// ติด associated
 exports.getTransferHistorySector = async (req, res, next) => {
   try {
     const transfereeSectors = await transfer.findAll({
-      attributes: [
-        [
-          Sequelize.fn("DISTINCT", Sequelize.col("transfereeSector")),
-          "transfereeSector"
-        ]
-      ],
+      attributes: ["transfereeSector"],
       where: {
-        transfereeSector: { [Op.ne]: null },
+        transfereeSector: { [Sequelize.Op.ne]: null },
         status: {
-          [Op.in]: [
+          [Sequelize.Op.in]: [
             "approve",
             "partiallyApprove",
             "waitingReturnApprove",
@@ -1762,76 +1773,70 @@ exports.getTransferHistorySector = async (req, res, next) => {
             "done"
           ]
         },
-        deletedAt: { [Op.eq]: null }
+        deletedAt: null
       },
-      raw: true // สั่งให้คืนค่าเป็น JSON ไม่ต้องแปลงเป็น Model instance
+      group: ["transfereeSector"],
+      order: [["transfereeSector", "ASC"]]
     });
 
     console.log("transfereeSectors:", transfereeSectors);
 
-    res.json({ transfereeSectors });
+    res.status(200).json({ transfereeSectors });
   } catch (err) {
     next(err);
   }
 };
 
-// ติด associated
 exports.getTransferById = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
+    console.log("transferId:", transferId);
 
-    const transferData = await transfer.findOne({
+    const transferById = await transfer.findOne({
       where: { _id: transferId },
       include: [
         {
-          model: asset,
-          as: "assets",
-          where: {
-            _id: {
-              [Op.in]: Sequelize.literal(
-                "(SELECT assetId FROM transfer_asset WHERE transferId = " +
-                  transferId +
-                  ")"
-              )
-            },
-            deletedAt: { [Op.eq]: null }
-          },
-          attributes: [
-            "_id",
-            "assetNumber",
-            "productName",
-            "serialNumber",
-            "sector",
-            "imageArray"
+          model: transferHasAsset,
+          as: "transferHasAssets",
+          include: [
+            {
+              model: asset,
+              as: "TB_ASSET",
+              where: { deletedAt: null },
+              attributes: [
+                "_id",
+                "assetNumber",
+                "productName",
+                // "serialNumber",
+                "sector"
+                // "imageArray"
+              ]
+            }
           ]
         },
         {
-          model: pkAsset,
-          as: "packageAssets",
-          where: {
-            _id: {
-              [Op.in]: Sequelize.literal(
-                "(SELECT packageAssetId FROM transfer_packageAsset WHERE transferId = " +
-                  transferId +
-                  ")"
-              )
-            },
-            deletedAt: { [Op.eq]: null }
-          },
-          attributes: [
-            "_id",
-            "assetNumber",
-            "productName",
-            "serialNumber",
-            "sector",
-            "imageArray"
+          model: transferHasPkAsset,
+          as: "transferHasPkAssets",
+          include: [
+            {
+              model: pkAsset,
+              as: "TB_PACKAGE_ASSET",
+              where: { deletedAt: null },
+              attributes: [
+                "_id",
+                "assetNumber",
+                "productName",
+                // "serialNumber",
+                "sector"
+                // "imageArray"
+              ]
+            }
           ]
         }
-      ],
-      raw: true
+      ]
     });
 
-    res.json({ transferData });
+    res.status(200).json({ transferById });
   } catch (err) {
     next(err);
   }
