@@ -14,7 +14,7 @@ const borrowRoute = require("./route/borrowRoute");
 // const withdrawRoute = require("./route/withdrawRoute");
 const transferRoute = require("./route/transferRoute");
 // const repairRoute = require("./route/repairRoute");
-// const merchantRoute = require("./route/merchantRoute");
+const merchantRoute = require("./route/merchantRoute");
 // const roleRoute = require("./route/roleRoute");
 // const dashboardRoute = require("./route/dashboardRoute");
 // dropdown
@@ -69,7 +69,7 @@ app.use("/borrow", borrowRoute);
 // app.use("/withdraw", withdrawRoute);
 app.use("/transfer", transferRoute);
 // app.use("/repair", repairRoute);
-// app.use("/merchant", merchantRoute);
+app.use("/merchant", merchantRoute);
 // app.use("/role", roleRoute);
 // app.use("/dashboard", dashboardRoute);
 // dropdown

@@ -90,6 +90,10 @@ db.type = require("./typeModel")(sequelize, Sequelize);
 db.merchant = require("./merchantModel")(sequelize, Sequelize);
 db.merchantAddress = require("./merchantAddressModel")(sequelize, Sequelize);
 db.merchantRelation = require("./merchantRelationModel")(sequelize, Sequelize);
+db.merchantDocumentArray = require("./merchantDocumentArrayModel")(
+  sequelize,
+  Sequelize
+);
 
 // db.room = require("./roomModel")(sequelize, Sequelize);
 //   db.team = require("./model/team")( sequelize , Sequelize );
@@ -204,6 +208,11 @@ db.merchant.hasMany(db.merchantRelation, {
   foreignKey: { name: "merchantId", field: "merchantId" },
   onDelete: "cascade"
 });
+db.merchant.hasMany(db.merchantDocumentArray, {
+  as: "merchantDocumentArray",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade"
+});
 
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
@@ -244,6 +253,9 @@ db.merchantAddress.belongsTo(db.merchant, {
   foreignKey: "merchantId"
 });
 db.merchantRelation.belongsTo(db.merchant, {
+  foreignKey: "merchantId"
+});
+db.merchantDocumentArray.belongsTo(db.merchant, {
   foreignKey: "merchantId"
 });
 
