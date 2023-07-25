@@ -1553,28 +1553,28 @@ exports.getAllPackageAsset = async (req, res, next) => {
             },
           ],
         },
-      ],
-      include: [
         {
           model: PackageAssetImage,
+          require: false,
+
           as: "packageAssetImages",
         },
-      ],
-      include: [
         {
           model: PackageAssetDocument,
+          require: false,
+
           as: "packageAssetDocuments",
         },
-      ],
-      include: [
         {
           model: BottomSubComponentDataPkAsset,
-          as: "bottomSubComponentDataPackagekAssets",
+          require: false,
+
+          as: "bottomSubComponentDataPackageAssets",
         },
-      ],
-      include: [
         {
           model: SubComponentPkAsset,
+          require: false,
+
           as: "subComponentPackageAssets",
         },
       ],
@@ -1597,63 +1597,45 @@ exports.getAllPackageAsset = async (req, res, next) => {
 exports.getPackageAssetById = async (req, res, next) => {
   try {
     const packageAssetId = req.params.packageAssetId;
-    // const packageAsset = await PackageAsset.aggregate([
-    //   { $match: { _id: ObjectID(packageAssetId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       localField: "_id",
-    //       foreignField: "packageAssetId",
-    //       as: "asset",
-    //     },
-    //   },
-    // ]);
+
     const packageAsset = await PackageAsset.findOne({
       where: { _id: packageAssetId },
-      // include: [
-      //   {
-      //     model: Asset,
-      //     require: false,
-      //     as: "assets",
-      //     include: [
-      //       {
-      //         model: AssetImage,
-      //         as: "assetImages",
-      //       },
-      //     ],
-      //     include: [
-      //       {
-      //         model: AssetDocument,
-      //         as: "assetDocuments",
-      //       },
-      //     ],
-      //   },
-      // ],
-      // include: [
-      //   {
-      //     model: PackageAssetImage,
-      //     require: false,
-
-      //     as: "packageAssetImages",
-      //   },
-      // ],
-      // include: [
-      //   {
-      //     model: PackageAssetDocument,
-      //     require: false,
-
-      //     as: "packageAssetDocuments",
-      //   },
-      // ],
       include: [
+        {
+          model: Asset,
+          require: false,
+          as: "assets",
+          include: [
+            {
+              model: AssetImage,
+              as: "assetImages",
+            },
+          ],
+          include: [
+            {
+              model: AssetDocument,
+              as: "assetDocuments",
+            },
+          ],
+        },
+        {
+          model: PackageAssetImage,
+          require: false,
+
+          as: "packageAssetImages",
+        },
+        {
+          model: PackageAssetDocument,
+          require: false,
+
+          as: "packageAssetDocuments",
+        },
         {
           model: BottomSubComponentDataPkAsset,
           require: false,
 
           as: "bottomSubComponentDataPackageAssets",
         },
-      ],
-      include: [
         {
           model: SubComponentPkAsset,
           require: false,

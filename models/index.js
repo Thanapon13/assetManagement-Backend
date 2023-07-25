@@ -59,7 +59,7 @@ db.repairSector = require("./repairSectorModel")(sequelize, Sequelize);
 db.room = require("./roomModel")(sequelize, Sequelize);
 db.sector = require("./sectorModel")(sequelize, Sequelize);
 db.source = require("./sourceModel")(sequelize, Sequelize);
-db.subComponentTransfer = require("./subCompomentTransferModel")(
+db.subComponentTransfer = require("./subComponentTransferModel")(
   sequelize,
   Sequelize
 );
@@ -138,17 +138,17 @@ db.borrow.hasMany(db.subComponentBorrow, {
 });
 
 db.pkAsset.hasMany(db.asset, {
-  as: "packageAssets",
+  as: "assets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
 db.pkAsset.hasMany(db.pkAssetDocument, {
-  as: "packageDocuments",
+  as: "packageAssetDocuments",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
 db.pkAsset.hasMany(db.pkAssetImage, {
-  as: "packageImages",
+  as: "packageAssetImages",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });

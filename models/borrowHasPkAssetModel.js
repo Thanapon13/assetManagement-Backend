@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       reason: {
         type: Sequelize.STRING(1000),
-        allowNull: false,
+        allowNull: true,
         field: "reason",
       },
       return: {
