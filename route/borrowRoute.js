@@ -5,7 +5,7 @@ const borrowController = require("../controller/borrowController");
 const upload = require("../middleware/upload");
 
 router.post("/create", borrowController.createBorrow);
-router.patch("/update/:borrowId", borrowController.updateBorrow);
+// router.patch("/update/:borrowId", borrowController.updateBorrow);
 
 // router
 //   .route('/')
