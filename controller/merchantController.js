@@ -1,9 +1,196 @@
+const { Op } = require("sequelize");
+const fs = require("fs");
+
 const {
   merchant,
   merchantAddress,
   merchantRelation,
   merchantDocumentArray
 } = require("../models");
+
+function delete_file(path) {
+  fs.unlink(path, err => {
+    if (err) throw err;
+    console.log(path + " was deleted");
+  });
+}
+
+exports.getAllMerchant = async (req, res, next) => {
+  try {
+    const merchantData = await merchant.findAll({
+      include: [
+        {
+          model: merchantAddress,
+          as: "merchantAddress"
+        },
+        {
+          model: merchantRelation,
+          as: "merchantRelation"
+        },
+        {
+          model: merchantDocumentArray,
+          as: "merchantDocumentArray"
+        }
+      ],
+      order: [["updatedAt", "DESC"]]
+    });
+
+    res.status(200).json({ merchantData });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBySearch = async (req, res, next) => {
+  try {
+    const typeTextSearch = req.query.typeTextSearch || "";
+    const textSearch = req.query.textSearch || "";
+    const status = req.query.status || "";
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 10;
+
+    let query = {};
+
+    if (textSearch !== "") {
+      query[typeTextSearch] = { [Op.like]: `%${textSearch}%` };
+    }
+
+    if (status !== "") {
+      if (status !== "all") {
+        query["status"] = status;
+      }
+    }
+
+    query["deletedAt"] = { [Op.eq]: null };
+    console.log("query:", query);
+
+    const merchantData = await merchant.findAndCountAll({
+      where: query,
+      order: [["updatedAt", "DESC"]],
+      include: [
+        {
+          model: merchantAddress,
+          as: "merchantAddress"
+        },
+        {
+          model: merchantRelation,
+          as: "merchantRelation"
+        },
+        {
+          model: merchantDocumentArray,
+          as: "merchantDocumentArray"
+        }
+      ],
+      offset: page * limit,
+      limit: limit
+    });
+
+    const merchants = merchantData.rows;
+    const total = merchantData.count;
+
+    res.status(200).json({ merchants, page: page + 1, limit, total });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBySearchViewOnly = async (req, res, next) => {
+  try {
+    const typeTextSearch = req.query.typeTextSearch || "";
+    const textSearch = req.query.textSearch || "";
+    const status = req.query.status || "";
+    const page = parseInt(req.query.page) - 1 || 0;
+    const limit = parseInt(req.query.limit) || 10;
+
+    let query = {};
+
+    if (textSearch !== "") {
+      query[typeTextSearch] = { [Op.like]: `%${textSearch}%` };
+    }
+
+    if (status !== "") {
+      if (status !== "all") {
+        query["status"] = status;
+      }
+    }
+
+    query["deletedAt"] = { [Op.eq]: null };
+    console.log("query:", query);
+
+    const merchantData = await merchant.findAndCountAll({
+      where: query,
+      order: [["updatedAt", "DESC"]],
+      include: [
+        {
+          model: merchantAddress,
+          as: "merchantAddress"
+        },
+        {
+          model: merchantRelation,
+          as: "merchantRelation"
+        },
+        {
+          model: merchantDocumentArray,
+          as: "merchantDocumentArray"
+        }
+      ],
+      offset: page * limit,
+      limit: limit
+    });
+
+    const merchants = merchantData.rows;
+    const total = merchantData.count;
+
+    res.status(200).json({ merchants, page: page + 1, limit, total });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getMerchantDropdown = async (req, res, next) => {
+  try {
+    const merchants = await merchant.findAll({
+      where: {
+        status: { [Op.ne]: "saveDraft" },
+        deletedAt: { [Op.eq]: null }
+      },
+      attributes: ["realMerchantId", "companyName", "name"],
+      order: [["realMerchantId", "DESC"]]
+    });
+    res.status(200).json({ merchant: merchants });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getMerchantById = async (req, res, next) => {
+  try {
+    const { merchantId } = req.params;
+    console.log("merchantId:", merchantId);
+
+    const merchantData = await merchant.findAll({
+      where: { _id: merchantId },
+      include: [
+        {
+          model: merchantAddress,
+          as: "merchantAddress"
+        },
+        {
+          model: merchantRelation,
+          as: "merchantRelation"
+        },
+        {
+          model: merchantDocumentArray,
+          as: "merchantDocumentArray"
+        }
+      ]
+    });
+
+    res.status(200).json({ merchantData });
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.createMerchant = async (req, res, next) => {
   try {
@@ -163,25 +350,29 @@ exports.updateMerchant = async (req, res, next) => {
       status
     } = inputObject;
 
-    const oldDocumentArray = await merchantDocumentArray.findOne({
+    const merchantInfo = await merchantDocumentArray.findAll({
       where: { merchantId: merchantId }
     });
+    console.log("merchantInfo:", merchantInfo);
+
+    const oldDocumentArray = merchantInfo;
     console.log("oldDocumentArray:", oldDocumentArray);
 
     if (arrayDocument.length > 0) {
-      console.log("arrayDocument:", arrayDocument);
+      // console.log("arrayDocument:", arrayDocument);
       for (el of arrayDocument) {
-        await merchantDocumentArray.update(
-          { document: el.filename, merchantId: merchantId },
-          { where: { merchantId: merchantId } }
-        );
+        await merchantDocumentArray.create({
+          document: el.filename,
+          merchantId: merchantId
+        });
       }
     }
 
     let notExistArrayDocument = [];
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
       const existObjects = existArray.map(obj => obj.document + obj._id);
-
+      console.log("existObjects:", existObjects);
+      console.log("oldDocumentArray----:", oldDocumentArray);
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
           !existObjects.includes(
@@ -191,8 +382,7 @@ exports.updateMerchant = async (req, res, next) => {
           notExistArray.push(oldDocumentArray[i]);
         }
       }
-
-      console.log("notExistArrayDocument:", notExistArrayDocument);
+      console.log("notExistArray----:", notExistArray);
       return notExistArray;
     }
 
@@ -203,6 +393,7 @@ exports.updateMerchant = async (req, res, next) => {
         notExistArrayDocument
       );
     }
+    console.log("notExistArrayDocument:", notExistArrayDocument);
     console.log("existArrayDocumentArray:", existArrayDocumentArray);
 
     if (notExistArrayDocument.length > 0) {
@@ -213,7 +404,6 @@ exports.updateMerchant = async (req, res, next) => {
             merchantId: merchantId
           }
         });
-
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
@@ -230,20 +420,62 @@ exports.updateMerchant = async (req, res, next) => {
     for (const address of merchantAddressArray) {
       await merchantAddress.update(
         { ...address },
-        { where: { _id: address.id } }
+        { where: { _id: merchantId } }
       );
     }
 
     for (const relation of merchantRelationArray) {
       await merchantRelation.update(
         { ...relation },
-        { where: { _id: relation.id } }
+        { where: { _id: merchantId } }
       );
     }
 
     res.status(200).json({
       message: "update merchant successfully"
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteMerchant = async (req, res, next) => {
+  try {
+    const { merchantId } = req.params;
+    const { reason } = req.body;
+
+    console.log("merchantId:", merchantId);
+    console.log("reason:", reason);
+
+    const merchantById = await merchant.findByPk(merchantId);
+
+    if (merchantById.status == "saveDraft") {
+      await merchantById.destroy();
+    } else {
+      console.log("merchantById:", merchantById);
+      merchantById.deletedAt = new Date();
+      merchantById.reason = reason;
+      // console.log("merchant.reason:", merchant.reason);
+      await merchantById.save();
+    }
+
+    res.status(200).json({ merchantById });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteAll = async (req, res, next) => {
+  try {
+    const merchantDate = await merchant.destroy({
+      where: {
+        name: {
+          [Op.ne]: null
+        }
+      }
+    });
+
+    res.status(200).json({ merchantDate });
   } catch (err) {
     next(err);
   }
