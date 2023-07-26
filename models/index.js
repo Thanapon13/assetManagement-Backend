@@ -94,6 +94,9 @@ db.merchantDocumentArray = require("./merchantDocumentArrayModel")(
   sequelize,
   Sequelize
 );
+db.user = require("./userModel")(sequelize, Sequelize);
+db.role = require("./roleModel")(sequelize, Sequelize);
+db.accessScreen = require("./accessScreenModel")(sequelize, Sequelize);
 
 // db.room = require("./roomModel")(sequelize, Sequelize);
 //   db.team = require("./model/team")( sequelize , Sequelize );
@@ -214,6 +217,18 @@ db.merchant.hasMany(db.merchantDocumentArray, {
   onDelete: "cascade"
 });
 
+// feat : User
+db.user.hasMany(db.accessScreen, {
+  as: "userAccessScreen",
+  foreignKey: { name: "userId", field: "userId" },
+  onDelete: "cascade"
+});
+db.user.hasMany(db.role, {
+  as: "userRole",
+  foreignKey: { name: "userId", field: "userId" },
+  onDelete: "cascade"
+});
+
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -257,6 +272,12 @@ db.merchantRelation.belongsTo(db.merchant, {
 });
 db.merchantDocumentArray.belongsTo(db.merchant, {
   foreignKey: "merchantId"
+});
+db.accessScreen.belongsTo(db.user, {
+  foreignKey: "userId"
+});
+db.role.belongsTo(db.user, {
+  foreignKey: "userId"
 });
 
 // sequelize.sync({ force: true });

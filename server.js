@@ -47,6 +47,7 @@ const hospitalRoute = require("./route/hospitalRoute");
 const docterTypeRoute = require("./route/docterTypeRoute");
 const medicalFieldRoute = require("./route/medicalFieldRoute");
 const countingUnitRoute = require("./route/countingUnitRoute");
+const user = require("./route/userRoute");
 
 const db = require("./models/index");
 db.sequelize.sync();
@@ -62,7 +63,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // app.use("/images", express.static("public/pics"));
 // app.use("/documents", express.static("public/documents"));
-// app.use("/user", require("./route/userRoute"));
+app.use("/user", user);
 app.use("/asset", assetRoute);
 app.use("/packageAsset", packageAssetRoute);
 app.use("/borrow", borrowRoute);
