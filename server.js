@@ -71,7 +71,7 @@ app.use("/borrow", borrowRoute);
 app.use("/transfer", transferRoute);
 // app.use("/repair", repairRoute);
 app.use("/merchant", merchantRoute);
-// app.use("/role", roleRoute);
+// app.use("/role", roleRoute); // ทำ
 // app.use("/dashboard", dashboardRoute);
 // dropdown
 app.use("/building", buildingRoute);

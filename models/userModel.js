@@ -10,273 +10,268 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       thaiPrefix: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "thaiPrefix",
+        field: "thaiPrefix"
       },
       thaiFirstName: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "thaiPrefix",
+        field: "thaiFirstName"
       },
       thaiLastName: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "thaiLastName",
+        field: "thaiLastName"
       },
       engPrefix: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "engPrefix",
+        field: "engPrefix"
       },
       engFirstName: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "engFirstName",
+        field: "engFirstName"
       },
       engLastName: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "engLastName",
-      },
-      thaiFirstName: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        field: "thaiPrefix",
+        field: "engLastName"
       },
       idCard: {
         type: Sequelize.STRING(20),
         allowNull: false,
-        field: "idCard",
+        field: "idCard"
       },
       sex: {
         type: Sequelize.STRING(10),
         allowNull: false,
-        field: "sex",
+        field: "sex"
       },
       birthDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: "birthDate",
+        field: "birthDate"
       },
       password: {
         type: Sequelize.STRING(100),
         allowNull: false,
-        field: "password",
+        field: "password"
       },
       username: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "username",
+        field: "username"
       },
       passwordStartDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: "passwordStartDate",
+        field: "passwordStartDate"
       },
       passwordEndDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: "passwordEndDate",
+        field: "passwordEndDate"
       },
       employeeId: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "employeeId",
+        field: "employeeId"
       },
       professionalLicenseNumber: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "professionalLicenseNumber",
+        field: "professionalLicenseNumber"
       },
       sector: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "sector",
+        field: "sector"
       },
       medicalBranchCode: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "medicalBranchCode",
+        field: "medicalBranchCode"
       },
       thaiPosition: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "thaiPosition",
+        field: "thaiPosition"
       },
       engPosition: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "engPosition",
+        field: "engPosition"
       },
       personnelTypeCode: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "personnelTypeCode",
+        field: "personnelTypeCode"
       },
       hospital: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "hospital",
+        field: "hospital"
       },
       fromHospital: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "fromHospital",
+        field: "fromHospital"
       },
 
       toHospital: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "toHospital",
+        field: "toHospital"
       },
       houseNo: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "houseNo",
+        field: "houseNo"
       },
       villageNo: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "villageNo",
+        field: "villageNo"
       },
       soi: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "soi",
+        field: "soi"
       },
       separatedSoi: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "separatedSoi",
+        field: "separatedSoi"
       },
       road: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "road",
+        field: "road"
       },
       village: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "village",
+        field: "village"
       },
       district: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "district",
+        field: "district"
       },
       subdistrict: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "subdistrict",
+        field: "subdistrict"
       },
       province: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "province",
+        field: "province"
       },
       zipcode: {
         type: Sequelize.STRING(5),
         allowNull: false,
-        field: "zipcode",
+        field: "zipcode"
       },
       email: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "email",
+        field: "email"
       },
       phoneNumber: {
         type: Sequelize.STRING(10),
         allowNull: false,
-        field: "phoneNumber",
+        field: "phoneNumber"
       },
       homePhoneNumber: {
         type: Sequelize.STRING(10),
         allowNull: false,
-        field: "homePhoneNumber",
+        field: "homePhoneNumber"
       },
       lineId: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "lineId",
+        field: "lineId"
       },
       facebook: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "facebook",
+        field: "facebook"
       },
       docterType: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "docterType",
+        field: "docterType"
       },
       medicalField: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "medicalField",
+        field: "medicalField"
       },
       dateTimeRecord: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: "dateTimeRecord",
+        field: "dateTimeRecord"
       },
       dateTimeModify: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: "dateTimeModify",
+        field: "dateTimeModify"
       },
       dateTimeUpdatePassword: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "dateTimeUpdatePassword",
+        field: "dateTimeUpdatePassword"
       },
       userEndDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "userEndDate",
+        field: "userEndDate"
       },
       PACSDateTime: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "PACSDateTime",
+        field: "PACSDateTime"
       },
       lastRevisionDateTime: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "lastRevisionDateTime",
+        field: "lastRevisionDateTime"
       },
       note: {
         type: Sequelize.STRING(1000),
         allowNull: true,
-        field: "note",
+        field: "note"
       },
       lastLoginDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "lastLoginDate",
+        field: "lastLoginDate"
       },
       status: {
         type: Sequelize.STRING(50),
         allowNull: false,
         field: "status",
-        default: "active",
+        default: "active"
       },
       reason: {
         type: Sequelize.STRING(1000),
         allowNull: true,
-        field: "reason",
+        field: "reason"
       },
       deletedAt: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "deletedAt",
-      },
+        field: "deletedAt"
+      }
     },
     {
-      tableName: "TB_USERS",
+      tableName: "TB_USERS"
     }
   );
 

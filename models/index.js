@@ -229,6 +229,12 @@ db.user.hasMany(db.role, {
   onDelete: "cascade"
 });
 
+// feat : Role
+// db.role.hasMany(db.user, {
+//   as: "roleId",
+//   foreignKey: { name: "roleId", field: "roleId" }
+// });
+
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -279,6 +285,9 @@ db.accessScreen.belongsTo(db.user, {
 db.role.belongsTo(db.user, {
   foreignKey: "userId"
 });
+// db.user.belongsTo(db.role, {
+//   foreignKey: "roleId"
+// });
 
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");
