@@ -116,46 +116,52 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
+// exports.createUser = async (req, res, next) => {
+//   try {
+//     let value = req.body.input;
+//     console.log("value", value);
+
+//     const checkUser = await user.findOne({
+//       where: { username: value.username }
+//     });
+
+//     if (checkUser) {
+//       createError("invalid username or password", 400);
+//     }
+
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(value.password, salt);
+//     console.log("hashedPassword:", hashedPassword);
+//     value.password = hashedPassword;
+//     const userCreate = await user.create(value);
+
+//     const userId = userCreate.dataValues._id;
+//     console.log("userId:", userId);
+
+//     await role.create({
+//       roleName: value.role,
+//       userId: userId
+//     });
+
+//     res.status(201).json({ message: "register success", userCreate });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.createUser = async (req, res, next) => {
   try {
-    let value = req.body.input;
-    console.log("value", value);
+    const { input } = req.body;
+    // console.log("input:", input);
+    console.log(" input.username:", input.username);
 
     const checkUser = await user.findOne({
-      where: { username: value.username }
+      where: { username: input.username }
     });
 
     if (checkUser) {
       createError("invalid username or password", 400);
     }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(value.password, salt);
-    console.log("hashedPassword:", hashedPassword);
-    value.password = hashedPassword;
-    const userCreate = await user.create(value);
-
-    const userId = userCreate.dataValues._id;
-    console.log("userId:", userId);
-
-    await role.create({
-      roleName: value.role,
-      userId: userId
-    });
-
-    res.status(201).json({ message: "register success", userCreate });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.updateUser = async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-    const { input } = req.body;
-
-    console.log("userId:", userId);
-    console.log("input:", input);
 
     const {
       thaiPrefix,
@@ -167,6 +173,7 @@ exports.updateUser = async (req, res, next) => {
       idCard,
       sex,
       birthDate,
+      password,
       username,
       passwordStartDate,
       passwordEndDate,
@@ -199,8 +206,156 @@ exports.updateUser = async (req, res, next) => {
       lineId,
       facebook,
       // ตำแหน่ง
+      role,
       docterType,
       medicalField,
+      // บันทึกเหตุการณ์
+
+      dateTimeRecord,
+      dateTimeModify,
+      dateTimeUpdatePassword,
+      userEndDateTime,
+      PACSDateTime,
+      lastRevisionDateTime,
+      level,
+      note,
+      status,
+      roleId
+    } = input;
+
+    console.log("input:", input);
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(input.password, salt);
+    // console.log("hashedPassword:", hashedPassword);
+
+    const createUser = await user.create({
+      thaiPrefix,
+      thaiFirstName,
+      thaiLastName,
+      engPrefix,
+      engFirstName,
+      engLastName,
+      idCard,
+      sex,
+      birthDate,
+      password: hashedPassword,
+      username,
+      passwordStartDate,
+      passwordEndDate,
+
+      // ข้อมูลพนักงาน
+      employeeId,
+      professionalLicenseNumber,
+      sector,
+      medicalBranchCode,
+      thaiPosition,
+      engPosition,
+      personnelTypeCode,
+      hospital,
+      fromHospital,
+      toHospital,
+
+      // ที่อยู่
+      houseNo,
+      villageNo,
+      soi,
+      separatedSoi,
+      road,
+      village,
+      district,
+      subdistrict,
+      province,
+      zipcode,
+
+      // ข้อมูลการติดต่อ
+      email,
+      phoneNumber,
+      homePhoneNumber,
+      lineId,
+      facebook,
+
+      // ตำแหน่ง
+      // role,
+      docterType,
+      medicalField,
+
+      // บันทึกเหตุการณ์
+      dateTimeRecord,
+      dateTimeModify,
+      dateTimeUpdatePassword,
+      userEndDateTime,
+      PACSDateTime,
+      lastRevisionDateTime,
+      level,
+      note,
+      status,
+      roleId
+    });
+
+    res.status(200).json({ createUser });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { input } = req.body;
+
+    console.log("userId:", userId);
+    console.log("input:", input);
+
+    const {
+      thaiPrefix,
+      thaiFirstName,
+      thaiLastName,
+      engPrefix,
+      engFirstName,
+      engLastName,
+      idCard,
+      sex,
+      birthDate,
+      username,
+      passwordStartDate,
+      passwordEndDate,
+
+      // ข้อมูลพนักงาน
+      employeeId,
+      professionalLicenseNumber,
+      sector,
+      medicalBranchCode,
+      thaiPosition,
+      engPosition,
+      personnelTypeCode,
+      hospital,
+      fromHospital,
+      toHospital,
+
+      // ที่อยู่
+      houseNo,
+      villageNo,
+      soi,
+      separatedSoi,
+      road,
+      village,
+      district,
+      subdistrict,
+      province,
+      zipcode,
+
+      // ข้อมูลการติดต่อ
+      email,
+      phoneNumber,
+      homePhoneNumber,
+      lineId,
+      facebook,
+
+      // ตำแหน่ง
+      docterType,
+      medicalField,
+
       // บันทึกเหตุการณ์
 
       dateTimeRecord,

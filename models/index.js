@@ -232,7 +232,8 @@ db.user.hasMany(db.role, {
 // feat : Role
 // db.role.hasMany(db.user, {
 //   as: "roleId",
-//   foreignKey: { name: "roleId", field: "roleId" }
+//   foreignKey: { name: "roleId", field: "roleId" },
+//   onDelete: "cascade"
 // });
 
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
