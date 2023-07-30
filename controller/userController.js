@@ -116,39 +116,6 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
-// exports.createUser = async (req, res, next) => {
-//   try {
-//     let value = req.body.input;
-//     console.log("value", value);
-
-//     const checkUser = await user.findOne({
-//       where: { username: value.username }
-//     });
-
-//     if (checkUser) {
-//       createError("invalid username or password", 400);
-//     }
-
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(value.password, salt);
-//     console.log("hashedPassword:", hashedPassword);
-//     value.password = hashedPassword;
-//     const userCreate = await user.create(value);
-
-//     const userId = userCreate.dataValues._id;
-//     console.log("userId:", userId);
-
-//     await role.create({
-//       roleName: value.role,
-//       userId: userId
-//     });
-
-//     res.status(201).json({ message: "register success", userCreate });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 exports.createUser = async (req, res, next) => {
   try {
     const { input } = req.body;
@@ -177,6 +144,7 @@ exports.createUser = async (req, res, next) => {
       username,
       passwordStartDate,
       passwordEndDate,
+
       // ข้อมูลพนักงาน
       employeeId,
       professionalLicenseNumber,
@@ -188,6 +156,7 @@ exports.createUser = async (req, res, next) => {
       hospital,
       fromHospital,
       toHospital,
+
       // ที่อยู่
       houseNo,
       villageNo,
@@ -199,18 +168,19 @@ exports.createUser = async (req, res, next) => {
       subdistrict,
       province,
       zipcode,
+
       // ข้อมูลการติดต่อ
       email,
       phoneNumber,
       homePhoneNumber,
       lineId,
       facebook,
+
       // ตำแหน่ง
-      role,
       docterType,
       medicalField,
-      // บันทึกเหตุการณ์
 
+      // บันทึกเหตุการณ์
       dateTimeRecord,
       dateTimeModify,
       dateTimeUpdatePassword,
@@ -223,10 +193,9 @@ exports.createUser = async (req, res, next) => {
       roleId
     } = input;
 
-    console.log("input:", input);
-
+    // console.log("input:", input);
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(input.password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
     // console.log("hashedPassword:", hashedPassword);
 
     const createUser = await user.create({
@@ -276,7 +245,6 @@ exports.createUser = async (req, res, next) => {
       facebook,
 
       // ตำแหน่ง
-      // role,
       docterType,
       medicalField,
 
@@ -367,10 +335,7 @@ exports.updateUser = async (req, res, next) => {
       level,
       note,
       status,
-
-      //role
-      roleId,
-      roleName
+      roleId
     } = input;
 
     const userById = await user.findOne({
@@ -436,16 +401,9 @@ exports.updateUser = async (req, res, next) => {
     userById.level = level;
     userById.note = note;
     userById.status = status;
+    userById.roleId = roleId;
 
     await userById.save();
-
-    await role.update(
-      {
-        roleId: roleId,
-        roleName: roleName
-      },
-      { where: { userId: userById._id } }
-    );
 
     res.status(201).json({ message: "updateUser success" });
   } catch (err) {
@@ -453,7 +411,6 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
-// ----
 exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
