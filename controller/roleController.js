@@ -91,7 +91,10 @@ exports.updateRole = async (req, res, next) => {
       console.log("screenData:", screenData);
 
       const accessScreenData = await accessScreen.findOne({
-        where: { name: screenData.name, roleId: roleId }
+        where: {
+          name: screenData.name,
+          roleId: roleId
+        }
       });
 
       console.log("accessScreenData:", accessScreenData);
