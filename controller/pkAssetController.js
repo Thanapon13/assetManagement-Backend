@@ -91,7 +91,7 @@ exports.createPackageAsset = async (req, res, next) => {
 
       bottomSubComponentDataJSON,
     } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
 
     const inputObject = JSON.parse(input);
     console.log("inputObject", inputObject);
@@ -1549,6 +1549,7 @@ exports.getAllPackageAsset = async (req, res, next) => {
           include: [
             {
               model: AssetDocument,
+
               as: "assetDocuments",
             },
           ],

@@ -23,7 +23,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         unique: true,
         field: "order"
-      },
+      }
     },
     {
       tableName: "TBM_ACCESS_SCREENS"

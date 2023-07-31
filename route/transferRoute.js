@@ -2,32 +2,45 @@ const express = require("express");
 const transferController = require("../controller/transferController");
 
 const router = express.Router();
+
 router.post("/create", transferController.createTransfer);
+
 router.patch("/update/:transferId", transferController.updateTransfer);
+
 router.patch("/delete/:transferId", transferController.deleteTransfer);
+
 router.get("/searchAssetTransfer", transferController.getBySearch);
+
 router.get("/all", transferController.getAllTransfer);
+
 router.get(
   "/transferSectorForSearch",
   transferController.getTransferSectorForSearch
 );
+
 router.get(
   "/transfereeSectorForSearch",
   transferController.getTransfereeSectorForSearch
 );
-// transferApprove page
+
+// // transferApprove page
+
 router.get(
   "/searchTopTransferApprove",
   transferController.getBySearchTopTransferApprove
 );
+
+// ยังไม่ test
 router.patch(
   "/approveAllWaitingTransfer",
   transferController.approveAllWaitingTransfer
 );
+
 router.patch(
   "/rejectAllWaitingTransfer",
   transferController.rejectAllWaitingTransfer
 );
+
 router.patch(
   "/rejectIndividualWaitingTransfer",
   transferController.rejectIndividualWaitingTransfer
@@ -49,7 +62,8 @@ router.get(
   transferController.getViewTransferApproveDetailById
 );
 
-// transferHistory page
+// // transferHistory page
+
 router.get(
   "/searchTransferHistory",
   transferController.getBySearchTransferHistory

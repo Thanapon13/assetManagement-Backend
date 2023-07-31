@@ -91,6 +91,16 @@ db.type4 = require("./type4Model")(sequelize, Sequelize);
 db.type8 = require("./type8Model")(sequelize, Sequelize);
 db.type13 = require("./type13Model")(sequelize, Sequelize);
 db.type = require("./typeModel")(sequelize, Sequelize);
+db.merchant = require("./merchantModel")(sequelize, Sequelize);
+db.merchantAddress = require("./merchantAddressModel")(sequelize, Sequelize);
+db.merchantRelation = require("./merchantRelationModel")(sequelize, Sequelize);
+db.merchantDocumentArray = require("./merchantDocumentArrayModel")(
+  sequelize,
+  Sequelize
+);
+db.user = require("./userModel")(sequelize, Sequelize);
+db.role = require("./roleModel")(sequelize, Sequelize);
+db.accessScreen = require("./accessScreenModel")(sequelize, Sequelize);
 
 // db.room = require("./roomModel")(sequelize, Sequelize);
 //   db.team = require("./model/team")( sequelize , Sequelize );
@@ -189,8 +199,44 @@ db.asset.hasMany(db.transferHasAsset, {
   onDelete: "cascade",
 });
 db.pkAsset.hasMany(db.transferHasPkAsset, {
-  as: "transferHasPkAssets",
+  as: "transferHasPkAssetsData",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
+
+// feat : merchant
+db.merchant.hasMany(db.merchantAddress, {
+  as: "merchantAddress",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade",
+});
+db.merchant.hasMany(db.merchantRelation, {
+  as: "merchantRelation",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade",
+});
+db.merchant.hasMany(db.merchantDocumentArray, {
+  as: "merchantDocumentArray",
+  foreignKey: { name: "merchantId", field: "merchantId" },
+  onDelete: "cascade",
+});
+
+// feat : User
+// db.user.hasMany(db.role, {
+//   as: "userRole",
+//   foreignKey: { name: "userId", field: "userId" },
+//   onDelete: "cascade"
+// });
+
+// feat : Role
+db.role.hasMany(db.accessScreen, {
+  as: "roleAccessScreen",
+  foreignKey: { name: "roleId", field: "roleId" },
+  onDelete: "cascade",
+});
+db.role.hasMany(db.user, {
+  as: "roleUser",
+  foreignKey: { name: "roleId", field: "roleId" },
   onDelete: "cascade",
 });
 
@@ -221,6 +267,13 @@ db.asset.hasOne(db.repair, {
 //   foreignKey: "packageAssetId",
 //   onDelete: "cascade",
 // });
+// feat : Role
+// db.role.hasMany(db.user, {
+//   as: "roleId",
+//   foreignKey: { name: "roleId", field: "roleId" },
+//   onDelete: "cascade"
+// });
+
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
@@ -261,6 +314,9 @@ db.transferHasPkAsset.belongsTo(db.transfer, {
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
+db.merchantAddress.belongsTo(db.merchant, {
+  foreignKey: "merchantId",
+});
 /////////  feat : repair
 db.repairDocument.belongsTo(db.repair, {
   foreignKey: "repairId",
@@ -277,6 +333,19 @@ db.repair.belongsTo(db.asset, {
 // db.repair.belongsTo(db.pkAsset, {
 //   foreignKey: "packageAssetId",
 // });
+db.merchantRelation.belongsTo(db.merchant, {
+  foreignKey: "merchantId",
+});
+db.merchantDocumentArray.belongsTo(db.merchant, {
+  foreignKey: "merchantId",
+});
+db.accessScreen.belongsTo(db.role, {
+  foreignKey: "roleId",
+});
+db.user.belongsTo(db.role, {
+  foreignKey: "roleId",
+});
+
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");
 module.exports = db;

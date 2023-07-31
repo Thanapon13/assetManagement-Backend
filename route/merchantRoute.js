@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const merchantController = require("../controller/merchantController");
-const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
 router.get("/all", merchantController.getAllMerchant);

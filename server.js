@@ -1,7 +1,4 @@
 // const { sequelize } = require("./models");
-// sequelize.sync({ force: true });
-// sequelize.sync({ alter: true });
-
 const express = require("express");
 const dotenv = require("dotenv").config();
 const helmet = require("helmet");
@@ -15,10 +12,11 @@ const packageAssetRoute = require("./route/packageAssetRoute");
 const assetRoute = require("./route/assetRoute");
 const borrowRoute = require("./route/borrowRoute");
 // const withdrawRoute = require("./route/withdrawRoute");
-// const transferRoute = require("./route/transferRoute");
+
+const transferRoute = require("./route/transferRoute");
 const repairRoute = require("./route/repairRoute");
-// const merchantRoute = require("./route/merchantRoute");
-// const roleRoute = require("./route/roleRoute");
+const merchantRoute = require("./route/merchantRoute");
+const roleRoute = require("./route/roleRoute");
 // const dashboardRoute = require("./route/dashboardRoute");
 // dropdown
 const buildingRoute = require("./route/buildingRoute");
@@ -50,6 +48,7 @@ const hospitalRoute = require("./route/hospitalRoute");
 const docterTypeRoute = require("./route/docterTypeRoute");
 const medicalFieldRoute = require("./route/medicalFieldRoute");
 const countingUnitRoute = require("./route/countingUnitRoute");
+const user = require("./route/userRoute");
 
 const db = require("./models/index");
 db.sequelize.sync();
@@ -65,15 +64,16 @@ app.use(express.urlencoded({ extended: true }));
 
 // app.use("/images", express.static("public/pics"));
 // app.use("/documents", express.static("public/documents"));
-// app.use("/user", require("./route/userRoute"));
+app.use("/user", user);
 app.use("/asset", assetRoute);
 app.use("/packageAsset", packageAssetRoute);
 app.use("/borrow", borrowRoute);
 // app.use("/withdraw", withdrawRoute);
-// app.use("/transfer", transferRoute);
+
+app.use("/transfer", transferRoute);
 app.use("/repair", repairRoute);
-// app.use("/merchant", merchantRoute);
-// app.use("/role", roleRoute);
+app.use("/merchant", merchantRoute);
+app.use("/role", roleRoute);
 // app.use("/dashboard", dashboardRoute);
 // dropdown
 app.use("/building", buildingRoute);

@@ -3,10 +3,10 @@ const multer = require("multer");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // console.log(file, "filemulter");
-    if (file.fieldname === "arrayImage") {
+    if (file.fieldname === "arrayImage" || file.fieldname === "arrayDocument") {
       cb(null, "public/documents");
     } // console.log(file, "filemulter");
-    else  {
+    else {
       cb(null, "public/pics");
     }
   },

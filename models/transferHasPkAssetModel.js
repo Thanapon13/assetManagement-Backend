@@ -10,11 +10,27 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
+      reason: {
+        type: Sequelize.STRING(1000),
+        allowNull: true,
+        default: "",
+        field: "reason"
+      },
+      return: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+        field: "return"
+      },
+      returnDate: {
+        type: Sequelize.DATE,
+        allowNull: true,
+        field: "returnDate"
+      }
     },
     {
-      tableName: "TB_TRANSFER_HAS_PACKAGE_ASSETS",
+      tableName: "TB_TRANSFER_HAS_PACKAGE_ASSETS"
     }
   );
 

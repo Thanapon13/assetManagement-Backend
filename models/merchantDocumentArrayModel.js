@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const transferHasAsset = sequelize.define(
-    "TB_TRANSFER_HAS_ASSETS",
+  const merchantDocumentArray = sequelize.define(
+    "TB_MEERCHANT_DOCUMENTS_ARRAY",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -12,27 +12,16 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         field: "_id"
       },
-      reason: {
-        type: Sequelize.STRING(1000),
-        allowNull: true,
-        default: "",
-        field: "reason"
-      },
-      return: {
+      document: {
         type: Sequelize.STRING(50),
-        allowNull: true,
-        field: "return"
-      },
-      returnDate: {
-        type: Sequelize.DATE,
-        allowNull: true,
-        field: "returnDate"
+        allowNull: false,
+        field: "document"
       }
     },
     {
-      tableName: "TB_TRANSFER_HAS_ASSETS"
+      tableName: "TB_MEERCHANT_DOCUMENTS_ARRAY"
     }
   );
 
-  return transferHasAsset;
+  return merchantDocumentArray;
 };
