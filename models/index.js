@@ -41,6 +41,8 @@ db.brand = require("./brandModel")(sequelize, Sequelize);
 db.building = require("./buildingModel")(sequelize, Sequelize);
 db.category = require("./categoryModel")(sequelize, Sequelize);
 db.companyPrefix = require("./companyPrefixModel")(sequelize, Sequelize);
+db.costOfRepairMan = require("./costOfRepairManModel")(sequelize, Sequelize);
+db.costOfRepair = require("./costOfRepairModel")(sequelize, Sequelize);
 db.countingUnit = require("./countingUnitModel")(sequelize, Sequelize);
 db.department = require("./departmentModel")(sequelize, Sequelize);
 db.docterType = require("./docterTypeModel")(sequelize, Sequelize);
@@ -55,6 +57,8 @@ db.pkAssetDocument = require("./pkAssetDocumentModel")(sequelize, Sequelize);
 db.pkAssetImage = require("./pkAssetImageModel")(sequelize, Sequelize);
 db.pkAsset = require("./pkAssetModel")(sequelize, Sequelize);
 db.purposeOfUse = require("./purposeOfUseModel")(sequelize, Sequelize);
+db.repairDocument = require("./repairDocumentModel")(sequelize, Sequelize);
+db.repair = require("./repairModel")(sequelize, Sequelize);
 db.repairSector = require("./repairSectorModel")(sequelize, Sequelize);
 db.room = require("./roomModel")(sequelize, Sequelize);
 db.sector = require("./sectorModel")(sequelize, Sequelize);
@@ -116,6 +120,7 @@ db.asset.hasMany(db.assetImage, {
   foreignKey: { name: "assetId", field: "assetId" },
   onDelete: "cascade",
 });
+//////  feat : borrow
 db.borrow.hasMany(db.borrowHasAsset, {
   as: "borrowHasAssets",
   foreignKey: { name: "borrowId", field: "borrowId" },
@@ -136,7 +141,7 @@ db.borrow.hasMany(db.subComponentBorrow, {
   foreignKey: { name: "borrowId", field: "borrowId" },
   onDelete: "cascade",
 });
-
+/////////  feat : pkAsset
 db.pkAsset.hasMany(db.asset, {
   as: "assets",
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
@@ -162,7 +167,6 @@ db.pkAsset.hasMany(db.bottomSubComponentDataPkAsset, {
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
-
 ////  feat : transfer
 db.transfer.hasMany(db.subComponentTransfer, {
   as: "subComponentTransfers",
@@ -189,26 +193,59 @@ db.pkAsset.hasMany(db.transferHasPkAsset, {
   foreignKey: { name: "packageAssetId", field: "packageAssetId" },
   onDelete: "cascade",
 });
+
+////  feat : repair
+db.repair.hasMany(db.repairDocument, {
+  as: "repairDocuments",
+  foreignKey: { name: "repairId", field: "repairId" },
+  onDelete: "cascade",
+});
+db.repair.hasMany(db.costOfRepair, {
+  as: "costOfRepairArray",
+  foreignKey: { name: "repairId", field: "repairId" },
+  onDelete: "cascade",
+});
+db.repair.hasMany(db.costOfRepairMan, {
+  as: "informRepairManArray",
+  foreignKey: { name: "repairId", field: "repairId" },
+  onDelete: "cascade",
+});
+db.asset.hasOne(db.repair, {
+  as: "repairAssetId",
+  // foreignKey: "assetId",
+  foreignKey: { name: "assetId", field: "assetId" },
+  onDelete: "cascade",
+});
+// db.pkAsset.hasOne(db.repair, {
+//   // as: "repairPackageAssetId",
+//   foreignKey: "packageAssetId",
+//   onDelete: "cascade",
+// });
 //name ตรงสำคัญพยายามตั่งให้เป็นชื่อเดียวกับ FK ใน table ที่นำไปใช้นะครับ
 
 //ส่วนนี้เป็นการตั้ง relation แบบกลับกันกับด้านบน จริงแล้วเราไม่ตั้งก็ได้นะครับแต่ผมแนะนำให้ตั้งเอาไว้ เพราะเวลาที่เราไม่ได้ใส่
 //line นี้จะทำให้เราสามารถใช้  team ในการหา player ได้อย่างเดียวและไม่สามารถใช้ player หา team ได้
 db.floor.belongsTo(db.building, { foreignKey: "buildingId" });
 db.room.belongsTo(db.floor, { foreignKey: "floorId" });
+
+/////////  feat : asset
 db.subComponentAsset.belongsTo(db.asset, { foreignKey: "assetId" });
 db.assetDocument.belongsTo(db.asset, { foreignKey: "assetId" });
 db.assetImage.belongsTo(db.asset, { foreignKey: "assetId" });
 db.asset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
+/////////  feat : borrow
 db.borrowHasAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
 db.borrowHasPkAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
 db.borrowImage.belongsTo(db.borrow, { foreignKey: "borrowId" });
 db.subComponentBorrow.belongsTo(db.borrow, { foreignKey: "borrowId" });
+/////////  feat : pkAsset
 db.pkAssetDocument.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.pkAssetImage.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.subComponentPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.bottomSubComponentDataPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
+/////////  feat : transfer
 db.subComponentTransfer.belongsTo(db.transfer, {
   foreignKey: "transferId",
 });
@@ -224,6 +261,22 @@ db.transferHasPkAsset.belongsTo(db.transfer, {
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
+/////////  feat : repair
+db.repairDocument.belongsTo(db.repair, {
+  foreignKey: "repairId",
+});
+db.costOfRepairMan.belongsTo(db.repair, {
+  foreignKey: "repairId",
+});
+db.costOfRepair.belongsTo(db.repair, {
+  foreignKey: "repairId",
+});
+db.repair.belongsTo(db.asset, {
+  foreignKey: "assetId",
+});
+// db.repair.belongsTo(db.pkAsset, {
+//   foreignKey: "packageAssetId",
+// });
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");
 module.exports = db;
