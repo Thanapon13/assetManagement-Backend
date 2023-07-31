@@ -218,14 +218,21 @@ db.merchant.hasMany(db.merchantDocumentArray, {
 });
 
 // feat : User
-db.user.hasMany(db.accessScreen, {
-  as: "userAccessScreen",
-  foreignKey: { name: "userId", field: "userId" },
+// db.user.hasMany(db.role, {
+//   as: "userRole",
+//   foreignKey: { name: "userId", field: "userId" },
+//   onDelete: "cascade"
+// });
+
+// feat : Role
+db.role.hasMany(db.accessScreen, {
+  as: "roleAccessScreen",
+  foreignKey: { name: "roleId", field: "roleId" },
   onDelete: "cascade"
 });
-db.user.hasMany(db.role, {
-  as: "userRole",
-  foreignKey: { name: "userId", field: "userId" },
+db.role.hasMany(db.user, {
+  as: "roleUser",
+  foreignKey: { name: "roleId", field: "roleId" },
   onDelete: "cascade"
 });
 
@@ -280,15 +287,12 @@ db.merchantRelation.belongsTo(db.merchant, {
 db.merchantDocumentArray.belongsTo(db.merchant, {
   foreignKey: "merchantId"
 });
-db.accessScreen.belongsTo(db.user, {
-  foreignKey: "userId"
+db.accessScreen.belongsTo(db.role, {
+  foreignKey: "roleId"
 });
-db.role.belongsTo(db.user, {
-  foreignKey: "userId"
+db.user.belongsTo(db.role, {
+  foreignKey: "roleId"
 });
-// db.user.belongsTo(db.role, {
-//   foreignKey: "roleId"
-// });
 
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");

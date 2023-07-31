@@ -1,4 +1,4 @@
-const { user, role, accessScreen, Sequelize } = require("../models");
+const { user, role, Sequelize } = require("../models");
 const createError = require("../utils/createError");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -198,6 +198,16 @@ exports.createUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     // console.log("hashedPassword:", hashedPassword);
 
+    const roleData = await role.findOne({
+      where: {
+        _id: roleId
+      }
+    });
+    console.log("roleData:", roleData);
+
+    const roleDataId = roleData.dataValues._id;
+    console.log("roleDataId:", roleDataId);
+
     const createUser = await user.create({
       thaiPrefix,
       thaiFirstName,
@@ -258,7 +268,7 @@ exports.createUser = async (req, res, next) => {
       level,
       note,
       status,
-      roleId
+      roleId: roleDataId
     });
 
     res.status(200).json({ createUser });
@@ -325,7 +335,6 @@ exports.updateUser = async (req, res, next) => {
       medicalField,
 
       // บันทึกเหตุการณ์
-
       dateTimeRecord,
       dateTimeModify,
       dateTimeUpdatePassword,
@@ -341,10 +350,20 @@ exports.updateUser = async (req, res, next) => {
     const userById = await user.findOne({
       where: { _id: userId },
       attributes: { exclude: ["password"] },
-      include: [{ model: role, as: "userRole" }]
+      include: [{ model: role, as: "TBM_ROLE" }]
     });
     console.log("userById:", userById);
-    console.log("input:", input);
+    // console.log("input:", input);
+
+    const roleData = await role.findOne({
+      where: {
+        _id: roleId
+      }
+    });
+    console.log("roleData:", roleData);
+
+    const roleDataId = roleData.dataValues._id;
+    console.log("roleDataId:", roleDataId);
 
     userById.thaiPrefix = thaiPrefix;
     userById.thaiFirstName = thaiFirstName;
@@ -358,6 +377,7 @@ exports.updateUser = async (req, res, next) => {
     userById.username = username;
     userById.passwordStartDate = passwordStartDate;
     userById.passwordEndDate = passwordEndDate;
+
     // ข้อมูลพนักงาน
     userById.employeeId = employeeId;
     userById.professionalLicenseNumber = professionalLicenseNumber;
@@ -369,6 +389,7 @@ exports.updateUser = async (req, res, next) => {
     userById.hospital = hospital;
     userById.fromHospital = fromHospital;
     userById.toHospital = toHospital;
+
     // ที่อยู่
     userById.houseNo = houseNo;
     userById.villageNo = villageNo;
@@ -380,18 +401,20 @@ exports.updateUser = async (req, res, next) => {
     userById.subdistrict = subdistrict;
     userById.province = province;
     userById.zipcode = zipcode;
+
     // ข้อมูลการติดต่อ
     userById.email = email;
     userById.phoneNumber = phoneNumber;
     userById.homePhoneNumber = homePhoneNumber;
     userById.lineId = lineId;
     userById.facebook = facebook;
+
     // ตำแหน่ง
     userById.role = role;
     userById.docterType = docterType;
     userById.medicalField = medicalField;
-    // บันทึกเหตุการณ์
 
+    // บันทึกเหตุการณ์
     userById.dateTimeRecord = dateTimeRecord;
     userById.dateTimeModify = dateTimeModify;
     userById.dateTimeUpdatePassword = dateTimeUpdatePassword;
@@ -401,8 +424,7 @@ exports.updateUser = async (req, res, next) => {
     userById.level = level;
     userById.note = note;
     userById.status = status;
-    userById.roleId = roleId;
-
+    userById.roleId = roleDataId;
     await userById.save();
 
     res.status(201).json({ message: "updateUser success" });
