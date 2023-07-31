@@ -296,14 +296,6 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "deletedAt"
       },
-      // purchaseContract: purchaseContractSchema,
-      // distribution: distributionSchema,
-
-      // packageAssetId: {
-      //   type: Sequelize.INTEGER(11),
-      //   allowNull: true,
-      //   field: "packageAssetId"
-      // },
 
       delereasontedAt: {
         type: Sequelize.STRING(100),
