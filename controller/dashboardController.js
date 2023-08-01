@@ -1,5 +1,5 @@
-const { asset } = require("../models");
 const { Op } = require("sequelize");
+const { asset } = require("../models");
 
 exports.getAssetBySearch = async (req, res, next) => {
   try {
@@ -20,26 +20,26 @@ exports.getAssetBySearch = async (req, res, next) => {
     if (status !== "") {
       query["status"] = status;
     } else {
-      query["status"] = { [Op.notILike]: "saveDraft" };
+      query["status"] = { [Op.notLike]: "saveDraft" };
     }
 
-    query["purchaseContract.deliveryDocument"] = { [Op.eq]: null };
-
+    query["deliveryDocument"] = { [Op.eq]: null };
     if (sector !== "") {
       query["sector"] = sector;
     }
+
     if (price !== "") {
       let priceSplit = price.split("-");
       const priceFrom = parseInt(priceSplit[0]);
       const priceTo = parseInt(priceSplit[1]);
-      query["purchaseContract.price"] = {
+      query["price"] = {
         [Op.gte]: priceFrom,
         [Op.lte]: priceTo
       };
     }
 
     if (deliveryDocument !== "") {
-      query["purchaseContract.deliveryDocument"] = deliveryDocument;
+      query["deliveryDocument"] = deliveryDocument;
     }
     query["deletedAt"] = { [Op.eq]: null };
     console.log(query, "query");
@@ -53,20 +53,23 @@ exports.getAssetBySearch = async (req, res, next) => {
 
     let listStatusOfRepair = [];
     let queryActiveAsset = {};
+
     listStatusOfRepair = ["repair", "saveDraft"];
     queryActiveAsset["status"] = { [Op.notIn]: listStatusOfRepair };
     queryActiveAsset["deletedAt"] = { [Op.eq]: null };
-    queryActiveAsset["distribution.distributeApprovalReleaseDate"] = {
+    queryActiveAsset["distributeApprovalReleaseDate"] = {
       [Op.eq]: null
     };
 
     let activeCount = await asset.count({
       where: queryActiveAsset
     });
+
     let queryDistributionAsset = {};
-    queryDistributionAsset["distribution.distributeApprovalReleaseDate"] = {
+    queryDistributionAsset["distributeApprovalReleaseDate"] = {
       [Op.ne]: null
     };
+
     queryDistributionAsset["status"] = { [Op.ne]: "saveDraft" };
     queryDistributionAsset["deletedAt"] = { [Op.eq]: null };
     const distributionCount = await asset.count({
@@ -81,6 +84,7 @@ exports.getAssetBySearch = async (req, res, next) => {
     });
 
     let totalCount = activeCount + repairCount;
+    console.log("totalCount:", totalCount);
 
     res.status(200).json({
       totalCount,
@@ -89,6 +93,16 @@ exports.getAssetBySearch = async (req, res, next) => {
       repairCount,
       assetData
     });
+
+    res.status(200).json({ message: "sadad" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getRepairBySearch = async (req, res, next) => {
+  try {
+    console.log("getRepairBySearch:");
   } catch (err) {
     next(err);
   }
