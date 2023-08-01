@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const borrowHasPkAsset = sequelize.define(
-    "TB_BORROW_HAS_PACKAGE_ASSETS",
+  const costOfRepairMan = sequelize.define(
+    "TB_COST_OF_REPAIR_MANS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -12,26 +12,36 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true,
         field: "_id",
       },
-      reason: {
-        type: Sequelize.STRING(1000),
-        allowNull: true,
-        field: "reason",
-      },
-      return: {
+      name: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        field: "return",
+        allowNull: true,
+        field: "name",
       },
-      returnDate: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        field: "returnDate",
+      workPerHour: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        field: "workPerHour",
+      },
+      ratePerHour: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        field: "ratePerHour",
+      },
+      totalEarn: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        field: "totalEarn",
+      },
+      amountExtra: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        field: "amountExtra",
       },
     },
     {
-      tableName: "TB_BORROW_HAS_PACKAGE_ASSETS",
+      tableName: "TB_COST_OF_REPAIR_MANS",
     }
   );
 
-  return borrowHasPkAsset;
+  return costOfRepairMan;
 };

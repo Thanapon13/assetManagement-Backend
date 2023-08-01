@@ -15,7 +15,7 @@ const moment = require("moment/moment");
 const { ObjectID } = require("bson");
 
 function delete_file(path) {
-  fs.unlink(path, err => {
+  fs.unlink(path, (err) => {
     if (err) throw err;
     console.log(path + " was deleted");
   });
@@ -89,7 +89,7 @@ exports.createPackageAsset = async (req, res, next) => {
       accumulateDepreciationRemainPrice,
       accumulateDepreciationBookValue,
 
-      bottomSubComponentDataJSON
+      bottomSubComponentDataJSON,
     } = req.body;
     // console.log(req.body);
 
@@ -119,7 +119,7 @@ exports.createPackageAsset = async (req, res, next) => {
       type13,
       allSector,
 
-      status
+      status,
     } = inputObject;
 
     // console.log(req.body);
@@ -147,7 +147,7 @@ exports.createPackageAsset = async (req, res, next) => {
     // for gen new realAssetId
     let newestAsset = await Asset.findOne({
       order: [["createdAt", "DESC"]],
-      attributes: ["_id", "realAssetId"]
+      attributes: ["_id", "realAssetId"],
     });
     //   .sort([["createdAt", -1]])
     //   .select("realAssetId");
@@ -235,19 +235,19 @@ exports.createPackageAsset = async (req, res, next) => {
           accumulateDepreciationCumulativePrice,
         accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
         accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-        accumulateDepreciationBookValue: accumulateDepreciationBookValue
+        accumulateDepreciationBookValue: accumulateDepreciationBookValue,
       });
       for (let i = 0; i < baseArrayImageObj.length; i++) {
         await PackageAssetImage.create({
           image: arrayImage[i].filename,
-          packageAssetId: packageAsset._id
+          packageAssetId: packageAsset._id,
         });
       }
       // console.log("saveImageArray",saveImageArray)
       for (let i = 0; i < baseArrayDocumentObj.length; i++) {
         await PackageAssetDocument.create({
           document: arrayDocument[i].filename,
-          packageAssetId: packageAsset._id
+          packageAssetId: packageAsset._id,
         });
       }
       for (let i = 0; i < objSubComponentArray.length; i++) {
@@ -259,7 +259,7 @@ exports.createPackageAsset = async (req, res, next) => {
           assetNumber: objSubComponentArray[i].assetNumber,
           sector: objSubComponentArray[i].sector,
           price: objSubComponentArray[i].price,
-          asset01: objSubComponentArray[i].asset01
+          asset01: objSubComponentArray[i].asset01,
         });
       }
       for (let i = 0; i < objGenDataArray.length; i++) {
@@ -269,7 +269,7 @@ exports.createPackageAsset = async (req, res, next) => {
           serialNumber: objGenDataArray[i].serialNumber,
           replacedAssetNumber: objGenDataArray[i].replacedAssetNumber,
           sector: objGenDataArray[i].sector,
-          asset01: objGenDataArray[i].asset01
+          asset01: objGenDataArray[i].asset01,
         });
       }
       console.log(packageAsset);
@@ -362,14 +362,14 @@ exports.createPackageAsset = async (req, res, next) => {
             accumulateDepreciationCumulativePrice,
           accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
           accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-          accumulateDepreciationBookValue: accumulateDepreciationBookValue
+          accumulateDepreciationBookValue: accumulateDepreciationBookValue,
         });
         for (let i = 0; i < baseArrayImageObj.length; i++) {
           await PackageAssetImage.create({
             image:
               arrayImage[(+quantity + +objSubComponentArray.length) * i + index]
                 .filename,
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
         }
         // console.log("saveImageArray",saveImageArray)
@@ -380,7 +380,7 @@ exports.createPackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +objSubComponentArray.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
         }
         for (
@@ -495,7 +495,7 @@ exports.createPackageAsset = async (req, res, next) => {
             status,
             reserved: false,
 
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
           for (let j = 0; j < baseArrayImageObj.length; j++) {
             await AssetImage.create({
@@ -503,7 +503,7 @@ exports.createPackageAsset = async (req, res, next) => {
                 arrayImage[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -513,7 +513,7 @@ exports.createPackageAsset = async (req, res, next) => {
                 arrayDocument[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
           }
         }
@@ -589,7 +589,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       accumulateDepreciationRemainPrice,
       accumulateDepreciationBookValue,
 
-      reserved
+      reserved,
     } = req.body;
     // console.log(req.body);
 
@@ -629,7 +629,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       type4,
       type8,
       type13,
-      status
+      status,
     } = inputObject;
     bottomSubComponentDataObject = JSON.parse(bottomSubComponentDataJSON);
     // console.log(bottomSubComponentDataObject)
@@ -660,7 +660,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       );
       let newestAsset = await Asset.findOne({
         order: [["createdAt", "DESC"]],
-        attributes: ["_id", "realAssetId"]
+        attributes: ["_id", "realAssetId"],
       });
       let newestRealAssetId = parseInt(newestAsset.realAssetId) - 1;
       const genDataArray = JSON.parse(genDataJSON);
@@ -754,7 +754,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             accumulateDepreciationCumulativePrice,
           accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
           accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-          accumulateDepreciationBookValue: accumulateDepreciationBookValue
+          accumulateDepreciationBookValue: accumulateDepreciationBookValue,
         });
 
         // saveImageAndDocument ///////////////////////////////////////////////////////////
@@ -762,7 +762,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (index == 0) {
             await PackageAssetImage.create({
               image: existArrayImageArray[j].image,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
             // saveImageArray.push({ image: existArrayImageArray[j].image });
           } else {
@@ -779,7 +779,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetImage.create({
               image: newImageName,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
             // saveImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -794,7 +794,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (i == 0) {
             await PackageAssetDocument.create({
               document: existArrayDocumentArray[j].document,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
             // saveDocumentArray.push({
             //   document: existArrayDocumentArray[j].document,
@@ -814,7 +814,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetDocument.create({
               document: newDocumentName,
-              packageAssetId: packageAsset._id
+              packageAssetId: packageAsset._id,
             });
             // saveDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -831,7 +831,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayImage[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
           // saveImageArray.push({
           //   image:
@@ -848,7 +848,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
           // saveDocumentArray.push({
           //   document:
@@ -966,7 +966,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             status: status,
             reserved: false,
 
-            packageAssetId: packageAsset._id
+            packageAssetId: packageAsset._id,
           });
           for (let j = 0; j < existArrayImageArray.length; j++) {
             // console.log(existArrayImageArray[j].image);
@@ -982,7 +982,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetImage.create({
               image: newImageName,
-              assetId: assetCreate._id
+              assetId: assetCreate._id,
             });
             // saveSubImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -1007,7 +1007,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetDocument.create({
               document: newDocumentName,
-              asset: assetCreate._id
+              asset: assetCreate._id,
             });
             // saveSubDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -1025,7 +1025,7 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              assetId: assetCreate._id
+              assetId: assetCreate._id,
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -1037,7 +1037,7 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              asset: assetCreate._id
+              asset: assetCreate._id,
             });
           }
         }
@@ -1049,10 +1049,10 @@ exports.updatePackageAsset = async (req, res, next) => {
     }
 
     const oldImageArray = await PackageAssetImage.findAll({
-      where: { packageAssetId: packageAssetId }
+      where: { packageAssetId: packageAssetId },
     });
     const oldDocumentArray = PackageAssetDocument.findAll({
-      where: { packageAssetId: packageAssetId }
+      where: { packageAssetId: packageAssetId },
     });
 
     if (arrayImage.length > 0) {
@@ -1060,7 +1060,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         s;
         await PackageAssetImage.create({
           image: el.filename,
-          packageAssetId: packageAssetId
+          packageAssetId: packageAssetId,
         });
         // await PackageAsset.updateOne(
         //   { _id: packageAssetId },
@@ -1073,7 +1073,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       for (el of arrayDocument) {
         await PackageAssetDocument.create({
           document: el.filename,
-          packageAssetId: packageAssetId
+          packageAssetId: packageAssetId,
         });
         // await PackageAsset.updateOne(
         //   { _id: packageAssetId },
@@ -1086,7 +1086,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     let notExistArrayDocument = [];
 
     function getNotExistImage(existArray, oldImageArray, notExistArray) {
-      const existObjects = existArray.map(obj => obj.image + obj._id);
+      const existObjects = existArray.map((obj) => obj.image + obj._id);
 
       for (let i = 0; i < oldImageArray.length; i++) {
         if (
@@ -1105,7 +1105,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     );
 
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map(obj => obj.document + obj._id);
+      const existObjects = existArray.map((obj) => obj.document + obj._id);
 
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
@@ -1129,7 +1129,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (notExistArrayImage.length > 0) {
       for (let i = 0; i < notExistArrayImage.length; i++) {
         await PackageAssetImage.destroy({
-          where: { _id: notExistArrayImage[i]._id }
+          where: { _id: notExistArrayImage[i]._id },
         });
         delete_file(`./public/pics/${notExistArrayImage[i].image}`);
       }
@@ -1137,7 +1137,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
         await PackageAssetDocument.destroy({
-          where: { _id: notExistArrayDocument[i]._id }
+          where: { _id: notExistArrayDocument[i]._id },
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
@@ -1235,7 +1235,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       const genDataArray = JSON.parse(genDataJSON);
       await SubComponentPkAsset.destroy({
-        where: { packageAssetId: packageAssetId }
+        where: { packageAssetId: packageAssetId },
       });
       for (let i = 0; i < genDataArray.length; i++) {
         await SubComponentPkAsset.create({
@@ -1244,11 +1244,11 @@ exports.updatePackageAsset = async (req, res, next) => {
           serialNumber: genDataArray[i].serialNumber,
           replacedAssetNumber: genDataArray[i].replacedAssetNumber,
           sector: genDataArray[i].sector,
-          asset01: genDataArray[i].asset01
+          asset01: genDataArray[i].asset01,
         });
       }
       await BottomSubComponentDataPkAsset.destroy({
-        where: { packageAssetId: packageAssetId }
+        where: { packageAssetId: packageAssetId },
       });
       for (let i = 0; i < bottomSubComponentDataObject.length; i++) {
         await BottomSubComponentDataPkAsset.create({
@@ -1258,7 +1258,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           assetNumber: bottomSubComponentDataObject[i].assetNumber,
           sector: bottomSubComponentDataObject[i].sector,
           price: bottomSubComponentDataObject[i].price,
-          asset01: bottomSubComponentDataObject[i].asset01
+          asset01: bottomSubComponentDataObject[i].asset01,
         });
       }
     } else {
@@ -1290,16 +1290,16 @@ exports.getSectorForSearch = async (req, res, next) => {
         [Op.and]: [
           { deletedAt: { [Op.eq]: null } },
           { sector: { [Op.ne]: null } },
-          { sector: { [Op.ne]: "" } }
-        ]
+          { sector: { [Op.ne]: "" } },
+        ],
       },
       attributes: [
         // ["_id", "_id"],
         ["sector", "sector"],
-        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"]
+        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
       ],
       group: "sector",
-      raw: true
+      raw: true,
     });
     res.json({ sector });
   } catch (err) {
@@ -1313,8 +1313,8 @@ exports.deletePackageAsset = async (req, res, next) => {
     const { reason } = req.body;
     const packageAssetById = await PackageAsset.findOne({
       where: {
-        _id: packageAssetId
-      }
+        _id: packageAssetId,
+      },
     });
     if (packageAssetById == null)
       return res.json("This packageAsset not found");
@@ -1323,7 +1323,7 @@ exports.deletePackageAsset = async (req, res, next) => {
     } else {
       const packageAsset = await PackageAsset.find({
         where: { _id: packageAssetId },
-        include: [{ model: Asset, as: "assets" }]
+        include: [{ model: Asset, as: "assets" }],
       });
       //   const packageAsset = await PackageAsset.aggregate([
       //     { $match: { _id: ObjectID(packageAssetId) } },
@@ -1356,7 +1356,7 @@ exports.deletePackageAsset = async (req, res, next) => {
         { reason: reason, deletedAt: new Date() },
 
         {
-          _id: packageAssetId
+          _id: packageAssetId,
         }
       );
 
@@ -1407,7 +1407,7 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
     let queryArray = [];
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
       });
     }
     if (status !== "") {
@@ -1415,16 +1415,16 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
     } else {
       queryArray.push({
         status: {
-          [Op.like]: `%${status}%`
-        }
+          [Op.like]: `%${status}%`,
+        },
       });
     }
     if (dateFrom !== "") {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate()
-        }
+          [Op.lte]: moment().endOf("day").toDate(),
+        },
       });
     }
     if (dateTo !== "") {
@@ -1434,8 +1434,8 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo)
-        }
+          [Op.lte]: new Date(modifiedDateTo),
+        },
       });
     }
     if (sector !== "") {
@@ -1451,7 +1451,7 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
 
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit
+      limit: limit,
     });
     // .sort({ updatedAt: -1 })
     // .skip(page * limit)
@@ -1543,42 +1543,43 @@ exports.getAllPackageAsset = async (req, res, next) => {
           include: [
             {
               model: AssetImage,
-              as: "assetImages"
-            }
+              as: "assetImages",
+            },
           ],
           include: [
             {
               model: AssetDocument,
-              as: "assetDocuments"
-            }
-          ]
-        }
-      ],
-      include: [
+
+              as: "assetDocuments",
+            },
+          ],
+        },
         {
           model: PackageAssetImage,
-          as: "packageAssetImages"
-        }
-      ],
-      include: [
+          require: false,
+
+          as: "packageAssetImages",
+        },
         {
           model: PackageAssetDocument,
-          as: "packageAssetDocuments"
-        }
-      ],
-      include: [
+          require: false,
+
+          as: "packageAssetDocuments",
+        },
         {
           model: BottomSubComponentDataPkAsset,
-          as: "bottomSubComponentDataPackagekAssets"
-        }
-      ],
-      include: [
+          require: false,
+
+          as: "bottomSubComponentDataPackageAssets",
+        },
         {
           model: SubComponentPkAsset,
-          as: "subComponentPackageAssets"
-        }
+          require: false,
+
+          as: "subComponentPackageAssets",
+        },
       ],
-      order: [["updatedAt", "DESC"]]
+      order: [["updatedAt", "DESC"]],
     });
     //   .sort({ updatedAt: -1 })
     //   .skip(page * limit)
@@ -1597,70 +1598,52 @@ exports.getAllPackageAsset = async (req, res, next) => {
 exports.getPackageAssetById = async (req, res, next) => {
   try {
     const packageAssetId = req.params.packageAssetId;
-    // const packageAsset = await PackageAsset.aggregate([
-    //   { $match: { _id: ObjectID(packageAssetId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       localField: "_id",
-    //       foreignField: "packageAssetId",
-    //       as: "asset",
-    //     },
-    //   },
-    // ]);
+
     const packageAsset = await PackageAsset.findOne({
       where: { _id: packageAssetId },
-      // include: [
-      //   {
-      //     model: Asset,
-      //     require: false,
-      //     as: "assets",
-      //     include: [
-      //       {
-      //         model: AssetImage,
-      //         as: "assetImages",
-      //       },
-      //     ],
-      //     include: [
-      //       {
-      //         model: AssetDocument,
-      //         as: "assetDocuments",
-      //       },
-      //     ],
-      //   },
-      // ],
-      // include: [
-      //   {
-      //     model: PackageAssetImage,
-      //     require: false,
-
-      //     as: "packageAssetImages",
-      //   },
-      // ],
-      // include: [
-      //   {
-      //     model: PackageAssetDocument,
-      //     require: false,
-
-      //     as: "packageAssetDocuments",
-      //   },
-      // ],
       include: [
+        {
+          model: Asset,
+          require: false,
+          as: "assets",
+          include: [
+            {
+              model: AssetImage,
+              as: "assetImages",
+            },
+          ],
+          include: [
+            {
+              model: AssetDocument,
+              as: "assetDocuments",
+            },
+          ],
+        },
+        {
+          model: PackageAssetImage,
+          require: false,
+
+          as: "packageAssetImages",
+        },
+        {
+          model: PackageAssetDocument,
+          require: false,
+
+          as: "packageAssetDocuments",
+        },
         {
           model: BottomSubComponentDataPkAsset,
           require: false,
 
-          as: "bottomSubComponentDataPackageAssets"
-        }
-      ],
-      include: [
+          as: "bottomSubComponentDataPackageAssets",
+        },
         {
           model: SubComponentPkAsset,
           require: false,
 
-          as: "subComponentPackageAssets"
-        }
-      ]
+          as: "subComponentPackageAssets",
+        },
+      ],
     });
     // console.log(asset);
     // const packageAsset = await PackageAsset.findById({ _id: packageAssetId });
@@ -1675,27 +1658,27 @@ exports.getAllSector = async (req, res, next) => {
     const sector = await PackageAsset.aggregate([
       {
         $match: {
-          $and: [{ deletedAt: { $eq: null } }, { sector: { $ne: null } }]
-        }
+          $and: [{ deletedAt: { $eq: null } }, { sector: { $ne: null } }],
+        },
       },
       {
         $group: {
           _id: { sector: "$sector" },
-          numberOfzipcodes: { $sum: 1 }
-        }
+          numberOfzipcodes: { $sum: 1 },
+        },
       },
       {
         $project: {
           sector: "$_id.sector",
           numberOfzipcodes: "$numberOfzipcodes",
-          _id: 0
-        }
+          _id: 0,
+        },
       },
       {
         $sort: {
-          sector: 1
-        }
-      }
+          sector: 1,
+        },
+      },
     ]);
     res.json({ sector });
   } catch (err) {

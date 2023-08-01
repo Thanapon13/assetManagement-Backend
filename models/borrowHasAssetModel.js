@@ -14,17 +14,18 @@ module.exports = (sequelize, Sequelize) => {
       },
       reason: {
         type: Sequelize.STRING(1000),
-        allowNull: false,
+        allowNull: true,
+        default: "",
         field: "reason",
       },
       return: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "return",
       },
       returnDate: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
         field: "returnDate",
       },
     },

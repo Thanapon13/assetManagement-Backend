@@ -10,6 +10,14 @@ const AssetImage = require("../models").assetImage;
 const AssetDocument = require("../models").assetDocument;
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
+const fs = require("fs");
+
+function delete_file(path) {
+  fs.unlink(path, (err) => {
+    if (err) throw err;
+    console.log(path + " was deleted");
+  });
+}
 
 exports.createAsset = async (req, res, next) => {
   // เหลือ create transfer

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const repairController = require("../controller/repairController");
-const protect = require("../middleware/authMiddleware");
+// const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
 router.post("/create", repairController.createRepair);
@@ -27,8 +27,7 @@ router.get(
 );
 router.get("/searchTopApprove", repairController.getBySearchTopRepairApprove);
 router.get("/searchDetailRecord", repairController.getBySearchOfDetailRecord);
-// // repairHistory page
-router.get("/searchHistory", repairController.getBySearchOfHistory);
+ 
 router.get(
   "/getHistoryThisAssetByAssetId",
   repairController.getHistoryThisAssetByAssetNumber
@@ -53,47 +52,8 @@ router.patch(
   upload.fields([{ name: "arrayDocument" }]),
   repairController.outSourceRepairRecord
 );
-router.get("/getAssetNumber", repairController.getAssetNumberSelector);
-router.get("/getAssetByAssetNumber", repairController.getAssetByAssetNumber);
-
-// router.get("/BorrowHistorySector", repairController.getBorrowHistorySector);
-
-// // repairCheck page
-// router.get("/searchBorrowCheck", repairController.getBySearchBorrowCheck);
-// router.get("/repairCheckSector", repairController.getBorrowCheckSector);
-// router.get("/repairCheck/:repairId", repairController.getBorrowCheckById);
-
-// router.patch(
-//   "/repairCheckReturnApprove/:repairId",
-//   upload.fields([{ name: "arrayImage" }]),
-//   repairController.updateBorrowCheckReturnApproveById
-// );
-
-// // status first fetch
-// router.get(
-//   "/allFirstFetchBorrowApprove",
-//   repairController.getAllFirstFetchBorrowApprove
-// );
-// // dropdown
-// router.get(
-//   "/dropdownAllSectorFromBorrow",
-//   repairController.getAllSectorFromBorrow
-// );
-
-// router.get(
-//   "/viewBorrowApproveDetailById/:repairId",
-//   repairController.getViewBorrowApproveDetailById
-// );
-
-// router.get(
-//   "/viewBorrowHistoryByAssetId/:assetId",
-//   repairController.getViewBorrowHistoryByAssetId
-// );
-
-// router.get(
-//   "/viewBorrowHistoryByPackageAssetId/:packageAssetId",
-//   repairController.getViewBorrowHistoryByPackageAssetId
-// );
+// router.get("/getAssetNumber", repairController.getAssetNumberSelector);
+// router.get("/getAssetByAssetNumber", repairController.getAssetByAssetNumber);
 
 router.get("/:repairId", repairController.getRepairById);
 
