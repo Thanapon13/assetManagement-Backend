@@ -62,8 +62,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use("/images", express.static("public/pics"));
-// app.use("/documents", express.static("public/documents"));
+app.use("/images", express.static("public/pics"));
+app.use("/documents", express.static("public/documents"));
 app.use("/user", user);
 app.use("/asset", assetRoute);
 app.use("/packageAsset", packageAssetRoute);

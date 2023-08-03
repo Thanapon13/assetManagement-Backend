@@ -4,13 +4,16 @@ const {
   assetImage,
   subComponentAsset,
   assetDocument,
-  building
+  building,
 } = require("../models");
 const AssetImage = require("../models").assetImage;
 const AssetDocument = require("../models").assetDocument;
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const fs = require("fs");
+const sapAuthService = require("../services/sap/auth");
+const sapAssetMasterService = require("../services/sap/assetMaster");
+const sapCapitalizationService = require("../services/sap/capitalization");
 
 function delete_file(path) {
   fs.unlink(path, (err) => {
@@ -90,7 +93,7 @@ exports.createAsset = async (req, res, next) => {
       room, // note วันที่ย้ายเข้า - ย้ายออก
       name_recorder,
       name_courier,
-      name_approver
+      name_approver,
     } = req.body;
 
     console.log(req.body);
@@ -116,7 +119,7 @@ exports.createAsset = async (req, res, next) => {
       distributeToSector,
       guaranteedMonth,
       purposeOfUse,
-      status
+      status,
     } = inputObject;
     let otherInputObject = {};
 
@@ -133,7 +136,7 @@ exports.createAsset = async (req, res, next) => {
 
     let newestRealAssetId;
     let newestAsset = await asset.findOne({
-      attributes: ["realAssetId"]
+      attributes: ["realAssetId"],
     });
     if (newestAsset == null) {
       newestRealAssetId = 0;
@@ -199,7 +202,7 @@ exports.createAsset = async (req, res, next) => {
         accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
         accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
         accumulateDepreciationBookValue: accumulateDepreciationBookValue,
-        realAssetId: newestRealAssetId + 1
+        realAssetId: newestRealAssetId + 1,
       });
 
       const newAssetId = createdAsset.dataValues._id;
@@ -211,7 +214,7 @@ exports.createAsset = async (req, res, next) => {
         // console.log("roomImage:", roomImage);
         await assetImage.create({
           image: roomImage.filename,
-          assetId: newAssetId
+          assetId: newAssetId,
         });
         // console.log("Uploaded roomImage:", roomImage);
       }
@@ -222,7 +225,7 @@ exports.createAsset = async (req, res, next) => {
         // console.log("documentArray:", documentArray);
         await assetDocument.create({
           document: documentArray.filename,
-          assetId: newAssetId
+          assetId: newAssetId,
         });
         // console.log("Uploaded documentArray:", documentArray);
       }
@@ -232,7 +235,7 @@ exports.createAsset = async (req, res, next) => {
         const subComponentData = genDataArray[i];
         await subComponentAsset.create({
           ...subComponentData,
-          assetId: newAssetId
+          assetId: newAssetId,
         });
       }
     } else {
@@ -299,7 +302,7 @@ exports.createAsset = async (req, res, next) => {
           accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
           accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
           accumulateDepreciationBookValue: accumulateDepreciationBookValue,
-          realAssetId: newestRealAssetId + 1
+          realAssetId: newestRealAssetId + 1,
         });
         const newAssetId = createdAsset.dataValues._id;
         console.log("newAssetId:", newAssetId);
@@ -309,7 +312,7 @@ exports.createAsset = async (req, res, next) => {
           console.log("roomImage:", roomImage);
           await assetImage.create({
             image: roomImage.filename,
-            assetId: newAssetId
+            assetId: newAssetId,
           });
         }
 
@@ -318,10 +321,37 @@ exports.createAsset = async (req, res, next) => {
 
           await assetDocument.create({
             document: documentArray.filename,
-            assetId: newAssetId
+            assetId: newAssetId,
           });
         }
       }
+    }
+    // for (let i = 0; i < genDataArray; i++) {
+    //   dataInsertAssetMaster.push({
+    //     ItemCode: genDataArray[i].assetNumber,
+    //     ItemName: productName,
+    //     ItemType: "itFixedAssets",
+    //     AssetClass: "1209010101.101",
+    //   });
+    // }
+
+    const responseLogin = await sapAuthService.login();
+
+    const sessionId = responseLogin.data.SessionId;
+    console.log("sessionId", sessionId);
+    for (let a = 0; a < genDataArray.length; a++) {
+      let dataInsertAssetMaster = {
+        ItemCode: genDataArray[a].assetNumber,
+        ItemName: productName,
+        ItemType: "itFixedAssets",
+        AssetClass: "1209010101.101",
+      };
+      console.log("dataInsertAssetMaster", dataInsertAssetMaster);
+      const responseCreateAssetMaster = await sapAssetMasterService.create(
+        dataInsertAssetMaster,
+        sessionId
+      );
+      console.log("responseCreateAssetMaster", responseCreateAssetMaster);
     }
 
     res.status(200).json({ message: "Successfully created" });
@@ -334,8 +364,8 @@ exports.deleteAsset = async (req, res, next) => {
   try {
     const remove = await asset.findOne({
       where: {
-        _id: req.params.assetId
-      }
+        _id: req.params.assetId,
+      },
     });
     if (!remove) {
       createError("this post was not found", 400);
@@ -359,8 +389,8 @@ exports.deleteSubComponentAsset = async (req, res, next) => {
   try {
     const removeSubComponentAsset = await subComponentAsset.findOne({
       where: {
-        _id: req.body.id
-      }
+        _id: req.body.id,
+      },
     });
 
     if (removeSubComponentAsset) {
@@ -399,10 +429,10 @@ exports.getAllBuilding = async (req, res, next) => {
       where: {
         [Op.and]: [
           { deletedAt: { [Op.ne]: null } },
-          { building: { [Op.ne]: null } }
-        ]
+          { building: { [Op.ne]: null } },
+        ],
       },
-      attributes: ["building"]
+      attributes: ["building"],
     });
 
     res.json({ building: buildingData });
@@ -452,7 +482,7 @@ exports.getBySearch = async (req, res, next) => {
 
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
       });
     }
     if (status !== "") {
@@ -460,16 +490,16 @@ exports.getBySearch = async (req, res, next) => {
     } else {
       queryArray.push({
         status: {
-          [Op.like]: `%${status}%`
-        }
+          [Op.like]: `%${status}%`,
+        },
       });
     }
     if (dateFrom !== "") {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate()
-        }
+          [Op.lte]: moment().endOf("day").toDate(),
+        },
       });
     }
     if (dateTo !== "") {
@@ -479,8 +509,8 @@ exports.getBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo)
-        }
+          [Op.lte]: new Date(modifiedDateTo),
+        },
       });
     }
     if (sector !== "") {
@@ -493,7 +523,7 @@ exports.getBySearch = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit
+      limit: limit,
     });
     // for show how many pages
     const total = await asset.count({ where: { [Op.and]: queryArray } });
@@ -606,15 +636,15 @@ exports.getAssetById = async (req, res, next) => {
     // ]);
     const assetData = await asset.findOne({
       where: {
-        _id: assetId
+        _id: assetId,
       },
       include: [
         {
           model: assetImage,
           require: false,
-          as: "assetImages"
-        }
-      ]
+          as: "assetImages",
+        },
+      ],
       // include: [
       //   {
       //     model: assetDocument,
@@ -640,16 +670,16 @@ exports.getSectorForSearch = async (req, res, next) => {
         [Op.and]: [
           { deletedAt: { [Op.eq]: null } },
           { sector: { [Op.ne]: null } },
-          { sector: { [Op.ne]: "" } }
-        ]
+          { sector: { [Op.ne]: "" } },
+        ],
       },
       attributes: [
         // ["_id", "_id"],
         ["sector", "sector"],
-        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"]
+        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
       ],
       group: "sector",
-      raw: true
+      raw: true,
     });
     res.json({ sector });
   } catch (err) {
@@ -672,25 +702,25 @@ exports.getByProductSelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
     }
 
@@ -710,20 +740,20 @@ exports.getByProductSelector = async (req, res, next) => {
       where: { [Op.and]: queryAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("*")), "quantity"]
+        [sequelize.fn("COUNT", sequelize.col("*")), "quantity"],
       ],
       group: "productName",
-      raw: false
+      raw: false,
     });
     console.log(2342, assetData);
     let packageAssetData = await pkAsset.findAll({
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"]
+        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],
       ],
       group: "productName",
-      raw: true
+      raw: true,
     });
 
     // let asset = await Asset.aggregate([
@@ -785,25 +815,25 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
     }
     queryAssetArray.push({ deletedAt: { [Op.eq]: null } });
@@ -820,10 +850,10 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
     console.log(queryAssetArray, "queryAssetArray");
     console.log(queryPackageAssetArray, "queryPackageAssetArray");
     let assetData = await asset.findAll({
-      where: { [Op.and]: queryAssetArray }
+      where: { [Op.and]: queryAssetArray },
     });
     let packageAssetData = await pkAsset.findAll({
-      where: { [Op.and]: queryPackageAssetArray }
+      where: { [Op.and]: queryPackageAssetArray },
     });
 
     assetData = assetData.concat(packageAssetData);
@@ -851,25 +881,25 @@ exports.getQuantitySelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`
-        }
+          [Op.like]: `%${assetNumber}%`,
+        },
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`
-        }
+          [Op.like]: `%${productName}%`,
+        },
       });
     }
 
@@ -889,17 +919,17 @@ exports.getQuantitySelector = async (req, res, next) => {
     let quantity = 0;
 
     let assetData = await asset.findAll({
-      where: { [Op.and]: queryAssetArray }
+      where: { [Op.and]: queryAssetArray },
     });
     let packageAssetData = await pkAsset.findAll({
-      where: { [Op.and]: queryPackageAssetArray }
+      where: { [Op.and]: queryPackageAssetArray },
     });
     if (assetData.length > 0) {
       // for show how many quantity of this product
       quantity = await asset.count({ where: { [Op.and]: queryAssetArray } });
     } else if (packageAssetData.length > 0) {
       quantity = await pkAsset.count({
-        where: { [Op.and]: queryPackageAssetArray }
+        where: { [Op.and]: queryPackageAssetArray },
       });
     }
 
@@ -980,7 +1010,7 @@ exports.updateAsset = async (req, res, next) => {
       room, // note วันที่ย้ายเข้า - ย้ายออก
       name_recorder,
       name_courier,
-      name_approver
+      name_approver,
     } = req.body;
     // console.log(req.body);
 
@@ -1015,7 +1045,7 @@ exports.updateAsset = async (req, res, next) => {
       asset01,
       replacedAssetNumber,
       serialNumber,
-      status
+      status,
     } = inputObject;
     let existArrayImageArray = [];
     let existArrayDocumentArray = [];
@@ -1080,7 +1110,7 @@ exports.updateAsset = async (req, res, next) => {
         for (let j = 0; j < existArrayDocumentArray.length; j++) {
           if (i == 0) {
             saveDocumentArray.push({
-              document: existArrayDocumentArray[j].document
+              document: existArrayDocumentArray[j].document,
             });
           } else {
             // console.log(existArrayDocumentArray[j].document);
@@ -1109,7 +1139,7 @@ exports.updateAsset = async (req, res, next) => {
         }
         for (let j = 0; j < lengthOfBaseDocumentArray; j++) {
           saveDocumentArray.push({
-            document: arrayDocument[quantity * j + i].filename
+            document: arrayDocument[quantity * j + i].filename,
           });
         }
         newestRealAssetId = newestRealAssetId + 1;
@@ -1154,7 +1184,7 @@ exports.updateAsset = async (req, res, next) => {
             billNumber,
             purchaseYear,
             purchaseDate,
-            documentDate
+            documentDate,
           },
 
           // การจำหน่าย
@@ -1163,7 +1193,7 @@ exports.updateAsset = async (req, res, next) => {
             distributeDocumentDate,
             distributeApprovalReleaseDate,
             distributeStatus,
-            distributionNote
+            distributionNote,
           },
 
           // ค่าเสื่อม
@@ -1200,7 +1230,7 @@ exports.updateAsset = async (req, res, next) => {
 
           // document
           documentArray: saveDocumentArray,
-          reserved: false
+          reserved: false,
         });
         // await Transfer.create({
         //   transferDocumentNumber: newestTransferDocumentNumber + 1,
@@ -1254,7 +1284,7 @@ exports.updateAsset = async (req, res, next) => {
     let notExistArrayDocument = [];
 
     function getNotExistImage(existArray, oldImageArray, notExistArray) {
-      const existObjects = existArray.map(obj => obj.image + obj._id);
+      const existObjects = existArray.map((obj) => obj.image + obj._id);
 
       for (let i = 0; i < oldImageArray.length; i++) {
         if (
@@ -1273,7 +1303,7 @@ exports.updateAsset = async (req, res, next) => {
     );
 
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map(obj => obj.document + obj._id);
+      const existObjects = existArray.map((obj) => obj.document + obj._id);
 
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (

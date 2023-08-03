@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const role = sequelize.define(
-    "TBM_ROLES",
+    "TB_ROLES",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -10,22 +10,22 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id"
+        field: "_id",
       },
       roleName: {
         type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
-        field: "roleName"
+        field: "roleName",
       },
       deletedAt: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "deletedAt"
-      }
+        field: "deletedAt",
+      },
     },
     {
-      tableName: "TBM_ROLES"
+      tableName: "TBM_ROLES",
     }
   );
 

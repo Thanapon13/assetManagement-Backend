@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const accessScreen = sequelize.define(
-    "TBM_ACCESS_SCREENS",
+    "TB_ACCESS_SCREENS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
