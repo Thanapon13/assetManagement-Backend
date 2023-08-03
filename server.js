@@ -17,7 +17,7 @@ const transferRoute = require("./route/transferRoute");
 const repairRoute = require("./route/repairRoute");
 const merchantRoute = require("./route/merchantRoute");
 const roleRoute = require("./route/roleRoute");
-// const dashboardRoute = require("./route/dashboardRoute");
+const dashboardRoute = require("./route/dashboardRoute");
 // dropdown
 const buildingRoute = require("./route/buildingRoute");
 const floorRoute = require("./route/floorRoute");
@@ -74,7 +74,7 @@ app.use("/transfer", transferRoute);
 app.use("/repair", repairRoute);
 app.use("/merchant", merchantRoute);
 app.use("/role", roleRoute);
-// app.use("/dashboard", dashboardRoute);
+app.use("/dashboard", dashboardRoute);
 // dropdown
 app.use("/building", buildingRoute);
 app.use("/floor", floorRoute);
