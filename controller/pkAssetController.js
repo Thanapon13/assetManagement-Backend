@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
-
+const Type = require("../models").type;
 const Asset = require("../models").asset;
 const AssetImage = require("../models").assetImage;
 const AssetDocument = require("../models").assetDocument;
@@ -13,6 +13,11 @@ const SubComponentPkAsset = require("../models").subComponentPkAsset;
 const fs = require("fs");
 const moment = require("moment/moment");
 const { ObjectID } = require("bson");
+const { pkAsset } = require("../models");
+const sapAuthService = require("../services/sap/auth");
+const sapAssetMasterService = require("../services/sap/assetMaster");
+const sapCapitalizationService = require("../services/sap/capitalization");
+const sapRetirementService = require("../services/sap/retirement");
 
 function delete_file(path) {
   fs.unlink(path, (err) => {
@@ -68,12 +73,6 @@ exports.createPackageAsset = async (req, res, next) => {
       depreciationPrice,
       depreciationYearUsed,
       depreciationCarcassPrice,
-      depreciationProcess,
-      depreciationPresentMonth,
-      depreciationCumulativePrice,
-      depreciationYearPrice,
-      depreciationRemainPrice,
-      depreciationBookValue,
 
       // ค่าเสื่อมรายปี
       accumulateDepreciationStartDate,
@@ -82,19 +81,13 @@ exports.createPackageAsset = async (req, res, next) => {
       accumulateDepreciationPrice,
       accumulateDepreciationYearUsed,
       accumulateDepreciationCarcassPrice,
-      accumulateDepreciationProcess,
-      accumulateDepreciationPresentMonth,
-      accumulateDepreciationCumulativePrice,
-      accumulateDepreciationYearPrice,
-      accumulateDepreciationRemainPrice,
-      accumulateDepreciationBookValue,
 
       bottomSubComponentDataJSON,
     } = req.body;
     // console.log(req.body);
 
     const inputObject = JSON.parse(input);
-    console.log("inputObject", inputObject);
+    // console.log("inputObject", inputObject);
     let {
       engProductName,
       productName,
@@ -143,7 +136,7 @@ exports.createPackageAsset = async (req, res, next) => {
     // console.log("arrayDocument",arrayDocument)
 
     const objSubComponentArray = JSON.parse(bottomSubComponentDataJSON);
-    console.log("objSubComponentArray.length", objSubComponentArray.length);
+    // console.log("objSubComponentArray.length", objSubComponentArray.length);
     // for gen new realAssetId
     let newestAsset = await Asset.findOne({
       order: [["createdAt", "DESC"]],
@@ -215,12 +208,6 @@ exports.createPackageAsset = async (req, res, next) => {
         depreciationPrice: depreciationPrice,
         depreciationYearUsed: depreciationYearUsed,
         depreciationCarcassPrice: depreciationCarcassPrice,
-        depreciationProcess: depreciationProcess,
-        depreciationPresentMonth: depreciationPresentMonth,
-        depreciationCumulativePrice: depreciationCumulativePrice,
-        depreciationYearPrice: depreciationYearPrice,
-        depreciationRemainPrice: depreciationRemainPrice,
-        depreciationBookValue: depreciationBookValue,
 
         // ค่าเสื่อมรายปี
         accumulateDepreciationStartDate: accumulateDepreciationStartDate,
@@ -229,13 +216,6 @@ exports.createPackageAsset = async (req, res, next) => {
         accumulateDepreciationPrice: accumulateDepreciationPrice,
         accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
         accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice,
-        accumulateDepreciationProcess: accumulateDepreciationProcess,
-        accumulateDepreciationPresentMonth: accumulateDepreciationPresentMonth,
-        accumulateDepreciationCumulativePrice:
-          accumulateDepreciationCumulativePrice,
-        accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
-        accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-        accumulateDepreciationBookValue: accumulateDepreciationBookValue,
       });
       for (let i = 0; i < baseArrayImageObj.length; i++) {
         await PackageAssetImage.create({
@@ -251,7 +231,7 @@ exports.createPackageAsset = async (req, res, next) => {
         });
       }
       for (let i = 0; i < objSubComponentArray.length; i++) {
-        console.log(12312312);
+        // console.log(12312312);
         await BottomSubComponentDataPkAsset.create({
           packageAssetId: packageAsset._id,
           serialNumber: objSubComponentArray[i].serialNumber,
@@ -272,9 +252,12 @@ exports.createPackageAsset = async (req, res, next) => {
           asset01: objGenDataArray[i].asset01,
         });
       }
-      console.log(packageAsset);
+      // console.log(packageAsset);
     } else {
+      const responseLogin = await sapAuthService.login();
+      const sessionId = responseLogin.data.SessionId;
       objGenDataArray.forEach(async (el, index) => {
+        let bottomComponenetArray = [];
         // console.log(`Package${index+1}`)
 
         // console.log("saveDocumentArray",saveDocumentArray)
@@ -338,12 +321,6 @@ exports.createPackageAsset = async (req, res, next) => {
           depreciationPrice: depreciationPrice,
           depreciationYearUsed: depreciationYearUsed,
           depreciationCarcassPrice: depreciationCarcassPrice,
-          depreciationProcess: depreciationProcess,
-          depreciationPresentMonth: depreciationPresentMonth,
-          depreciationCumulativePrice: depreciationCumulativePrice,
-          depreciationYearPrice: depreciationYearPrice,
-          depreciationRemainPrice: depreciationRemainPrice,
-          depreciationBookValue: depreciationBookValue,
 
           // ค่าเสื่อมรายปี
           accumulateDepreciationStartDate: accumulateDepreciationStartDate,
@@ -355,21 +332,14 @@ exports.createPackageAsset = async (req, res, next) => {
           accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
           accumulateDepreciationCarcassPrice:
             accumulateDepreciationCarcassPrice,
-          accumulateDepreciationProcess: accumulateDepreciationProcess,
-          accumulateDepreciationPresentMonth:
-            accumulateDepreciationPresentMonth,
-          accumulateDepreciationCumulativePrice:
-            accumulateDepreciationCumulativePrice,
-          accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
-          accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-          accumulateDepreciationBookValue: accumulateDepreciationBookValue,
         });
+        console.log("packageAsset :", packageAsset.dataValues._id);
         for (let i = 0; i < baseArrayImageObj.length; i++) {
           await PackageAssetImage.create({
             image:
               arrayImage[(+quantity + +objSubComponentArray.length) * i + index]
                 .filename,
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
         }
         // console.log("saveImageArray",saveImageArray)
@@ -380,8 +350,101 @@ exports.createPackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +objSubComponentArray.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
+        }
+        const getAssetClass = await Type.findOne({ name: type });
+        let AssetClass;
+        if (getAssetClass == null) {
+          AssetClass = "1209010101.101";
+        } else {
+          AssetClass = getAssetClass.value;
+        }
+        let dataInsertAssetMasterOfPkAsset = {
+          ItemCode: el.assetNumber,
+          ItemName: productName,
+          ItemType: "itFixedAssets",
+          AssetClass: AssetClass,
+        };
+        // console.log(
+        //   "dataInsertAssetMasterOfPkAsset",
+        //   dataInsertAssetMasterOfPkAsset
+        // );
+        const responseCreateAssetMasterOfPkAsset =
+          await sapAssetMasterService.create(
+            dataInsertAssetMasterOfPkAsset,
+            sessionId
+          );
+        if (
+          depreciationStartDate &&
+          depreciationRegisterDate &&
+          depreciationReceivedDate
+        ) {
+          let dataInsertCapitalizationOfPkAsset = {
+            PostingDate: depreciationStartDate.split("T")[0],
+            DocumentDate: depreciationStartDate.split("T")[0],
+            AssetValueDate: depreciationStartDate.split("T")[0],
+            BPLId: "1",
+            Remarks: "Capitalization PackageAsset",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: el.assetNumber,
+                Quantity: 1,
+                TotalLC: parseInt(price),
+              },
+            ],
+            AssetDocumentAreaJournalCollection: [
+              {
+                DepreciationArea: "TFRS",
+                JournalRemarks: "Capitalization-Test",
+              },
+            ],
+          };
+          // console.log(
+          //   "dataInsertCapitalizationOfPkAsset",
+          //   dataInsertCapitalizationOfPkAsset
+          // );
+
+          const responseCreateCapitalizationOfPkAsset =
+            await sapCapitalizationService.create(
+              dataInsertCapitalizationOfPkAsset,
+              sessionId
+            );
+          // console.log(
+          //   "responseCreateCapitalizationOfPkAsset : ",
+          //   responseCreateCapitalizationOfPkAsset
+          // );
+          await PackageAsset.update(
+            {
+              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry,
+            },
+            {
+              where: {
+                _id: packageAsset.dataValues._id,
+              },
+            }
+          );
+        }
+        if (distributeStatus === true) {
+          let dataInsertRetirement = {
+            PostingDate: distributeDocumentDate.split("T")[0],
+            DocumentDate: distributeDocumentDate.split("T")[0],
+            AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+            DocumentType: "adtScrapping",
+            BPLId: "1",
+            Remarks: "Retiremant on Asset Management System",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: el.assetNumber,
+              },
+            ],
+          };
+          const responseCreateRetirementOfPkAsset =
+            await sapRetirementService.create(dataInsertRetirement, sessionId);
+          // console.log(
+          //   "responseCreateRetirementOfPkAsset : ",
+          //   responseCreateRetirementOfPkAsset
+          // );
         }
         for (
           let i = index * quantity;
@@ -394,7 +457,7 @@ exports.createPackageAsset = async (req, res, next) => {
           // console.log("packageAsset._id",packageAsset._id)
 
           // console.log("saveSubDocumentArray",saveSubDocumentArray)
-          await Asset.create({
+          const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
             // engProductName,
@@ -439,7 +502,7 @@ exports.createPackageAsset = async (req, res, next) => {
             contractNumber: contractNumber,
             receivedDate: receivedDate,
             seller: seller,
-            price: price,
+            price: objSubComponentArray[i].price,
             billNumber: billNumber,
             purchaseYear: purchaseYear,
             purchaseDate: purchaseDate,
@@ -459,12 +522,6 @@ exports.createPackageAsset = async (req, res, next) => {
             depreciationPrice: depreciationPrice,
             depreciationYearUsed: depreciationYearUsed,
             depreciationCarcassPrice: depreciationCarcassPrice,
-            depreciationProcess: depreciationProcess,
-            depreciationPresentMonth: depreciationPresentMonth,
-            depreciationCumulativePrice: depreciationCumulativePrice,
-            depreciationYearPrice: depreciationYearPrice,
-            depreciationRemainPrice: depreciationRemainPrice,
-            depreciationBookValue: depreciationBookValue,
 
             // ค่าเสื่อมรายปี
             accumulateDepreciationStartDate: accumulateDepreciationStartDate,
@@ -476,15 +533,6 @@ exports.createPackageAsset = async (req, res, next) => {
             accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
             accumulateDepreciationCarcassPrice:
               accumulateDepreciationCarcassPrice,
-            accumulateDepreciationProcess: accumulateDepreciationProcess,
-            accumulateDepreciationPresentMonth:
-              accumulateDepreciationPresentMonth,
-            accumulateDepreciationCumulativePrice:
-              accumulateDepreciationCumulativePrice,
-            accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
-            accumulateDepreciationRemainPrice:
-              accumulateDepreciationRemainPrice,
-            accumulateDepreciationBookValue: accumulateDepreciationBookValue,
 
             // image
             // imageArray: saveSubImageArray,
@@ -495,15 +543,16 @@ exports.createPackageAsset = async (req, res, next) => {
             status,
             reserved: false,
 
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
+
           for (let j = 0; j < baseArrayImageObj.length; j++) {
             await AssetImage.create({
               image:
                 arrayImage[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              packageAssetId: packageAsset._id,
+              assetId: componentAssetOfPk.dataValues._id,
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -513,10 +562,174 @@ exports.createPackageAsset = async (req, res, next) => {
                 arrayDocument[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              packageAssetId: packageAsset._id,
+              assetId: componentAssetOfPk.dataValues._id,
             });
           }
+          //case1 สร้างแยก
+          const getAssetClass = await Type.findOne({ name: type });
+          let AssetClass;
+          if (getAssetClass == null) {
+            AssetClass = "1209010101.101";
+          } else {
+            AssetClass = getAssetClass.value;
+          }
+          let dataInsertAssetMaster = {
+            ItemCode: objSubComponentArray[i].assetNumber,
+            ItemName: objSubComponentArray[i].productName,
+            ItemType: "itFixedAssets",
+            AssetClass: AssetClass,
+          };
+          // console.log("dataInsertAssetMaster", dataInsertAssetMaster);
+          const responseCreateAssetMaster = await sapAssetMasterService.create(
+            dataInsertAssetMaster,
+            sessionId
+          );
+          if (
+            depreciationStartDate &&
+            depreciationRegisterDate &&
+            depreciationReceivedDate
+          ) {
+            let dataInsertCapitalization = {
+              PostingDate: depreciationStartDate.split("T")[0],
+              DocumentDate: depreciationStartDate.split("T")[0],
+              AssetValueDate: depreciationStartDate.split("T")[0],
+              BPLId: "1",
+              Remarks: "Capitalization Asset",
+              AssetDocumentLineCollection: [
+                {
+                  AssetNumber: objSubComponentArray[i].assetNumber,
+                  Quantity: 1,
+                  TotalLC: parseInt(objSubComponentArray[i].price),
+                },
+              ],
+              AssetDocumentAreaJournalCollection: [
+                {
+                  DepreciationArea: "TFRS",
+                  JournalRemarks: "Capitalization-Test",
+                },
+              ],
+            };
+            // console.log("dataInsertCapitalization", dataInsertCapitalization);
+
+            const responseCreateCapitalization =
+              await sapCapitalizationService.create(
+                dataInsertCapitalization,
+                sessionId
+              );
+            // console.log(
+            //   "responseCreateCapitalization : ",
+            //   responseCreateCapitalization
+            // );
+            await Asset.update(
+              {
+                sapDocEntry: responseCreateCapitalization.data.DocEntry,
+              },
+              {
+                where: {
+                  _id: componentAssetOfPk.dataValues._id,
+                },
+              }
+            );
+          }
+          if (distributeStatus === true) {
+            let dataInsertRetirement = {
+              PostingDate: depreciationStartDate.split("T")[0],
+              DocumentDate: depreciationStartDate.split("T")[0],
+              AssetValueDate: depreciationStartDate.split("T")[0],
+              DocumentType: "adtScrapping",
+              BPLId: "1",
+              Remarks: "Retiremant on Asset Management System",
+              AssetDocumentLineCollection: [
+                {
+                  AssetNumber: objSubComponentArray[i].assetNumber,
+                },
+              ],
+            };
+            const responseCreateRetirement = await sapRetirementService.create(
+              dataInsertRetirement,
+              sessionId
+            );
+            // console.log(
+            //   "responseCreateRetirement : ",
+            //   responseCreateRetirement
+            // );
+          }
+          ////////////////// case สร้างเป็นชุด
+          // let dataInsertAssetMaster = {
+          //   ItemCode: objSubComponentArray[i].assetNumber,
+          //   ItemName: objSubComponentArray[i].productName,
+          //   ItemType: "itFixedAssets",
+          //   AssetClass: "1209010101.101",
+          // };
+          // console.log("dataInsertAssetMaster", dataInsertAssetMaster);
+          // const responseCreateAssetMaster = await sapAssetMasterService.create(
+          //   dataInsertAssetMaster,
+          //   sessionId
+          // );
+          // bottomComponenetArray.push({
+          //   AssetNumber: objSubComponentArray[i].assetNumber,
+          //   Quantity: 1,
+          //   TotalLC: parseInt(objSubComponentArray[i].price),
+          // });
         }
+        //////// case สร้างเป็นชุด
+        // if (
+        //   depreciationStartDate &&
+        //   depreciationRegisterDate &&
+        //   depreciationReceivedDate
+        // ) {
+        // let dataInsertCapitalization = {
+        // PostingDate: depreciationStartDate.split("T")[0],
+        // DocumentDate: depreciationStartDate.split("T")[0],
+        // AssetValueDate: depreciationStartDate.split("T")[0],
+        //   BPLId: "1",
+        //   Remarks: "Capitalization",
+        //   AssetDocumentLineCollection: bottomComponenetArray,
+        //   AssetDocumentAreaJournalCollection: [
+        //     {
+        //       DepreciationArea: "TFRS",
+        //       JournalRemarks: "Capitalization-Test",
+        //     },
+        //   ],
+        // };
+        // console.log("dataInsertCapitalization", dataInsertCapitalization);
+
+        // const responseCreateCapitalization =
+        //   await sapCapitalizationService.create(
+        //     dataInsertCapitalization,
+        //     sessionId
+        //   );
+        // console.log(
+        //   "responseCreateCapitalization : ",
+        //   responseCreateCapitalization
+        // );
+        // await pkAsset.update(
+        //   {
+        //     sapDocEntry: responseCreateCapitalization.data.DocEntry,
+        //   },
+        //   {
+        //     where: {
+        //       _id: componentAssetOfPk.dataValues._id,
+        //     },
+        //   }
+        // );
+        //}
+        // if (distributeStatus === true) {
+        //   let dataInsertRetirement = {
+        // PostingDate: distributeDocumentDate.split("T")[0],
+        // DocumentDate: distributeDocumentDate.split("T")[0],
+        // AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+        //     DocumentType: "adtScrapping",
+        //     BPLId: "1",
+        //     Remarks: "Retiremant on Asset Management System",
+        //     AssetDocumentLineCollection: bottomComponenetArray,
+        //   };
+        //   const responseCreateRetirement = await sapRetirementService.create(
+        //     dataInsertRetirement,
+        //     sessionId
+        //   );
+        //   console.log("responseCreateRetirement : ", responseCreateRetirement);
+        // }
       });
     }
 
@@ -568,12 +781,6 @@ exports.updatePackageAsset = async (req, res, next) => {
       depreciationPrice,
       depreciationYearUsed,
       depreciationCarcassPrice,
-      depreciationProcess,
-      depreciationPresentMonth,
-      depreciationCumulativePrice,
-      depreciationYearPrice,
-      depreciationRemainPrice,
-      depreciationBookValue,
 
       // ค่าเสื่อมรายปี
       accumulateDepreciationStartDate,
@@ -582,12 +789,6 @@ exports.updatePackageAsset = async (req, res, next) => {
       accumulateDepreciationPrice,
       accumulateDepreciationYearUsed,
       accumulateDepreciationCarcassPrice,
-      accumulateDepreciationProcess,
-      accumulateDepreciationPresentMonth,
-      accumulateDepreciationCumulativePrice,
-      accumulateDepreciationYearPrice,
-      accumulateDepreciationRemainPrice,
-      accumulateDepreciationBookValue,
 
       reserved,
     } = req.body;
@@ -664,6 +865,15 @@ exports.updatePackageAsset = async (req, res, next) => {
       });
       let newestRealAssetId = parseInt(newestAsset.realAssetId) - 1;
       const genDataArray = JSON.parse(genDataJSON);
+      const responseLogin = await sapAuthService.login();
+      const sessionId = responseLogin.data.SessionId;
+      const getAssetClass = await Type.findOne({ name: type });
+      let AssetClass;
+      if (getAssetClass == null) {
+        AssetClass = "1209010101.101";
+      } else {
+        AssetClass = getAssetClass.value;
+      }
       genDataArray.forEach(async (el, index) => {
         // let saveImageArray = [];
         // let saveDocumentArray = [];
@@ -730,12 +940,6 @@ exports.updatePackageAsset = async (req, res, next) => {
           depreciationPrice: depreciationPrice,
           depreciationYearUsed: depreciationYearUsed,
           depreciationCarcassPrice: depreciationCarcassPrice,
-          depreciationProcess: depreciationProcess,
-          depreciationPresentMonth: depreciationPresentMonth,
-          depreciationCumulativePrice: depreciationCumulativePrice,
-          depreciationYearPrice: depreciationYearPrice,
-          depreciationRemainPrice: depreciationRemainPrice,
-          depreciationBookValue: depreciationBookValue,
 
           // ค่าเสื่อมรายปี
           accumulateDepreciationStartDate: accumulateDepreciationStartDate,
@@ -747,14 +951,6 @@ exports.updatePackageAsset = async (req, res, next) => {
           accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
           accumulateDepreciationCarcassPrice:
             accumulateDepreciationCarcassPrice,
-          accumulateDepreciationProcess: accumulateDepreciationProcess,
-          accumulateDepreciationPresentMonth:
-            accumulateDepreciationPresentMonth,
-          accumulateDepreciationCumulativePrice:
-            accumulateDepreciationCumulativePrice,
-          accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
-          accumulateDepreciationRemainPrice: accumulateDepreciationRemainPrice,
-          accumulateDepreciationBookValue: accumulateDepreciationBookValue,
         });
 
         // saveImageAndDocument ///////////////////////////////////////////////////////////
@@ -762,7 +958,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (index == 0) {
             await PackageAssetImage.create({
               image: existArrayImageArray[j].image,
-              packageAssetId: packageAsset._id,
+              packageAssetId: packageAsset.dataValues._id,
             });
             // saveImageArray.push({ image: existArrayImageArray[j].image });
           } else {
@@ -779,7 +975,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetImage.create({
               image: newImageName,
-              packageAssetId: packageAsset._id,
+              packageAssetId: packageAsset.dataValues._id,
             });
             // saveImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -794,7 +990,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (i == 0) {
             await PackageAssetDocument.create({
               document: existArrayDocumentArray[j].document,
-              packageAssetId: packageAsset._id,
+              packageAssetId: packageAsset.dataValues._id,
             });
             // saveDocumentArray.push({
             //   document: existArrayDocumentArray[j].document,
@@ -814,7 +1010,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetDocument.create({
               document: newDocumentName,
-              packageAssetId: packageAsset._id,
+              packageAssetId: packageAsset.dataValues._id,
             });
             // saveDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -831,7 +1027,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayImage[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
           // saveImageArray.push({
           //   image:
@@ -848,7 +1044,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
           // saveDocumentArray.push({
           //   document:
@@ -859,10 +1055,97 @@ exports.updatePackageAsset = async (req, res, next) => {
         }
         // saveImageAndDocument ///////////////////////////////////////////////////////////
 
+        // console.log(
+        //   "bottomSubComponentDataObjectlength",
+        //   bottomSubComponentDataObject.length
+        // );
+
+        let dataInsertAssetMasterOfPkAsset = {
+          ItemCode: el.assetNumber,
+          ItemName: productName,
+          ItemType: "itFixedAssets",
+          AssetClass: AssetClass,
+        };
         console.log(
-          "bottomSubComponentDataObjectlength",
-          bottomSubComponentDataObject.length
+          "dataInsertAssetMasterOfPkAsset",
+          dataInsertAssetMasterOfPkAsset
         );
+        const responseCreateAssetMasterOfPkAsset =
+          await sapAssetMasterService.create(
+            dataInsertAssetMasterOfPkAsset,
+            sessionId
+          );
+        if (
+          depreciationStartDate &&
+          depreciationRegisterDate &&
+          depreciationReceivedDate
+        ) {
+          let dataInsertCapitalizationOfPkAsset = {
+            PostingDate: depreciationStartDate.split("T")[0],
+            DocumentDate: depreciationStartDate.split("T")[0],
+            AssetValueDate: depreciationStartDate.split("T")[0],
+            BPLId: "1",
+            Remarks: "Capitalization PackageAsset",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: el.assetNumber,
+                Quantity: 1,
+                TotalLC: parseInt(price),
+              },
+            ],
+            AssetDocumentAreaJournalCollection: [
+              {
+                DepreciationArea: "TFRS",
+                JournalRemarks: "Capitalization-Test",
+              },
+            ],
+          };
+          console.log(
+            "dataInsertCapitalizationOfPkAsset",
+            dataInsertCapitalizationOfPkAsset
+          );
+
+          const responseCreateCapitalizationOfPkAsset =
+            await sapCapitalizationService.create(
+              dataInsertCapitalizationOfPkAsset,
+              sessionId
+            );
+          console.log(
+            "responseCreateCapitalizationOfPkAsset : ",
+            responseCreateCapitalizationOfPkAsset
+          );
+          await PackageAsset.update(
+            {
+              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry,
+            },
+            {
+              where: {
+                _id: packageAsset.dataValues._id,
+              },
+            }
+          );
+        }
+        if (distributeStatus === true) {
+          let dataInsertRetirement = {
+            PostingDate: distributeDocumentDate.split("T")[0],
+            DocumentDate: distributeDocumentDate.split("T")[0],
+            AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+            DocumentType: "adtScrapping",
+            BPLId: "1",
+            Remarks: "Retiremant on Asset Management System",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: el.assetNumber,
+              },
+            ],
+          };
+          const responseCreateRetirementOfPkAsset =
+            await sapRetirementService.create(dataInsertRetirement, sessionId);
+          console.log(
+            "responseCreateRetirementOfPkAsset : ",
+            responseCreateRetirementOfPkAsset
+          );
+        }
         for (
           let i = index * lengthOfBaseBottomSubComponentData;
           i < (index + 1) * lengthOfBaseBottomSubComponentData &&
@@ -916,7 +1199,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             contractNumber: contractNumber,
             receivedDate: receivedDate,
             seller: seller,
-            price: price,
+            price: bottomSubComponentDataObject[i].price,
             billNumber: billNumber,
             purchaseYear: purchaseYear,
             purchaseDate: purchaseDate,
@@ -936,12 +1219,6 @@ exports.updatePackageAsset = async (req, res, next) => {
             depreciationPrice: depreciationPrice,
             depreciationYearUsed: depreciationYearUsed,
             depreciationCarcassPrice: depreciationCarcassPrice,
-            depreciationProcess: depreciationProcess,
-            depreciationPresentMonth: depreciationPresentMonth,
-            depreciationCumulativePrice: depreciationCumulativePrice,
-            depreciationYearPrice: depreciationYearPrice,
-            depreciationRemainPrice: depreciationRemainPrice,
-            depreciationBookValue: depreciationBookValue,
 
             // ค่าเสื่อมรายปี
             accumulateDepreciationStartDate: accumulateDepreciationStartDate,
@@ -953,20 +1230,11 @@ exports.updatePackageAsset = async (req, res, next) => {
             accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
             accumulateDepreciationCarcassPrice:
               accumulateDepreciationCarcassPrice,
-            accumulateDepreciationProcess: accumulateDepreciationProcess,
-            accumulateDepreciationPresentMonth:
-              accumulateDepreciationPresentMonth,
-            accumulateDepreciationCumulativePrice:
-              accumulateDepreciationCumulativePrice,
-            accumulateDepreciationYearPrice: accumulateDepreciationYearPrice,
-            accumulateDepreciationRemainPrice:
-              accumulateDepreciationRemainPrice,
-            accumulateDepreciationBookValue: accumulateDepreciationBookValue,
 
             status: status,
             reserved: false,
 
-            packageAssetId: packageAsset._id,
+            packageAssetId: packageAsset.dataValues._id,
           });
           for (let j = 0; j < existArrayImageArray.length; j++) {
             // console.log(existArrayImageArray[j].image);
@@ -982,7 +1250,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetImage.create({
               image: newImageName,
-              assetId: assetCreate._id,
+              assetId: assetCreate.dataValues._id,
             });
             // saveSubImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -1007,7 +1275,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetDocument.create({
               document: newDocumentName,
-              asset: assetCreate._id,
+              asset: assetCreate.dataValues._id,
             });
             // saveSubDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -1025,7 +1293,7 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              assetId: assetCreate._id,
+              assetId: assetCreate.dataValues._id,
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -1037,8 +1305,90 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              asset: assetCreate._id,
+              asset: assetCreate.dataValues._id,
             });
+          }
+          //case1 สร้างแยก
+          let dataInsertAssetMaster = {
+            ItemCode: bottomSubComponentDataObject[i].assetNumber,
+            ItemName: bottomSubComponentDataObject[i].productName,
+            ItemType: "itFixedAssets",
+            AssetClass: AssetClass,
+          };
+          console.log("dataInsertAssetMaster", dataInsertAssetMaster);
+          const responseCreateAssetMaster = await sapAssetMasterService.create(
+            dataInsertAssetMaster,
+            sessionId
+          );
+          if (
+            depreciationStartDate &&
+            depreciationRegisterDate &&
+            depreciationReceivedDate
+          ) {
+            let dataInsertCapitalization = {
+              PostingDate: depreciationStartDate.split("T")[0],
+              DocumentDate: depreciationStartDate.split("T")[0],
+              AssetValueDate: depreciationStartDate.split("T")[0],
+              BPLId: "1",
+              Remarks: "Capitalization Asset",
+              AssetDocumentLineCollection: [
+                {
+                  AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                  Quantity: 1,
+                  TotalLC: parseInt(bottomSubComponentDataObject[i].price),
+                },
+              ],
+              AssetDocumentAreaJournalCollection: [
+                {
+                  DepreciationArea: "TFRS",
+                  JournalRemarks: "Capitalization-Test",
+                },
+              ],
+            };
+            console.log("dataInsertCapitalization", dataInsertCapitalization);
+
+            const responseCreateCapitalization =
+              await sapCapitalizationService.create(
+                dataInsertCapitalization,
+                sessionId
+              );
+            console.log(
+              "responseCreateCapitalization : ",
+              responseCreateCapitalization
+            );
+            await Asset.update(
+              {
+                sapDocEntry: responseCreateCapitalization.data.DocEntry,
+              },
+              {
+                where: {
+                  _id: assetCreate.dataValues._id,
+                },
+              }
+            );
+          }
+          if (distributeStatus === true) {
+            let dataInsertRetirement = {
+              PostingDate: distributeDocumentDate.split("T")[0],
+              DocumentDate: distributeDocumentDate.split("T")[0],
+              AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+              DocumentType: "adtScrapping",
+              BPLId: "1",
+              Remarks: "Retiremant on Asset Management System",
+              AssetDocumentLineCollection: [
+                {
+                  AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                },
+              ],
+            };
+            const responseCreateRetirement = await sapRetirementService.create(
+              dataInsertRetirement,
+              sessionId
+            );
+            console.log(
+              "responseCreateRetirement : ",
+              responseCreateRetirement
+            );
           }
         }
       });
@@ -1170,26 +1520,25 @@ exports.updatePackageAsset = async (req, res, next) => {
     packageAssetById.replacedAssetNumber = replacedAssetNumber;
 
     //สัญญาจัดซื้อ
-    packageAssetById.purchaseContract.acquisitionMethod = acquisitionMethod;
-    packageAssetById.purchaseContract.moneyType = moneyType;
-    packageAssetById.purchaseContract.deliveryDocument = deliveryDocument;
-    packageAssetById.purchaseContract.contractNumber = contractNumber;
-    packageAssetById.purchaseContract.receivedDate = receivedDate;
-    packageAssetById.purchaseContract.seller = seller;
-    packageAssetById.purchaseContract.price = price;
-    packageAssetById.purchaseContract.billNumber = billNumber;
-    packageAssetById.purchaseContract.purchaseYear = purchaseYear;
-    packageAssetById.purchaseContract.purchaseDate = purchaseDate;
-    packageAssetById.purchaseContract.documentDate = documentDate;
+    packageAssetById.acquisitionMethod = acquisitionMethod;
+    packageAssetById.moneyType = moneyType;
+    packageAssetById.deliveryDocument = deliveryDocument;
+    packageAssetById.contractNumber = contractNumber;
+    packageAssetById.receivedDate = receivedDate;
+    packageAssetById.seller = seller;
+    packageAssetById.price = price;
+    packageAssetById.billNumber = billNumber;
+    packageAssetById.purchaseYear = purchaseYear;
+    packageAssetById.purchaseDate = purchaseDate;
+    packageAssetById.documentDate = documentDate;
 
     // การจำหน่าย
-    packageAssetById.distribution.salesDocument = salesDocument;
-    packageAssetById.distribution.distributeDocumentDate =
-      distributeDocumentDate;
-    packageAssetById.distribution.distributeApprovalReleaseDate =
+    packageAssetById.salesDocument = salesDocument;
+    packageAssetById.distributeDocumentDate = distributeDocumentDate;
+    packageAssetById.distributeApprovalReleaseDate =
       distributeApprovalReleaseDate;
-    packageAssetById.distribution.distributeStatus = distributeStatus;
-    packageAssetById.distribution.distributionNote = distributionNote;
+    packageAssetById.distributeStatus = distributeStatus;
+    packageAssetById.distributionNote = distributionNote;
 
     // ค่าเสื่อม
     packageAssetById.depreciationStartDate = depreciationStartDate;
@@ -1198,12 +1547,6 @@ exports.updatePackageAsset = async (req, res, next) => {
     packageAssetById.depreciationPrice = depreciationPrice;
     packageAssetById.depreciationYearUsed = depreciationYearUsed;
     packageAssetById.depreciationCarcassPrice = depreciationCarcassPrice;
-    packageAssetById.depreciationProcess = depreciationProcess;
-    packageAssetById.depreciationPresentMonth = depreciationPresentMonth;
-    packageAssetById.depreciationCumulativePrice = depreciationCumulativePrice;
-    packageAssetById.depreciationYearPrice = depreciationYearPrice;
-    packageAssetById.depreciationRemainPrice = depreciationRemainPrice;
-    packageAssetById.depreciationBookValue = depreciationBookValue;
 
     // ค่าเสื่อมรายปี
     packageAssetById.accumulateDepreciationStartDate =
@@ -1217,18 +1560,6 @@ exports.updatePackageAsset = async (req, res, next) => {
       accumulateDepreciationYearUsed;
     packageAssetById.accumulateDepreciationCarcassPrice =
       accumulateDepreciationCarcassPrice;
-    packageAssetById.accumulateDepreciationProcess =
-      accumulateDepreciationProcess;
-    packageAssetById.accumulateDepreciationPresentMonth =
-      accumulateDepreciationPresentMonth;
-    packageAssetById.accumulateDepreciationCumulativePrice =
-      accumulateDepreciationCumulativePrice;
-    packageAssetById.accumulateDepreciationYearPrice =
-      accumulateDepreciationYearPrice;
-    packageAssetById.accumulateDepreciationRemainPrice =
-      accumulateDepreciationRemainPrice;
-    packageAssetById.accumulateDepreciationBookValue =
-      accumulateDepreciationBookValue;
 
     packageAssetById.reserved = reserved;
     console.log("bottomSubComponentDataArray", bottomSubComponentDataObject);
@@ -1262,17 +1593,192 @@ exports.updatePackageAsset = async (req, res, next) => {
         });
       }
     } else {
-      for (let el of bottomSubComponentDataObject) {
-        // console.log(el._id)
-        // console.log(el.serialNumber)
-        // console.log(el.pricePerUnit)
-        // console.log(el.asset01)
-        let assetById = await Asset.findByPk(el._id);
+      const responseLogin = await sapAuthService.login();
+      let sessionId = responseLogin.data.SessionId;
+      if (
+        packageAssetById.sapDocEntry &&
+        depreciationStartDate &&
+        depreciationRegisterDate &&
+        depreciationReceivedDate
+      ) {
+        const responseLogin = await sapAuthService.login();
+        sessionId = responseLogin.data.SessionId;
+        let dataInsertCapitalization = {
+          PostingDate: depreciationStartDate.split("T")[0],
+          DocumentDate: depreciationStartDate.split("T")[0],
+          AssetValueDate: depreciationStartDate.split("T")[0],
+          BPLId: "1",
+          Remarks: "Capitalization",
+          AssetDocumentLineCollection: [
+            {
+              AssetNumber: packageAssetById.assetNumber,
+              Quantity: 1,
+              TotalLC: parseInt(packageAssetById.price),
+            },
+          ],
+          AssetDocumentAreaJournalCollection: [
+            {
+              DepreciationArea: "TFRS",
+              JournalRemarks: "Capitalization-Test",
+            },
+          ],
+        };
+        console.log("dataInsertCapitalization", dataInsertCapitalization);
+
+        const responseCreateCapitalization =
+          await sapCapitalizationService.create(
+            dataInsertCapitalization,
+            sessionId
+          );
+        console.log(
+          "responseCreateCapitalization : ",
+          responseCreateCapitalization
+        );
+        await PackageAsset.update(
+          {
+            sapDocEntry: responseCreateCapitalization.data.DocEntry,
+          },
+          {
+            where: {
+              _id: packageAssetId,
+            },
+          }
+        );
+      }
+      if (distributeStatus === true) {
+        const responseLogin = await sapAuthService.login();
+        sessionId = responseLogin.data.SessionId;
+        let dataInsertRetirement = {
+          PostingDate: distributeDocumentDate.split("T")[0],
+          DocumentDate: distributeDocumentDate.split("T")[0],
+          AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+          DocumentType: "adtScrapping",
+          BPLId: "1",
+          Remarks: "Retirement on Asset Management System",
+          AssetDocumentLineCollection: [
+            {
+              AssetNumber: packageAssetById.assetNumber,
+            },
+          ],
+        };
+        const responseCreateRetirement = await sapRetirementService.create(
+          dataInsertRetirement,
+          sessionId
+        );
+        console.log("responseCreateRetirement : ", responseCreateRetirement);
+      }
+
+      await BottomSubComponentDataPkAsset.destroy({
+        where: { packageAssetId: packageAssetId },
+      });
+      for (let i = 0; i < bottomSubComponentDataObject.length; i++) {
+        await BottomSubComponentDataPkAsset.create({
+          packageAssetId: packageAssetId,
+          serialNumber: bottomSubComponentDataObject[i].serialNumber,
+          productName: bottomSubComponentDataObject[i].productName,
+          assetNumber: bottomSubComponentDataObject[i].assetNumber,
+          sector: bottomSubComponentDataObject[i].sector,
+          price: bottomSubComponentDataObject[i].price,
+          asset01: bottomSubComponentDataObject[i].asset01,
+        });
+        let assetById = await Asset.findByPk(
+          bottomSubComponentDataObject[i]._id
+        );
         // console.log(assetById)
-        assetById.serialNumber = el.serialNumber;
-        assetById.pricePerUnit = el.pricePerUnit;
-        assetById.asset01 = el.asset01;
+        assetById.serialNumber = bottomSubComponentDataObject[i].serialNumber;
+        assetById.pricePerUnit = bottomSubComponentDataObject[i].pricePerUnit;
+        assetById.asset01 = bottomSubComponentDataObject[i].asset01;
         assetById.save();
+        // ลงทะเบียนค่าเสื่อม
+        if (
+          packageAssetById.sapDocEntry == null &&
+          depreciationStartDate &&
+          depreciationRegisterDate &&
+          depreciationReceivedDate
+        ) {
+          let dataInsertCapitalization = {
+            PostingDate: depreciationStartDate.split("T")[0],
+            DocumentDate: depreciationStartDate.split("T")[0],
+            AssetValueDate: depreciationStartDate.split("T")[0],
+            BPLId: "1",
+            Remarks: "Capitalization",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                Quantity: 1,
+                TotalLC: parseInt(bottomSubComponentDataObject[i].price),
+              },
+            ],
+            AssetDocumentAreaJournalCollection: [
+              {
+                DepreciationArea: "TFRS",
+                JournalRemarks: "Capitalization-Test",
+              },
+            ],
+          };
+          console.log("dataInsertCapitalization", dataInsertCapitalization);
+
+          const responseCreateCapitalization =
+            await sapCapitalizationService.create(
+              dataInsertCapitalization,
+              sessionId
+            );
+          console.log(
+            "responseCreateCapitalization : ",
+            responseCreateCapitalization
+          );
+          await Asset.update(
+            {
+              sapDocEntry: responseCreateCapitalization.data.DocEntry,
+            },
+            {
+              where: {
+                assetNumber: bottomSubComponentDataObject[i].assetNumber,
+              },
+            }
+          );
+        }
+        //ตัดจำหน่าย
+        if (distributeStatus === true) {
+          let dataInsertRetirement = {
+            PostingDate: distributeDocumentDate.split("T")[0],
+            DocumentDate: distributeDocumentDate.split("T")[0],
+            AssetValueDate: distributeApprovalReleaseDate.split("T")[0],
+            DocumentType: "adtScrapping",
+            BPLId: "1",
+            Remarks: "Retirement on Asset Management System",
+            AssetDocumentLineCollection: [
+              {
+                AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+              },
+            ],
+          };
+          const responseCreateRetirement = await sapRetirementService.create(
+            dataInsertRetirement,
+            sessionId
+          );
+          console.log("responseCreateRetirement : ", responseCreateRetirement);
+        }
+      }
+      if (distributeStatus === true) {
+        let dataInsertRetirement = {
+          PostingDate: dateNow,
+          DocumentDate: dateNow,
+          AssetValueDate: dateNow,
+          DocumentType: "adtScrapping",
+          BPLId: "1",
+          Remarks: "Retirement on Asset Management System",
+          AssetDocumentLineCollection: [
+            {
+              AssetNumber: packageAssetById.assetNumber,
+            },
+          ],
+        };
+        const responseCreateRetirement = await sapRetirementService.create(
+          dataInsertRetirement,
+          sessionId
+        );
+        console.log("responseCreateRetirement : ", responseCreateRetirement);
       }
     }
     await packageAssetById.save();
@@ -1325,20 +1831,8 @@ exports.deletePackageAsset = async (req, res, next) => {
         where: { _id: packageAssetId },
         include: [{ model: Asset, as: "assets" }],
       });
-      //   const packageAsset = await PackageAsset.aggregate([
-      //     { $match: { _id: ObjectID(packageAssetId) } },
-      //     {
-      //       $lookup: {
-      //         from: "assets",
-      //         localField: "_id",
-      //         foreignField: "packageAssetId",
-      //         as: "asset",
-      //       },
-      //     },
-      //   ]);
 
       const assets = packageAsset[0].assets;
-
       if (assets.length > 0) {
         for (el of assets) {
           let assetId = el._id;
@@ -1350,7 +1844,6 @@ exports.deletePackageAsset = async (req, res, next) => {
           );
         }
       }
-
       // change delete function
       await PackageAsset.update(
         { reason: reason, deletedAt: new Date() },

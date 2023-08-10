@@ -6,6 +6,7 @@ const cors = require("cors");
 const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 // const authRoute = require("./route/authRoutes");
 const packageAssetRoute = require("./route/packageAssetRoute");

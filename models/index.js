@@ -87,6 +87,7 @@ db.transferHasPkAsset = require("./transferHasPkAssetModel")(
   Sequelize
 );
 db.transfer = require("./transferModel")(sequelize, Sequelize);
+db.transferHistory = require("./transferHistoryModel")(sequelize, Sequelize);
 db.type4 = require("./type4Model")(sequelize, Sequelize);
 db.type8 = require("./type8Model")(sequelize, Sequelize);
 db.type13 = require("./type13Model")(sequelize, Sequelize);
@@ -190,6 +191,11 @@ db.transfer.hasMany(db.transferHasAsset, {
 });
 db.transfer.hasMany(db.transferHasPkAsset, {
   as: "transferHasPkAssets",
+  foreignKey: { name: "transferId", field: "transferId" },
+  onDelete: "cascade",
+});
+db.transfer.hasMany(db.transferHistory, {
+  as: "transferHasHistory",
   foreignKey: { name: "transferId", field: "transferId" },
   onDelete: "cascade",
 });
@@ -303,6 +309,9 @@ db.subComponentTransfer.belongsTo(db.transfer, {
   foreignKey: "transferId",
 });
 db.transferHasAsset.belongsTo(db.transfer, {
+  foreignKey: "transferId",
+});
+db.transferHistory.belongsTo(db.transfer, {
   foreignKey: "transferId",
 });
 db.transferHasAsset.belongsTo(db.asset, {

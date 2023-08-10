@@ -103,8 +103,8 @@ exports.getAssetBySearch = async (req, res, next) => {
 exports.getRepairBySearch = async (req, res, next) => {
   try {
     // for 2 field search
-    const typeTextSearch = req.query.typeTextSearch || "";
-    const textSearch = req.query.textSearch || "";
+    const informRepairIdDoc = req.query.informRepairIdDoc || "";
+    const assetNumber = req.query.assetNumber || "";
     const listTypeOfRepair =
       req.query.listTypeOfRepair ||
       "general,asset,project,computer,medicalEquipment";
@@ -113,8 +113,11 @@ exports.getRepairBySearch = async (req, res, next) => {
 
     let query = {};
 
-    if (textSearch !== "") {
-      query[typeTextSearch] = { [Op.iLike]: `%${textSearch}%` };
+    if (informRepairIdDoc !== "") {
+      query[informRepairIdDoc] = { [Op.iLike]: `%${textSearch}%` };
+    }
+    if (informRepairIdDoc !== "") {
+      query[assetNumber] = { [Op.iLike]: `%${textSearch}%` };
     }
 
     if (status !== "") {

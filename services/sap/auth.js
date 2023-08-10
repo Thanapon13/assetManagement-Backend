@@ -3,9 +3,9 @@ const https = require("https");
 const fs = require("fs");
 const { RequestError } = require("tedious");
 
-const agent = new https.Agent({
-  rejectUnauthorized: false,
-});
+// const agent = new https.Agent({
+//   rejectUnauthorized: false,
+// });
 
 async function login() {
   try {
@@ -13,14 +13,14 @@ async function login() {
       method: "post",
       url: "https://203.154.157.31:50000/b1s/v1/Login",
       responseType: "json",
-      timeout: 2000,
-      Headers: {},
+      // timeout: 5000,
+      // Headers: {},
       data: {
         CompanyDB: process.env.SAP_COMPANYDB,
         UserName: process.env.SAP_USERNAME,
         Password: process.env.SAP_PASSWORD,
       },
-      httpsAgent: agent,
+      // httpsAgent: agent,
     });
     // console.error("Error fetching data from API:", response);
     return response;

@@ -5,10 +5,9 @@ exports.createType = async (req, res, next) => {
   try {
     const { typeArray } = req.body;
     // const typeArrayObject = typeArray;
-    const typeArrayObject = JSON.parse(typeArray);
     const resType = [];
 
-    for (let el of typeArrayObject) {
+    for (let el of typeArray) {
       try {
         let type = await Type.create({
           name: el.name,
@@ -41,11 +40,10 @@ exports.updateType = async (req, res, next) => {
   try {
     const { typeArray } = req.body;
     // const typeArrayObject = typeArray;
-    const typeArrayObject = JSON.parse(typeArray);
     const resType = [];
 
-    for (let i = 0; i < typeArrayObject.length; i++) {
-      const { _id, name, value } = typeArrayObject[i];
+    for (let i = 0; i < typeArray.length; i++) {
+      const { _id, name, value } = typeArray[i];
       const type = await Type.findByPk(_id);
 
       if (!type) {

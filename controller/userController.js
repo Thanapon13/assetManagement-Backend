@@ -1,16 +1,13 @@
-const { user, role, Sequelize } = require("../models");
+const { user, role, accessScreen, Sequelize } = require("../models");
 const createError = require("../utils/createError");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const fs = require("fs");
 var nodemailer = require("nodemailer");
+var verfifyAndTokenService = require("../services/authService.js/verifyAndTokenService");
+const jwt = require("jsonwebtoken");
 
-const generateToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  });
-};
+let refreshTokenArray = [];
 
 exports.getAllUsers = async (req, res, next) => {
   try {
@@ -26,18 +23,18 @@ exports.getSectorForSearch = async (req, res, next) => {
     const sectors = await user.findAll({
       attributes: [
         "sector",
-        [Sequelize.fn("COUNT", Sequelize.col("sector")), "numberOfzipcodes"]
+        [Sequelize.fn("COUNT", Sequelize.col("sector")), "numberOfzipcodes"],
       ],
       where: {
         deletedAt: null,
         sector: {
           [Sequelize.Op.ne]: null,
-          [Sequelize.Op.ne]: ""
-        }
+          [Sequelize.Op.ne]: "",
+        },
       },
       group: ["sector"],
       raw: true,
-      order: [["sector", "ASC"]]
+      order: [["sector", "ASC"]],
     });
 
     res.json({ sectors });
@@ -54,8 +51,8 @@ exports.getUserRepairDropdown = async (req, res, next) => {
         "thaiFirstName",
         "thaiLastName",
         "sector",
-        "phoneNumber"
-      ]
+        "phoneNumber",
+      ],
     });
 
     res.status(200).json({ user: userData });
@@ -87,7 +84,7 @@ exports.getBySearch = async (req, res, next) => {
       where,
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit
+      limit,
     });
 
     const total = users.count;
@@ -107,8 +104,8 @@ exports.getUserById = async (req, res, next) => {
       attributes: { exclude: ["password"] },
       include: {
         model: role,
-        as: "userRole"
-      }
+        as: "userRole",
+      },
     });
     res.status(200).json({ userData });
   } catch (err) {
@@ -123,7 +120,7 @@ exports.createUser = async (req, res, next) => {
     console.log(" input.username:", input.username);
 
     const checkUser = await user.findOne({
-      where: { username: input.username }
+      where: { username: input.username },
     });
 
     if (checkUser) {
@@ -190,7 +187,7 @@ exports.createUser = async (req, res, next) => {
       level,
       note,
       status,
-      roleId
+      roleId,
     } = input;
 
     // console.log("input:", input);
@@ -198,15 +195,15 @@ exports.createUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     // console.log("hashedPassword:", hashedPassword);
 
-    const roleData = await role.findOne({
-      where: {
-        _id: roleId
-      }
-    });
-    console.log("roleData:", roleData);
+    // const roleData = await role.findOne({
+    //   where: {
+    //     _id: roleId,
+    //   },
+    // });
+    // console.log("roleData:", roleData);
 
-    const roleDataId = roleData.dataValues._id;
-    console.log("roleDataId:", roleDataId);
+    // const roleDataId = roleData.dataValues._id;
+    // console.log("roleDataId:", roleDataId);
 
     const createUser = await user.create({
       thaiPrefix,
@@ -268,7 +265,7 @@ exports.createUser = async (req, res, next) => {
       level,
       note,
       status,
-      roleId: roleDataId
+      roleId,
     });
 
     res.status(200).json({ createUser });
@@ -344,21 +341,21 @@ exports.updateUser = async (req, res, next) => {
       level,
       note,
       status,
-      roleId
+      roleId,
     } = input;
 
     const userById = await user.findOne({
       where: { _id: userId },
       attributes: { exclude: ["password"] },
-      include: [{ model: role, as: "TBM_ROLE" }]
+      include: [{ model: role, as: "TBM_ROLE" }],
     });
     console.log("userById:", userById);
     // console.log("input:", input);
 
     const roleData = await role.findOne({
       where: {
-        _id: roleId
-      }
+        _id: roleId,
+      },
     });
     console.log("roleData:", roleData);
 
@@ -450,13 +447,19 @@ exports.login = async (req, res, next) => {
           "dateTimeUpdatePassword",
           "PACSDateTime",
           "lastRevisionDateTime",
-          "note"
-        ]
+          "note",
+        ],
       },
-      include: {
-        model: role,
-        as: "userRole"
-      }
+      include: [
+        {
+          model: role,
+          as: "TB_ROLE",
+        },
+      ],
+    });
+
+    const accessScreenData = await accessScreen.findAll({
+      where: { roleId: userData.TB_ROLE._id },
     });
 
     if (!userData) {
@@ -470,24 +473,27 @@ exports.login = async (req, res, next) => {
       const a = delete userData.dataValues.password;
       console.log("a:", a);
 
-      const token = generateToken({ userData });
+      const token = verfifyAndTokenService.generateAccessToken(userData,accessScreenData);
+      const refreshToken =
+        verfifyAndTokenService.generateRefreshToken(userData,accessScreenData);
       console.log("token:", token);
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("decoded", decoded);
+      // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // console.log("decoded", decoded);
 
       userData.dataValues.lastLoginDate = new Date();
       await userData.save();
 
       res.status(200).json({
-        _id: user.id,
-        email: user.email,
-        // role: user.roleId.roleName,
-        // screen: user.roleId.accessScreen,
-        token
+        _id: userData._id,
+        email: userData.email,
+        role: userData.TB_ROLE,
+        screen: accessScreenData,
+        token,
+        refreshToken,
       });
     } else {
-      createError("invalid credential", 401);
+      createError("invalid password", 401);
     }
   } catch (err) {
     next(err);
@@ -504,9 +510,9 @@ exports.resetPassword = async (req, res, next) => {
 
     const userData = await user.findOne({
       where: {
-        _id: userId
+        _id: userId,
       },
-      attributes: ["password"]
+      attributes: ["password"],
     });
     console.log("userData:", userData);
 
@@ -518,12 +524,12 @@ exports.resetPassword = async (req, res, next) => {
     // await userData.save();
     await user.update(
       {
-        password: hashedPassword
+        password: hashedPassword,
       },
       {
         where: {
-          _Id: userId
-        }
+          _Id: userId,
+        },
       }
     );
     res.status(400).json({ message: "resetPassword success" });
@@ -562,7 +568,7 @@ exports.verifyEmail = async (req, res, next) => {
 
     const userData = await user.findOne({
       where: { email },
-      attributes: ["_id", "email"]
+      attributes: ["_id", "email"],
     });
     console.log("userData:", userData);
 
@@ -588,8 +594,8 @@ function sendEmail(Email, link, userId) {
     service: "gmail",
     auth: {
       user: myemail,
-      pass: passemail
-    }
+      pass: passemail,
+    },
   });
   let from = `Panacea Plus ${myemail}`;
 
@@ -603,13 +609,13 @@ function sendEmail(Email, link, userId) {
       {
         filename: "background.jpg",
         path: "./image/background.jpg",
-        cid: "background" //same cid value as in the html img src
+        cid: "background", //same cid value as in the html img src
       },
       {
         filename: "icon.png",
         path: "./image/icon.png",
-        cid: "icon" //same cid value as in the html img src
-      }
+        cid: "icon", //same cid value as in the html img src
+      },
     ],
     html:
       ` <html>
@@ -678,7 +684,7 @@ function sendEmail(Email, link, userId) {
     </div>
     </body>
     </html>
-    ` // html body
+    `, // html body
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
@@ -688,3 +694,25 @@ function sendEmail(Email, link, userId) {
     }
   });
 }
+
+exports.logout = (req, res) => {
+  console.log(refreshTokens);
+  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  res.status(204);
+};
+
+exports.RefreshToken = (req, res) => {
+  const refreshtoken = req.body.token;
+  console.log("refresh token working");
+
+  if (!refreshtoken) {
+    return res.status(403).send("A token is required");
+  }
+  const responseVerify = verfifyAndTokenService.verify(refreshtoken);
+  console.log("responseVerify", responseVerify);
+  // jwt.verify(refreshtoken, process.env.REFRESH_TOKEN, (err, user) => {
+  //   if (err) return res.status(401).send("Invalid Token");
+  //   const accesstoken =  verfifyAndTokenService(user.user_id);
+  //   return res.send({ token: accesstoken });
+  // });
+};

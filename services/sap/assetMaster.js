@@ -1,89 +1,73 @@
 const axios = require("axios");
-const https = require("https");
+// const https = require("https");
 
-const agent = new https.Agent({
-  rejectUnauthorized: false,
-});
+// const agent = new https.Agent({
+//   rejectUnauthorized: false,
+// });
 
+// process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 async function create(data, sessionId, routeId) {
   try {
     const response = await axios({
       method: "post",
       url: "https://203.154.157.31:50000/b1s/v1/Items",
-      timeout: 3000,
-      Headers: {
+      // timeout: 5000,
+      headers: {
         // Path=/bts/v1; Secure; HttpOnly;
         // ROUTEID=.node0
-        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node9`,
+        "Content-Type": "application/json",
+        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
       },
-      data: {
+      data: JSON.stringify({
         ItemCode: data.ItemCode,
         ItemName: data.ItemName,
         ItemType: data.ItemType,
         AssetClass: data.AssetClass,
-      },
-      httpsAgent: agent,
+      }),
+
+      // httpsAgent: agent,
     });
     return response;
   } catch (error) {
-    console.error("Error fetching data from API:", error);
+    console.error("Error Create AssetMaster data from API:", error);
     throw error;
   }
 }
 
-async function view(data, sessionId) {
+async function cancel(data, sessionId, routeId) {
   try {
     const response = await axios({
-      method: "get",
-      url: "https://203.154.157.31:50000/b1s/v1/Items",
-      responseType: "json",
-      timeout: 1000,
-      Headers: {
-        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
+      method: "post",
+      url: `https://203.154.157.31:50000/b1s/v1/Items(${data})/Cancel`,
+      // timeout: 5000,
+      headers: {
         "Content-Type": "application/json",
-        Connection: "keep-alive",
+        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
       },
-      params: {
-        $filter: data.query,
-      },
-      httpsAgent: agent,
     });
     return response;
   } catch (error) {
-    console.error("Error fetching data from API:", error.message);
+    console.error("Error Cancel AssetMaster data from API:", error);
     throw error;
   }
 }
 
-// function update(data, sessionId) {
-//     axios({
-//       method: "get",
-//       url: "https://203.154.157.31:50000/b1s/v1/Items",
-//       responseType: "json",
-//       timeout: 1000,
-//       Headers: {
-//         Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
-//         "Content-Type": "application/json",
-//         Connection: "keep-alive",
-//       },
-//       params: {
-//         $filter: data.query,
-//       },
-//       data: {
-//         ItemCode: data.ItemCode,
-//         ItemName: data.ItemName,
-//         ItemType: data.ItemType,
-//         AssetClass: data.AssetClass,
-//       },
-//     })
-//       .then(function (response) {
-//         console.log("response", response);
-//         return false, response;
-//       })
-//       .catch(function (err) {
-//         console.log("err", err);
-//         return true, err;
-//       });
-//   }
+async function delete_assetMaster(data, sessionId, routeId) {
+  try {
+    const response = await axios({
+      method: "delete",
+      url: `https://203.154.157.31:50000/b1s/v1/Items(${data})`,
+      // timeout: 5000,
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error Delete AssetMaster data from API:", error);
+    throw error;
+  }
+}
 
-module.exports = { create, view };
+module.exports = { create, cancel, delete_assetMaster };

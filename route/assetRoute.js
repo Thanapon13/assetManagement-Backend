@@ -48,6 +48,10 @@ router.get(
 );
 
 router.get("/searchQuantitySelector", assetController.getQuantitySelector);
+router.get(
+  "/getDepreciationByAssetNumber",
+  assetController.getDepreciationByAssetNumber
+);
 
 router.get("/:assetId", assetController.getAssetById);
 
