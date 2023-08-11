@@ -152,6 +152,17 @@ db.borrow.hasMany(db.subComponentBorrow, {
   foreignKey: { name: "borrowId", field: "borrowId" },
   onDelete: "cascade",
 });
+
+db.asset.hasMany(db.borrowHasAsset, {
+  as: "borrowHasAssetsData",
+  foreignKey: { name: "assetId", field: "assetId" },
+  onDelete: "cascade",
+});
+db.pkAsset.hasMany(db.borrowHasPkAsset, {
+  as: "borrowHasPkAssetsData",
+  foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+  onDelete: "cascade",
+});
 /////////  feat : pkAsset
 db.pkAsset.hasMany(db.asset, {
   as: "assets",
@@ -293,8 +304,10 @@ db.assetDocument.belongsTo(db.asset, { foreignKey: "assetId" });
 db.assetImage.belongsTo(db.asset, { foreignKey: "assetId" });
 db.asset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 /////////  feat : borrow
+db.borrowHasAsset.belongsTo(db.asset, { foreignKey: "assetId" });
 db.borrowHasAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
 db.borrowHasPkAsset.belongsTo(db.borrow, { foreignKey: "borrowId" });
+db.borrowHasPkAsset.belongsTo(db.pkAsset, { foreignKey: "packageAssetId" });
 db.borrowImage.belongsTo(db.borrow, { foreignKey: "borrowId" });
 db.subComponentBorrow.belongsTo(db.borrow, { foreignKey: "borrowId" });
 /////////  feat : pkAsset
@@ -323,6 +336,7 @@ db.transferHasPkAsset.belongsTo(db.transfer, {
 db.transferHasPkAsset.belongsTo(db.pkAsset, {
   foreignKey: "packageAssetId",
 });
+////// feat : merchant
 db.merchantAddress.belongsTo(db.merchant, {
   foreignKey: "merchantId",
 });

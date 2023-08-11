@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         field: "_id",
       },
       image: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING(200),
         allowNull: false,
         field: "image",
       },

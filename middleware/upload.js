@@ -3,7 +3,7 @@ const multer = require("multer");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // console.log(file, "filemulter");
-    if (file.fieldname === "arrayImage" || file.fieldname === "arrayDocument") {
+    if (file.fieldname === "arrayDocument") {
       cb(null, "public/documents");
     } // console.log(file, "filemulter");
     else {
@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
-  }
+  },
 });
 
 //   module.exports = multer({ storage }).array("file");

@@ -9,7 +9,13 @@ const PackageAssetImage = require("../models").pkAssetImage;
 const PackageAssetDocument = require("../models").pkAssetDocument;
 const BottomSubComponentDataPkAsset =
   require("../models").bottomSubComponentDataPkAsset;
+const Borrow = require("../models").borrow;
+const Transfer = require("../models").transfer;
+
 const SubComponentPkAsset = require("../models").subComponentPkAsset;
+const BorrowhasPkAsset = require("../models").borrowHasPkAsset;
+const TransferhasPkAsset = require("../models").transferHasPkAsset;
+
 const fs = require("fs");
 const moment = require("moment/moment");
 const { ObjectID } = require("bson");
@@ -2135,6 +2141,28 @@ exports.getPackageAssetById = async (req, res, next) => {
           require: false,
 
           as: "subComponentPackageAssets",
+        },
+        {
+          model: BorrowhasPkAsset,
+          require: false,
+          as: "borrowHasPkAssetsData",
+          include: [
+            {
+              model: Borrow,
+              as: "TB_BORROW",
+            },
+          ],
+        },
+        {
+          model: TransferhasPkAsset,
+          require: false,
+          as: "transferHasPkAssetsData",
+          include: [
+            {
+              model: Transfer,
+              as: "TB_TRANSFER",
+            },
+          ],
         },
       ],
     });

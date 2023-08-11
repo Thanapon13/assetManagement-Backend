@@ -5,6 +5,10 @@ const {
   subComponentAsset,
   assetDocument,
   building,
+  transfer,
+  borrow,
+  transferHasAsset,
+  borrowHasAsset,
 } = require("../models");
 const Type = require("../models").type;
 const AssetImage = require("../models").assetImage;
@@ -119,6 +123,8 @@ exports.createAsset = async (req, res, next) => {
 
     const baseArrayImageObj = JSON.parse(baseArrayImage);
     const baseArrayDocumentObj = JSON.parse(baseArrayDocument);
+    const arrayImage = req?.files?.arrayImage || [];
+    const arrayDocument = req?.files?.arrayDocument || [];
 
     // subComponentAsset
     console.log("genDataJSON:", genDataJSON);
@@ -189,7 +195,7 @@ exports.createAsset = async (req, res, next) => {
       console.log("newAssetId:", newAssetId);
 
       for (let i = 0; i < baseArrayImageObj.length; i++) {
-        const roomImage = baseArrayImageObj[i];
+        const roomImage = arrayImage[i];
 
         // console.log("roomImage:", roomImage);
         await assetImage.create({
@@ -200,7 +206,7 @@ exports.createAsset = async (req, res, next) => {
       }
 
       for (let d = 0; d < baseArrayDocumentObj.length; d++) {
-        const documentArray = baseArrayDocumentObj[d];
+        const documentArray = arrayDocument[d];
 
         // console.log("documentArray:", documentArray);
         await assetDocument.create({
@@ -284,7 +290,7 @@ exports.createAsset = async (req, res, next) => {
         console.log("newAssetId:", newAssetId);
 
         for (let j = 0; j < baseArrayImageObj.length; j++) {
-          const roomImage = baseArrayImageObj[j];
+          const roomImage = arrayImage[quantity * j + i];
           console.log("roomImage:", roomImage);
           await assetImage.create({
             image: roomImage.filename,
@@ -293,7 +299,7 @@ exports.createAsset = async (req, res, next) => {
         }
 
         for (let j = 0; j < baseArrayDocumentObj.length; j++) {
-          const documentArray = baseArrayDocumentObj[j];
+          const documentArray = arrayDocument[quantity * j + i];
 
           await assetDocument.create({
             document: documentArray.filename,
@@ -595,90 +601,7 @@ exports.getAssetById = async (req, res, next) => {
   // เหลือ join transfer,borrow
   try {
     const assetId = req.params.assetId;
-    // const assetData = await asset.aggregate([
-    //   { $match: { _id: ObjectID(assetId) } },
-    //   // {
-    //   //   $lookup: {
-    //   //     from: "borrows",
-    //   //     localField: "_id",
-    //   //     foreignField: "assetIdArray.assetId",
-    //   //     as: "BorrowHistory",
-    //   //   },
-    //   // },
-    //   {
-    //     $lookup: {
-    //       from: "borrows",
-    //       let: { assetIds: "$_id" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [{ $in: ["$$assetIds", "$assetIdArray.assetId"] }],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $sort: {
-    //             borrowDate: -1,
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             borrowIdDoc: 1,
-    //             handler: 1,
-    //             sector: 1,
-    //             borrowDate: 1,
-    //             borrowSetReturnDate: 1,
-    //             borrowReturnDate: 1,
-    //             status: 1,
-    //           },
-    //         },
-    //       ],
-    //       as: "borrowHistory",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "transfers",
-    //       let: { assetIds: "$_id" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $in: ["$$assetIds", "$assetIdArray.assetId"] },
-    //                 {
-    //                   $or: [
-    //                     {
-    //                       $eq: ["$status", "done"],
-    //                     },
-    //                     {
-    //                       $eq: ["$status", "approve"],
-    //                     },
-    //                   ],
-    //                 },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $sort: {
-    //             createdAt: -1,
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             building: 1,
-    //             floor: 1,
-    //             room: 1,
-    //             createdAt: 1,
-    //           },
-    //         },
-    //       ],
-    //       as: "tranferHistory",
-    //     },
-    //   },
-    // ]);
+
     const assetData = await asset.findOne({
       where: {
         _id: assetId,
@@ -688,6 +611,38 @@ exports.getAssetById = async (req, res, next) => {
           model: assetImage,
           require: false,
           as: "assetImages",
+        },
+        {
+          model: assetDocument,
+          require: false,
+          as: "assetDocuments",
+        },
+        {
+          model: subComponentAsset,
+          require: false,
+          as: "subComponentAssets",
+        },
+        {
+          model: borrowHasAsset,
+          require: false,
+          as: "borrowHasAssetsData",
+          include: [
+            {
+              model: borrow,
+              as: "TB_BORROW",
+            },
+          ],
+        },
+        {
+          model: transferHasAsset,
+          require: false,
+          as: "transferHasAssets",
+          include: [
+            {
+              model: transfer,
+              as: "TB_TRANSFER",
+            },
+          ],
         },
       ],
       // include: [
@@ -1109,8 +1064,8 @@ exports.updateAsset = async (req, res, next) => {
     // }
     if (assetById.status == "saveDraft" && status == "inStock") {
       //flow like create but delete old
-      let lengthOfBaseImageArray = arrayImage.legth / quantity;
-      let lengthOfBaseDocumentArray = arrayDocument.legth / quantity;
+      let lengthOfBaseImageArray = arrayImage.length / quantity;
+      let lengthOfBaseDocumentArray = arrayDocument.length / quantity;
       let newestRealAssetId = parseInt(assetById.realAssetId) - 1;
       const genDataArray = JSON.parse(genDataJSON);
       const getAssetClass = await Type.findOne({ name: type });
@@ -1375,11 +1330,13 @@ exports.updateAsset = async (req, res, next) => {
     const oldImageArray = await assetImage.findAll({
       where: { assetId: assetId },
     });
-    const oldDocumentArray = assetDocument.findAll({
+    const oldDocumentArray = await assetDocument.findAll({
       where: { assetId: assetId },
     });
 
     console.log("oldImageArray", oldImageArray);
+    console.log("oldDocumentArray", oldDocumentArray);
+
     if (arrayImage.length > 0) {
       for (el of arrayImage) {
         await assetImage.create({

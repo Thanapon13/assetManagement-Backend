@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const subComponentBorrow = sequelize.define(
-    "TB_SUB_COMPONENT_BORROWS ",
+    "TB_SUB_COMPONENT_BORROWS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -35,7 +35,7 @@ module.exports = (sequelize, Sequelize) => {
     },
 
     {
-      tableName: "TB_SUB_COMPONENT_BORROWS ",
+      tableName: "TB_SUB_COMPONENT_BORROWS",
     }
   );
 

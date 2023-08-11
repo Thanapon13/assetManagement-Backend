@@ -5,7 +5,7 @@ const borrowController = require("../controller/borrowController");
 const upload = require("../middleware/upload");
 
 router.post("/create", borrowController.createBorrow);
-// router.patch("/update/:borrowId", borrowController.updateBorrow);
+router.patch("/update/:borrowId", borrowController.updateBorrow);
 
 // router
 //   .route('/')
@@ -56,11 +56,12 @@ router.get("/borrowCheckSector", borrowController.getBorrowCheckSector);
 // router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
 router.patch(
   "/borrowCheckSaving/:borrowId",
+  upload.fields([{ name: "arrayImage" }]),
   borrowController.updateBorrowCheckSavingById
 );
 router.patch(
   "/borrowCheckReturnApprove/:borrowId",
-  upload.fields([{ name: "arrayImage" }]),
+ 
   borrowController.updateBorrowCheckReturnApproveById
 );
 
