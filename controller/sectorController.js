@@ -4,14 +4,12 @@ const createError = require("../utils/createError");
 exports.createSector = async (req, res, next) => {
   try {
     const { sectorArray } = req.body;
-    // const sectorArrayObject = sectorArray;
-    const sectorArrayObject = JSON.parse(sectorArray);
     const resSector = [];
 
-    for (let el of sectorArrayObject) {
+    for (let el of sectorArray) {
       try {
         let sector = await Sector.create({
-          name: el.name,
+          name: el.name
         });
         resSector.push(sector);
       } catch (err) {
@@ -47,7 +45,7 @@ exports.updateSector = async (req, res, next) => {
       }
 
       const existingNameSector = await Sector.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameSector", existingNameSector);
       // console.log("existingNameSector.id", existingNameSector.id);
@@ -69,7 +67,7 @@ exports.updateSector = async (req, res, next) => {
 exports.getAllSector = async (req, res, next) => {
   try {
     const sector = await Sector.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ sector });
   } catch (err) {
@@ -82,8 +80,8 @@ exports.deleteSector = async (req, res, next) => {
     const _id = req.params.sectorId;
     let sector = await Sector.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ message: "delete sector successfully", sector });

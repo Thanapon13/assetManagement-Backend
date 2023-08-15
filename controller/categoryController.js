@@ -4,15 +4,14 @@ const createError = require("../utils/createError");
 exports.createCategory = async (req, res, next) => {
   try {
     const { categoryArray } = req.body;
-    // const categoryArrayObject = categoryArray
-    const categoryArrayObject = JSON.parse(categoryArray);
+
     const resCategory = [];
 
-    for (let el of categoryArrayObject) {
+    for (let el of categoryArray) {
       try {
         let category = await Category.create({
           name: el.name,
-          value: el.value,
+          value: el.value
         });
         resCategory.push(category);
       } catch (err) {
@@ -53,7 +52,7 @@ exports.updateCategory = async (req, res, next) => {
       }
 
       const existingNameCategory = await Category.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameCategory", existingNameCategory);
       // console.log("existingNameCategory.id", existingNameCategory.id);
@@ -62,7 +61,7 @@ exports.updateCategory = async (req, res, next) => {
       }
 
       const existingValueCategory = await Category.findOne({
-        where: { value: value },
+        where: { value: value }
       });
       // console.log("existingValueCategory", existingValueCategory);
 
@@ -87,7 +86,7 @@ exports.updateCategory = async (req, res, next) => {
 exports.getAllCategory = async (req, res, next) => {
   try {
     const category = await Category.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ category });
   } catch (err) {
@@ -100,8 +99,8 @@ exports.deleteCategory = async (req, res, next) => {
     const { _id } = req.body;
     let category = await Category.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ category });
