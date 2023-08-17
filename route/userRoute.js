@@ -11,7 +11,7 @@ router.get("/search", userController.getBySearch);
 router.post("/create", userController.createUser);
 
 router.post("/update/:userId", userController.updateUser);
-router.get("/:userId", protect, userController.getUserById);
+router.get("/:userId", userController.getUserById);
 router.post("/login", userController.login);
 router.post("/refreshToken", userController.RefreshToken);
 router.post("/logout", userController.logout);

@@ -27,12 +27,27 @@ router.get(
 );
 router.get("/searchTopApprove", repairController.getBySearchTopRepairApprove);
 router.get("/searchDetailRecord", repairController.getBySearchOfDetailRecord);
- 
+router.get("/searchHistory", repairController.getBySearchOfHistory);
+
 router.get(
   "/getHistoryThisAssetByAssetId",
   repairController.getHistoryThisAssetByAssetNumber
 );
 router.get("/searchOutsource", repairController.getBySearchOfOutsourceRapair);
+
+router.get(
+  "/getRepairTypeOutsourceForSearchOutsource",
+  repairController.getRepairTypeOutsourceForSearchOutsource
+);
+router.get(
+  "/getBuildingOutsourceForSearchOutsource",
+  repairController.getBuildingOutsourceForSearchOutsource
+);
+router.get(
+  "/getFloorForSearchOutsource",
+  repairController.getFloorForSearchOutsource
+);
+
 router.patch("/delete/:repairId", repairController.deleteRepair);
 router.patch("/offwork/:repairId", repairController.offWorkRepair);
 router.patch("/approveAllWaiting", repairController.approveAllWaitingRepair);

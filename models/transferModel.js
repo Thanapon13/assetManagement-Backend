@@ -30,7 +30,6 @@ module.exports = (sequelize, Sequelize) => {
       transfereeSector: {
         type: Sequelize.STRING(50),
         allowNull: true,
-        unique: true,
         field: "transfereeSector"
       },
       building: {

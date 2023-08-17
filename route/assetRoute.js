@@ -1,6 +1,7 @@
 const express = require("express");
 const assetController = require("../controller/assetController");
 const upload = require("../middleware/upload");
+const protect = require("../middleware/authMiddleware");
 
 // validate
 

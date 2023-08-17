@@ -95,7 +95,7 @@ db.type = require("./typeModel")(sequelize, Sequelize);
 db.merchant = require("./merchantModel")(sequelize, Sequelize);
 db.merchantAddress = require("./merchantAddressModel")(sequelize, Sequelize);
 db.merchantRelation = require("./merchantRelationModel")(sequelize, Sequelize);
-db.merchantDocumentArray = require("./merchantDocumentArrayModel")(
+db.merchantDocumentArray = require("./merchantDocumentModel")(
   sequelize,
   Sequelize
 );
@@ -275,15 +275,16 @@ db.repair.hasMany(db.costOfRepairMan, {
 });
 db.asset.hasOne(db.repair, {
   as: "repairAssetId",
-  // foreignKey: "assetId",
-  foreignKey: { name: "assetId", field: "assetId" },
-  onDelete: "cascade",
+  foreignKey: "assetId",
+  constraints: false,
+  // foreignKey: { name: "assetId", field: "assetId" },
 });
-// db.pkAsset.hasOne(db.repair, {
-//   // as: "repairPackageAssetId",
-//   foreignKey: "packageAssetId",
-//   onDelete: "cascade",
-// });
+db.pkAsset.hasOne(db.repair, {
+  as: "repairPackageAssetId",
+  foreignKey: "packageAssetId",
+  constraints: false,
+  // foreignKey: { name: "packageAssetId", field: "packageAssetId" },
+});
 // feat : Role
 // db.role.hasMany(db.user, {
 //   as: "roleId",
@@ -351,11 +352,16 @@ db.costOfRepair.belongsTo(db.repair, {
   foreignKey: "repairId",
 });
 db.repair.belongsTo(db.asset, {
+  as: "repairAssetId",
   foreignKey: "assetId",
+  constraints: false,
 });
-// db.repair.belongsTo(db.pkAsset, {
-//   foreignKey: "packageAssetId",
-// });
+
+db.repair.belongsTo(db.pkAsset, {
+  as: "repairPackageAssetId",
+  foreignKey: "packageAssetId",
+  constraints: false,
+});
 db.merchantRelation.belongsTo(db.merchant, {
   foreignKey: "merchantId",
 });

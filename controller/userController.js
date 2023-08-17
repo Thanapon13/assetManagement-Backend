@@ -104,7 +104,7 @@ exports.getUserById = async (req, res, next) => {
       attributes: { exclude: ["password"] },
       include: {
         model: role,
-        as: "userRole",
+        as: "TB_ROLE",
       },
     });
     res.status(200).json({ userData });
@@ -454,17 +454,17 @@ exports.login = async (req, res, next) => {
         {
           model: role,
           as: "TB_ROLE",
+          require: false,
         },
       ],
     });
+    if (!userData) {
+      createError("invalid username or password", 400);
+    }
 
     const accessScreenData = await accessScreen.findAll({
       where: { roleId: userData.TB_ROLE._id },
     });
-
-    if (!userData) {
-      createError("invalid username or password", 400);
-    }
 
     if (
       userData &&
@@ -473,9 +473,14 @@ exports.login = async (req, res, next) => {
       const a = delete userData.dataValues.password;
       console.log("a:", a);
 
-      const token = verfifyAndTokenService.generateAccessToken(userData,accessScreenData);
-      const refreshToken =
-        verfifyAndTokenService.generateRefreshToken(userData,accessScreenData);
+      const token = verfifyAndTokenService.generateAccessToken(
+        userData,
+        accessScreenData
+      );
+      const refreshToken = verfifyAndTokenService.generateRefreshToken(
+        userData,
+        accessScreenData
+      );
       console.log("token:", token);
 
       // const decoded = jwt.verify(token, process.env.JWT_SECRET);
