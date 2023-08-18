@@ -1382,13 +1382,95 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
     console.log("packageAssetIdArray:", packageAssetIdArray);
 
     // for check all reason have value
-    const assetIdArrayReason = assetIdArray.every(asset => asset.reason !== "");
+    const assetIdArrayReason = assetIdArray.every(
+      (asset) => asset.reason !== "" && asset.reason !== null
+    );
     const packageAssetIdArrayReason = packageAssetIdArray.every(
-      asset => asset.reason !== ""
+      (asset) => asset.reason !== "" && asset.reason !== null
+    );
+    const assetIdArrayUnReason = assetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
+    );
+    const packageAssetIdArrayUnReason = packageAssetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
     );
     console.log("assetIdArrayReason:", assetIdArrayReason);
     console.log("packageAssetIdArrayReason:", packageAssetIdArrayReason);
+    if (assetIdArrayUnReason && packageAssetIdArrayUnReason) {
+      // approve all
+      await transfer.update(
+        {
+          status: "approve",
+          dateTime_approver: new Date(),
+          note: input.note,
+        },
+        {
+          where: {
+            _id: transferId,
+          },
+        }
+      );
 
+      for (el of assetIdArray) {
+        // reject
+        let assetId = el.assetId;
+        await asset.update(
+          { status: "transfered", reserved: false },
+          {
+            where: {
+              _id: assetId,
+            },
+          }
+        );
+        await transferHasAsset.update(
+          {
+            reason: el.reason,
+            return: el.return,
+          },
+          { where: { assetId: assetId, transferId: transferId } }
+        );
+      }
+
+      // change all packageAsset status by id
+      for (el of packageAssetIdArray) {
+        let packageAssetId = el.packageAssetId;
+
+        // reject PackageAsset
+        await pkAsset.update(
+          { status: "transfered", reserved: false },
+          {
+            where: {
+              _id: packageAssetId,
+            },
+          }
+        );
+
+        let assetArray = await asset.findAll({ where: { packageAssetId } });
+        // console.log("assetArray:", assetArray);
+        for (let l = 0; l < assetArray.length; l++) {
+          let assetId = assetArray[l]._id;
+          // reject Asset
+          await asset.update(
+            { status: "transfered", reserved: false },
+            {
+              where: {
+                _id: assetId,
+              },
+            }
+          );
+        }
+        await transferHasPkAsset.update(
+          {
+            reason: el.reason,
+            return: el.return,
+          },
+          { where: { packageAssetId: packageAssetId, transferId: transferId } }
+        );
+      }
+      return res.json({
+        message: "This transferings has been successfully approved.",
+      });
+    }
     if (assetIdArrayReason && packageAssetIdArrayReason) {
       console.log("rejectAll:");
       // reject all
@@ -1461,8 +1543,8 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           { where: { packageAssetId: packageAssetId, transferId: transferId } }
         );
       }
-      res.json({
-        message: "This transferings has been successfully rejected."
+      return res.json({
+        message: "This transferings has been successfully rejected.",
       });
     } else {
       console.log("else:-------------");

@@ -262,7 +262,10 @@ exports.createPackageAsset = async (req, res, next) => {
     } else {
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
-      objGenDataArray.forEach(async (el, index) => {
+      for (let O = 0; O < objGenDataArray.length; O++) {
+        let el = objGenDataArray[O];
+        let index = O;
+        // objGenDataArray.forEach(async (el, index) => {
         let bottomComponenetArray = [];
         // console.log(`Package${index+1}`)
 
@@ -473,7 +476,7 @@ exports.createPackageAsset = async (req, res, next) => {
             asset01: objSubComponentArray[i].asset01,
 
             // sector: el.sector,
-            replacedAssetNumber: el.replacedAssetNumber,
+            replacedAssetNumber: objSubComponentArray[i].replacedAssetNumber,
             type: type,
             kind: kind,
             unit: unit,
@@ -735,7 +738,8 @@ exports.createPackageAsset = async (req, res, next) => {
         //   );
         //   console.log("responseCreateRetirement : ", responseCreateRetirement);
         // }
-      });
+      }
+      // });
     }
 
     res
@@ -879,7 +883,10 @@ exports.updatePackageAsset = async (req, res, next) => {
       } else {
         AssetClass = getAssetClass.value;
       }
-      genDataArray.forEach(async (el, index) => {
+      for (let O = 0; O < genDataArray.length; O++) {
+        let el = genDataArray[O];
+        let index = O;
+        // genDataArray.forEach(async (el, index) => {
         // let saveImageArray = [];
         // let saveDocumentArray = [];
         // console.log(`Package${index+1}`)
@@ -1395,7 +1402,8 @@ exports.updatePackageAsset = async (req, res, next) => {
             );
           }
         }
-      });
+      }
+      // });
       await PackageAsset.destroy({ where: { _id: packageAssetId } });
       return res
         .status(200)
