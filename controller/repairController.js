@@ -1226,15 +1226,21 @@ exports.offWorkRepair = async (req, res, next) => {
     const repairId = req.params.repairId;
     const { input } = req.body;
     const { repairResult, mechinicComment } = input;
-
+    let queryInsert = {};
+    const repairData = await Repair.findByPk(repairId);
+    if (repairData.outsourceFlag == "Y") {
+      queryInsert = { statusOutsourceRepair: "complete" };
+    }
     const repair = await Repair.update(
       {
         ...input,
+        ...queryInsert,
         status: "waitingForCheck",
         statusOfDetailRecord: "completeOfDetailRecord",
       },
-      { where: { _id: repairId } }
+      { where: { _id: repairId }, returning: true, plain: true }
     );
+
     res.json({ message: "off work successfully" });
   } catch (err) {
     next(err);
@@ -1250,8 +1256,14 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
         let repairId = topApproveList[i]._id;
         let assetId = topApproveList[i].assetId;
         let packageAssetId = topApproveList[i].packageAssetId;
+        let queryInsert = {};
+        const repairData = await Repair.findByPk(repairId);
+        if (repairData.outsourceFlag == "Y") {
+          queryInsert = { statusOutsourceRepair: "complete" };
+        }
         let repair = await Repair.update(
           {
+            ...queryInsert,
             statusOfDetailRecord: "inProgressOfDetailRecord",
             dateTime_approver: new Date(),
           },
@@ -1412,8 +1424,14 @@ exports.approveIndividualWaitingRepair = async (req, res, next) => {
     let repairId = topApproveList._id;
     let assetId = topApproveList.assetId;
     let packageAssetId = topApproveList.packageAssetId;
+    let queryInsert = {};
+    const repairData = await Repair.findByPk(repairId);
+    if (repairData.outsourceFlag == "Y") {
+      queryInsert = { statusOutsourceRepair: "complete" };
+    }
     await Repair.update(
       {
+        ...queryInsert,
         statusOfDetailRecord: "inProgressOfDetailRecord",
         dateTime_approver: new Date(),
       },

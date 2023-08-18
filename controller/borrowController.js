@@ -2059,35 +2059,35 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
         idArray = assetArray
           .concat(packageAssetArray)
           .map((asset) => asset._id);
-        if (idArray.length > 0) {
-          queryArray.push({
-            [Op.or]: [
-              {
-                include: {
-                  model: BorrowHasAsset,
-                  as: "borrowHasAssets",
-                  where: { assetId: { [Op.in]: idArray } },
-                },
-              },
-              {
-                include: {
-                  model: BorrowHasPkAsset,
+        // if (idArray.length > 0) {
+        // queryArray.push({
+        //   [Op.or]: [
+        //     {
+        //       include: {
+        //         model: BorrowHasAsset,
+        //         as: "borrowHasAssets",
+        //         where: { assetId: { [Op.in]: idArray } },
+        //       },
+        //     },
+        //     {
+        //       include: {
+        //         model: BorrowHasPkAsset,
 
-                  where: { packageAssetId: { [Op.in]: idArray } },
-                },
-              },
-            ],
-          });
-          // query["$or"] = [
-          //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
-          //   {
-          //     packageAssetIdArray: {
-          //       $elemMatch: { packageAssetId: { $in: idArray } },
-          //     },
-          //   },
-          // ];
-        }
-        console.log(idArray);
+        //         where: { packageAssetId: { [Op.in]: idArray } },
+        //       },
+        //     },
+        //   ],
+        // });
+        // query["$or"] = [
+        //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
+        //   {
+        //     packageAssetIdArray: {
+        //       $elemMatch: { packageAssetId: { $in: idArray } },
+        //     },
+        //   },
+        // ];
+        // }
+        // console.log(idArray);
       } else {
         queryArray.push({
           [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
@@ -2138,9 +2138,33 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
     console.log(queryArray[0][Op.or], "queryArray");
 
     const borrow = await Borrow.findAll({
-      where: { [Op.and]: queryArray },
-
-      // include: [{ model: Asset, require: false, as: "assets" }],
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+          // require: false,
+        },
+      ],
 
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
@@ -2149,7 +2173,34 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
 
     // console.log(asset)
     // for show how many pages
-    const total = await Borrow.count({ where: { [Op.and]: queryArray } });
+    const total = await Borrow.count({
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+        },
+      ],
+    });
 
     res.json({ borrow, idArray, page: page + 1, limit, total });
   } catch (err) {
@@ -2338,41 +2389,67 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     const borrow = await Borrow.findAll({
       where: {
         [Op.and]: queryArray,
-
-        // [Op.or]: [
-        //   {
-        //     "$BorrowHasAsset.assetId$": {
-        //       [Op.in]: idArray,
-        //     },
-        //   },
-          // {
-          //   "$borrowHasPkAssets.packageAssetId$": {
-          //     [Op.overlap]: idArray,
-          //   },
-          // },
-      //   ],
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
       },
       include: [
         {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
-          require: false,
+          // require: true,
         },
         {
           model: borrowHasPkAsset,
           as: "borrowHasPkAssets",
-          require: false,
+          // require: true,
         },
       ],
 
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      // limit: limit,
     });
 
     // console.log(asset)
     // for show how many pages
-    const total = await Borrow.count({ where: { [Op.and]: queryArray } });
+    const total = await Borrow.count({
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+        },
+      ],
+    });
 
     res.json({ borrow, idArray, page: page + 1, limit, total });
   } catch (err) {
