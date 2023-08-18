@@ -1902,20 +1902,20 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
     }
 
     if (dateFrom !== "") {
-      query.where.transferDate = {
+      query.where.dateTime_approver = {
         [Op.gte]: modifiedDateFrom,
         [Op.lte]: moment().endOf("day").format("YYYY-MM-DD"),
       };
     }
 
     if (dateTo !== "") {
-      query.where.transferDate = {
+      query.where.dateTime_approver = {
         [Op.lte]: modifiedDateTo,
       };
     }
 
     if (dateFrom !== "" && dateTo !== "") {
-      query.where.transferDate = {
+      query.where.dateTime_approver = {
         [Op.between]: [modifiedDateFrom, modifiedDateTo],
       };
     }
@@ -1949,7 +1949,7 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
         };
       }
     }
-
+    console.log("query :", query);
     const transferData = await transfer.findAll(query);
     const total = await transfer.count(query);
 
