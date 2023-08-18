@@ -57,8 +57,8 @@ exports.getAssetBySearch = async (req, res, next) => {
     listStatusOfRepair = ["repair", "saveDraft"];
     queryActiveAsset["status"] = { [Op.notIn]: listStatusOfRepair };
     queryActiveAsset["deletedAt"] = { [Op.eq]: null };
-    queryActiveAsset["distributeApprovalReleaseDate"] = {
-      [Op.eq]: null,
+    queryActiveAsset["distributeStatus"] = {
+      [Op.eq]: false,
     };
 
     let activeCount = await asset.count({
@@ -66,14 +66,20 @@ exports.getAssetBySearch = async (req, res, next) => {
     });
 
     let queryDistributionAsset = {};
-    queryDistributionAsset["distributeApprovalReleaseDate"] = {
-      [Op.ne]: null,
+    queryDistributionAsset["distributeStatus"] = {
+      [Op.ne]: false,
     };
 
     queryDistributionAsset["status"] = { [Op.ne]: "saveDraft" };
     queryDistributionAsset["deletedAt"] = { [Op.eq]: null };
     const distributionCount = await asset.count({
-      where: queryDistributionAsset,
+      where: {
+        distributeStatus: {
+          [Op.ne]: false,
+        },
+        status: { [Op.not]: "saveDraft" },
+        deletedAt: null,
+      },
     });
 
     let queryRepairAsset = {};
@@ -152,8 +158,8 @@ exports.getRepairBySearch = async (req, res, next) => {
       deletedAt: {
         [Op.eq]: null,
       },
-      distributeApprovalReleaseDate: {
-        [Op.eq]: null,
+      distributeStatus: {
+        [Op.eq]: false,
       },
     };
 
@@ -161,14 +167,14 @@ exports.getRepairBySearch = async (req, res, next) => {
       where: {
         status: { [Op.notIn]: listStatusOfRepair },
         deletedAt: null,
-        distributeApprovalReleaseDate: null,
+        distributeStatus: false,
       },
     });
     console.log("activeCount:", activeCount);
 
     const distributionCount = await asset.count({
       where: {
-        distributeApprovalReleaseDate: { [Op.ne]: null },
+        distributeStatus: { [Op.eq]: true },
         status: { [Op.not]: "saveDraft" },
         deletedAt: null,
       },

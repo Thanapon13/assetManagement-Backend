@@ -4,14 +4,13 @@ const createError = require("../utils/createError");
 exports.createAcquiredType = async (req, res, next) => {
   try {
     const { acquiredTypeArray } = req.body;
-    // const acquiredTypeArrayObject = acquiredTypeArray;
-    const acquiredTypeArrayObject = JSON.parse(acquiredTypeArray);
+
     const resAcquiredType = [];
 
-    for (let el of acquiredTypeArrayObject) {
+    for (let el of acquiredTypeArray) {
       try {
         let acquiredType = await AcquiredType.create({
-          name: el.name,
+          name: el.name
         });
 
         resAcquiredType.push(acquiredType);
@@ -46,7 +45,7 @@ exports.updateAcquiredType = async (req, res, next) => {
       }
 
       const existingNameAcquiredType = await AcquiredType.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameAcquiredType", existingNameAcquiredType);
       // console.log("existingNameAcquiredType.id", existingNameAcquiredType.id);
@@ -71,7 +70,7 @@ exports.updateAcquiredType = async (req, res, next) => {
 exports.getAllAcquiredType = async (req, res, next) => {
   try {
     const acquiredType = await AcquiredType.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ acquiredType });
   } catch (err) {
@@ -84,8 +83,8 @@ exports.deleteAcquiredType = async (req, res, next) => {
     const _id = req.params.acquiredTypeId;
     let acquiredType = await AcquiredType.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ message: "delete acquiredType successfully", acquiredType });

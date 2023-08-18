@@ -5,6 +5,7 @@ const Room = require("../models").room;
 exports.createRoom = async (req, res, next) => {
   try {
     const { roomArray } = req.body;
+    console.log("roomArray:", roomArray);
     const resRoom = [];
 
     for (el of roomArray) {
@@ -18,7 +19,7 @@ exports.createRoom = async (req, res, next) => {
     for (el of roomArray) {
       let room = await Room.create({
         name: el.name,
-        floorId: el.floorId,
+        floorId: el.floorId
       });
       resRoom.push(room);
     }
@@ -50,7 +51,7 @@ exports.updateRoom = async (req, res, next) => {
 exports.getAllRoom = async (req, res, next) => {
   try {
     const rooms = await Room.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     console.log(rooms);
     res.json({ rooms });
@@ -64,8 +65,8 @@ exports.deleteRoom = async (req, res, next) => {
     const { id } = req.body;
     let room = await Room.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ room });

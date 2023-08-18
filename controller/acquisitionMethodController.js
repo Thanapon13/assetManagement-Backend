@@ -4,14 +4,12 @@ const createError = require("../utils/createError");
 exports.createAcquisitionMethod = async (req, res, next) => {
   try {
     const { acquisitionMethodArray } = req.body;
-    // const acquisitionMethodArrayObject = acquisitionMethodArray;
-    const acquisitionMethodArrayObject = JSON.parse(acquisitionMethodArray);
     const resAcquisitionMethod = [];
 
-    for (let el of acquisitionMethodArrayObject) {
+    for (let el of acquisitionMethodArray) {
       try {
         let acquisitionMethod = await AcquisitionMethod.create({
-          name: el.name,
+          name: el.name
         });
         resAcquisitionMethod.push(acquisitionMethod);
       } catch (err) {
@@ -47,7 +45,7 @@ exports.updateAcquisitionMethod = async (req, res, next) => {
       }
 
       const existingNameAcquisitionMethod = await AcquisitionMethod.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameAcquisitionMethod", existingNameAcquisitionMethod);
       // console.log("existingNameAcquisitionMethod.id", existingNameAcquisitionMethod.id);
@@ -75,7 +73,7 @@ exports.updateAcquisitionMethod = async (req, res, next) => {
 exports.getAllAcquisitionMethod = async (req, res, next) => {
   try {
     const acquisitionMethod = await AcquisitionMethod.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ acquisitionMethod });
   } catch (err) {
@@ -88,13 +86,13 @@ exports.deleteAcquisitionMethod = async (req, res, next) => {
     const _id = req.params.acquisitionMethodId;
     let acquisitionMethod = await AcquisitionMethod.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({
       message: "delete acquisitionMethod successfully",
-      acquisitionMethod,
+      acquisitionMethod
     });
   } catch (err) {
     next(err);

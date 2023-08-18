@@ -6,6 +6,7 @@ const {
   asset,
   transferHasAsset,
   transferHasPkAsset,
+  assetImage,
 } = require("../models");
 const moment = require("moment/moment");
 
@@ -723,6 +724,7 @@ exports.updateTransfer = async (req, res, next) => {
       }
     }
 
+    console.log("-----------------------------------------------------");
     console.log("transferById", transferById);
     transferById.transferSector = transferSector;
     console.log(" transferById.transferSector:", transferSector);
@@ -742,6 +744,7 @@ exports.updateTransfer = async (req, res, next) => {
     console.log(" transferById.name_recorder :", name_recorder);
     transferById.name_courier = name_courier;
     console.log("transferById.name_courier :", name_courier);
+    console.log("-----------------------------------------------------");
 
     if (transferById.status == "saveDraft" && status == "waiting") {
       transferById.dateTime_recorder = new Date();
@@ -766,6 +769,7 @@ exports.updateTransfer = async (req, res, next) => {
     }
 
     transferById.status = status || transferById.status;
+
     await transferById.save();
 
     res.status(200).json({ message: "This transfer id updated successfully" });
@@ -1369,24 +1373,104 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
     const { input } = req.body;
-    console.log("transferId:", transferId);
+    // console.log("transferId:", transferId);
     console.log("input:", input);
 
     const assetIdArray = input[0].assetIdArray;
     const packageAssetIdArray = input[0].packageAssetIdArray;
-    // console.log("assetIdArray:", assetIdArray);
-    // console.log("packageAssetIdArray:", packageAssetIdArray);
+    console.log("assetIdArray:", assetIdArray);
+    console.log("packageAssetIdArray:", packageAssetIdArray);
 
     // for check all reason have value
     const assetIdArrayReason = assetIdArray.every(
-      (asset) => asset.reason !== ""
+      (asset) => asset.reason !== "" && asset.reason !== null
     );
     const packageAssetIdArrayReason = packageAssetIdArray.every(
-      (asset) => asset.reason !== ""
+      (asset) => asset.reason !== "" && asset.reason !== null
+    );
+    const assetIdArrayUnReason = assetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
+    );
+    const packageAssetIdArrayUnReason = packageAssetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
     );
     console.log("assetIdArrayReason:", assetIdArrayReason);
     console.log("packageAssetIdArrayReason:", packageAssetIdArrayReason);
+    if (assetIdArrayUnReason && packageAssetIdArrayUnReason) {
+      // approve all
+      await transfer.update(
+        {
+          status: "approve",
+          dateTime_approver: new Date(),
+          note: input.note,
+        },
+        {
+          where: {
+            _id: transferId,
+          },
+        }
+      );
 
+      for (el of assetIdArray) {
+        // reject
+        let assetId = el.assetId;
+        await asset.update(
+          { status: "transfered", reserved: false },
+          {
+            where: {
+              _id: assetId,
+            },
+          }
+        );
+        // await transferHasAsset.update(
+        //   {
+        //     reason: el.reason,
+        //     return: el.return,
+        //   },
+        //   { where: { assetId: assetId, transferId: transferId } }
+        // );
+      }
+
+      // change all packageAsset status by id
+      for (el of packageAssetIdArray) {
+        let packageAssetId = el.packageAssetId;
+
+        // reject PackageAsset
+        await pkAsset.update(
+          { status: "transfered", reserved: false },
+          {
+            where: {
+              _id: packageAssetId,
+            },
+          }
+        );
+
+        let assetArray = await asset.findAll({ where: { packageAssetId } });
+        // console.log("assetArray:", assetArray);
+        for (let l = 0; l < assetArray.length; l++) {
+          let assetId = assetArray[l]._id;
+          // reject Asset
+          await asset.update(
+            { status: "transfered", reserved: false },
+            {
+              where: {
+                _id: assetId,
+              },
+            }
+          );
+        }
+        // await transferHasPkAsset.update(
+        //   {
+        //     reason: el.reason,
+        //     return: el.return,
+        //   },
+        //   { where: { packageAssetId: packageAssetId, transferId: transferId } }
+        // );
+      }
+      return res.json({
+        message: "This transferings has been successfully approved.",
+      });
+    }
     if (assetIdArrayReason && packageAssetIdArrayReason) {
       // reject all
       await transfer.update(
@@ -1458,12 +1542,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           { where: { packageAssetId: packageAssetId, transferId: transferId } }
         );
       }
-      res.json({
+      return res.json({
         message: "This transferings has been successfully rejected.",
       });
     } else {
       // partially approve or approve
       // check obj in array ,what obj have some value in reason and return to array
+
       const assetIdReasonIndices = input[0].assetIdArray
         .map((item, idx) => {
           if (item.reason !== "") {
@@ -1471,6 +1556,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           }
         })
         .filter((item) => item !== undefined);
+      console.log("assetIdReasonIndices:", assetIdReasonIndices);
 
       const packageAssetIdReasonIndices = input[0].packageAssetIdArray
         .map((item, idx) => {
@@ -1480,6 +1566,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         })
         .filter((item) => item !== undefined);
 
+      console.log("packageAssetIdReasonIndices:", packageAssetIdReasonIndices);
       if (
         assetIdReasonIndices.length > 0 ||
         packageAssetIdReasonIndices.length > 0
@@ -1921,9 +2008,16 @@ exports.getTransferById = async (req, res, next) => {
                 "_id",
                 "assetNumber",
                 "productName",
-                // "serialNumber",
+                "serialNumber",
                 "sector",
                 // "imageArray"
+              ],
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                  attributes: ["image"],
+                },
               ],
             },
           ],
