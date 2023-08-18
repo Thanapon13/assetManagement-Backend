@@ -4,14 +4,12 @@ const createError = require("../utils/createError");
 exports.createSource = async (req, res, next) => {
   try {
     const { sourceArray } = req.body;
-    // const sourceArrayObject = sourceArray;
-    const sourceArrayObject = JSON.parse(sourceArray);
     const resSource = [];
 
-    for (let el of sourceArrayObject) {
+    for (let el of sourceArray) {
       try {
         let source = await Source.create({
-          name: el.name,
+          name: el.name
         });
         resSource.push(source);
       } catch (err) {
@@ -47,7 +45,7 @@ exports.updateSource = async (req, res, next) => {
       }
 
       const existingNameSource = await Source.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameSource", existingNameSource);
       // console.log("existingNameSource.id", existingNameSource.id);
@@ -69,7 +67,7 @@ exports.updateSource = async (req, res, next) => {
 exports.getAllSource = async (req, res, next) => {
   try {
     const source = await Source.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ source });
   } catch (err) {
@@ -82,8 +80,8 @@ exports.deleteSource = async (req, res, next) => {
     const _id = req.params.sourceId;
     let source = await Source.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ message: "delete source successfully", source });

@@ -10,390 +10,390 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id",
+        field: "_id"
       },
       sapDocEntry: {
         type: Sequelize.INTEGER(12),
         allowNull: true,
-        field: "sapDocEntry",
+        field: "sapDocEntry"
       },
       realAssetId: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "realAssetId",
+        field: "realAssetId"
       },
       assetNumber: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "assetNumber",
+        field: "assetNumber"
       },
       serialNumber: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "serialNumber",
+        field: "serialNumber"
       },
       productName: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "productName",
+        field: "productName"
       },
       source: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "source",
+        field: "source"
       },
       model: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "model",
+        field: "model"
       },
       engProductName: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "engProductName",
+        field: "engProductName"
       },
       status: {
         type: Sequelize.STRING(100),
         allowNull: false,
-        field: "status",
+        field: "status"
       },
       brand: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "brand",
+        field: "brand"
       },
       category: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "category",
+        field: "category"
       },
       acquiredType: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "acquiredType",
+        field: "acquiredType"
       },
       type: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "type",
+        field: "type"
       },
       unit: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "unit",
+        field: "unit"
       },
       quantity: {
         type: Sequelize.INTEGER(10),
         allowNull: true,
-        field: "quantity",
+        field: "quantity"
       },
       kind: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "kind",
+        field: "kind"
       },
       group: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "group",
+        field: "group"
       },
       guaranteedMonth: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "guaranteedMonth",
+        field: "guaranteedMonth"
       },
       purposeOfUse: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "purposeOfUse",
+        field: "purposeOfUse"
       },
       allSector: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "allSector",
+        field: "allSector"
       },
       department: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "department",
+        field: "department"
       },
       insuranceStartDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceStartDate",
+        field: "insuranceStartDate"
       },
       insuranceExpiredDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "insuranceExpiredDate"
       },
       sector: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "sector",
+        field: "sector"
       },
       sendDocument: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "sendDocument",
+        field: "sendDocument"
       },
       guarantee: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "guarantee",
+        field: "guarantee"
       },
       size: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "size",
+        field: "size"
       },
       assetGroupNumber: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "assetGroupNumber",
+        field: "assetGroupNumber"
       },
       asset01: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "asset01",
+        field: "asset01"
       },
       replacedAssetNumber: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "replacedAssetNumber",
+        field: "replacedAssetNumber"
       },
       pricePerUnit: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "pricePerUnit",
+        field: "pricePerUnit"
       },
 
       //ค่าเสื่อม
       depreciationStartDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "insuranceExpiredDate"
       },
       depreciationRegisterDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "insuranceExpiredDate"
       },
       depreciationReceivedDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "insuranceExpiredDate"
       },
       depreciationPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationPrice",
+        field: "depreciationPrice"
       },
       depreciationYearUsed: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationYearUsed",
+        field: "depreciationYearUsed"
       },
       depreciationCarcassPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationCarcassPrice",
+        field: "depreciationCarcassPrice"
       },
       depreciationProcess: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationProcess",
+        field: "depreciationProcess"
       },
       depreciationPresentMonth: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationPresentMonth",
+        field: "depreciationPresentMonth"
       },
       depreciationCumulativePrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationCumulativePrice",
+        field: "depreciationCumulativePrice"
       },
       depreciationYearPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationYearPrice",
+        field: "depreciationYearPrice"
       },
       depreciationRemainPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationRemainPrice",
+        field: "depreciationRemainPrice"
       },
       depreciationBookValue: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "depreciationBookValue",
+        field: "depreciationBookValue"
       },
       // ค่าเสื่อมรายปี
       accumulateDepreciationStartDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "accumulateDepreciationStartDate",
+        field: "accumulateDepreciationStartDate"
       },
       accumulateDepreciationRegisterDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "accumulateDepreciationRegisterDate",
+        field: "accumulateDepreciationRegisterDate"
       },
       accumulateDepreciationReceivedDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "accumulateDepreciationReceivedDate",
+        field: "accumulateDepreciationReceivedDate"
       },
       accumulateDepreciationPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationPrice",
+        field: "accumulateDepreciationPrice"
       },
       accumulateDepreciationYearUsed: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationYearUsed",
+        field: "accumulateDepreciationYearUsed"
       },
       accumulateDepreciationCarcassPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationCarcassPrice",
+        field: "accumulateDepreciationCarcassPrice"
       },
       accumulateDepreciationProcess: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationProcess",
+        field: "accumulateDepreciationProcess"
       },
       accumulateDepreciationPresentMonth: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationPresentMonth",
+        field: "accumulateDepreciationPresentMonth"
       },
       accumulateDepreciationCumulativePrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationCumulativePrice",
+        field: "accumulateDepreciationCumulativePrice"
       },
       accumulateDepreciationYearPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationYearPrice",
+        field: "accumulateDepreciationYearPrice"
       },
       accumulateDepreciationRemainPrice: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationRemainPrice",
+        field: "accumulateDepreciationRemainPrice"
       },
       accumulateDepreciationBookValue: {
         type: Sequelize.INTEGER(50),
         allowNull: true,
-        field: "accumulateDepreciationBookValue",
+        field: "accumulateDepreciationBookValue"
       },
       reserved: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false,
-        field: "reserved",
+        field: "reserved"
       },
       deletedAt: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "deletedAt",
+        field: "deletedAt"
       },
 
       delereasontedAt: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "reason",
+        field: "reason"
       },
 
       //สัญญาจัดซื้อ
       acquisitionMethod: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "acquisitionMethod",
+        field: "acquisitionMethod"
       },
       moneyType: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "moneyType",
+        field: "moneyType"
       },
       deliveryDocument: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "deliveryDocument",
+        field: "deliveryDocument"
       },
       contractNumber: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "contractNumber",
+        field: "contractNumber"
       },
       receivedDate: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "receivedDate",
+        field: "receivedDate"
       },
       seller: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "seller",
+        field: "seller"
       },
       price: {
-        type: Sequelize.INTEGER(100),
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: true,
-        field: "price",
+        field: "price"
       },
       billNumber: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "billNumber",
+        field: "billNumber"
       },
       purchaseYear: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "purchaseYear",
+        field: "purchaseYear"
       },
       purchaseDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "purchaseDate",
+        field: "purchaseDate"
       },
       documentDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "documentDate",
+        field: "documentDate"
       },
       //จำหน่าย
       salesDocument: {
         type: Sequelize.STRING(100),
         allowNull: true,
-        field: "salesDocument",
+        field: "salesDocument"
       },
       distributeDocumentDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "distributeDocumentDate",
+        field: "distributeDocumentDate"
       },
       distributeApprovalReleaseDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "distributeApprovalReleaseDate",
+        field: "distributeApprovalReleaseDate"
       },
       distributeStatus: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false,
-        field: "distributeStatus",
+        field: "distributeStatus"
       },
       distributionNote: {
         type: Sequelize.STRING(500),
         allowNull: true,
-        field: "distributionNote",
-      },
+        field: "distributionNote"
+      }
     },
     {
-      tableName: "TB_ASSETS",
+      tableName: "TB_ASSETS"
     }
   );
 

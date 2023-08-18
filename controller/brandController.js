@@ -4,14 +4,13 @@ const createError = require("../utils/createError");
 exports.createBrand = async (req, res, next) => {
   try {
     const { brandArray } = req.body;
-    // const brandArrayObject = brandArray;
-    const brandArrayObject = JSON.parse(brandArray);
+
     const resBrand = [];
 
-    for (let el of brandArrayObject) {
+    for (let el of brandArray) {
       try {
         let brand = await Brand.create({
-          name: el.name,
+          name: el.name
         });
         resBrand.push(brand);
       } catch (err) {
@@ -26,6 +25,17 @@ exports.createBrand = async (req, res, next) => {
     }
 
     res.json({ message: "create successfully", resBrand });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllBrandrand = async (req, res, next) => {
+  try {
+    const brand = await Brand.findAll({
+      attributes: ["_id", "name"]
+    });
+    res.json({ brand });
   } catch (err) {
     next(err);
   }
@@ -47,7 +57,7 @@ exports.updateBrand = async (req, res, next) => {
       }
 
       const existingNameBrand = await Brand.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameBrand", existingNameBrand);
       // console.log("existingNameBrand.id", existingNameBrand.id);
@@ -69,7 +79,7 @@ exports.updateBrand = async (req, res, next) => {
 exports.getAllBrand = async (req, res, next) => {
   try {
     const brand = await Brand.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
   } catch (err) {
     next(err);
@@ -81,8 +91,8 @@ exports.deleteBrand = async (req, res, next) => {
     const _id = req.params.brandId;
     let brand = await Brand.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
     res.json({ message: "delete brand successfully", brand });
   } catch (err) {

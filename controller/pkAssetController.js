@@ -26,7 +26,7 @@ const sapCapitalizationService = require("../services/sap/capitalization");
 const sapRetirementService = require("../services/sap/retirement");
 
 function delete_file(path) {
-  fs.unlink(path, (err) => {
+  fs.unlink(path, err => {
     if (err) throw err;
     console.log(path + " was deleted");
   });
@@ -88,7 +88,7 @@ exports.createPackageAsset = async (req, res, next) => {
       accumulateDepreciationYearUsed,
       accumulateDepreciationCarcassPrice,
 
-      bottomSubComponentDataJSON,
+      bottomSubComponentDataJSON
     } = req.body;
     // console.log(req.body);
 
@@ -118,7 +118,7 @@ exports.createPackageAsset = async (req, res, next) => {
       type13,
       allSector,
 
-      status,
+      status
     } = inputObject;
 
     // console.log(req.body);
@@ -136,17 +136,17 @@ exports.createPackageAsset = async (req, res, next) => {
 
     const arrayImage = req?.files?.arrayImage || [];
     // console.log("arrayImage.length",arrayImage.length)
-    // console.log("arrayImage",arrayImage)
+    console.log("arrayImage:", arrayImage);
     const arrayDocument = req?.files?.arrayDocument || [];
     // console.log("arrayDocument.length",arrayDocument.length)
-    // console.log("arrayDocument",arrayDocument)
+    console.log("arrayDocument:", arrayDocument);
 
     const objSubComponentArray = JSON.parse(bottomSubComponentDataJSON);
     // console.log("objSubComponentArray.length", objSubComponentArray.length);
     // for gen new realAssetId
     let newestAsset = await Asset.findOne({
       order: [["createdAt", "DESC"]],
-      attributes: ["_id", "realAssetId"],
+      attributes: ["_id", "realAssetId"]
     });
     //   .sort([["createdAt", -1]])
     //   .select("realAssetId");
@@ -221,19 +221,19 @@ exports.createPackageAsset = async (req, res, next) => {
         accumulateDepreciationReceivedDate: accumulateDepreciationReceivedDate,
         accumulateDepreciationPrice: accumulateDepreciationPrice,
         accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-        accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice,
+        accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice
       });
       for (let i = 0; i < baseArrayImageObj.length; i++) {
         await PackageAssetImage.create({
           image: arrayImage[i].filename,
-          packageAssetId: packageAsset._id,
+          packageAssetId: packageAsset._id
         });
       }
       // console.log("saveImageArray",saveImageArray)
       for (let i = 0; i < baseArrayDocumentObj.length; i++) {
         await PackageAssetDocument.create({
           document: arrayDocument[i].filename,
-          packageAssetId: packageAsset._id,
+          packageAssetId: packageAsset._id
         });
       }
       for (let i = 0; i < objSubComponentArray.length; i++) {
@@ -245,7 +245,7 @@ exports.createPackageAsset = async (req, res, next) => {
           assetNumber: objSubComponentArray[i].assetNumber,
           sector: objSubComponentArray[i].sector,
           price: objSubComponentArray[i].price,
-          asset01: objSubComponentArray[i].asset01,
+          asset01: objSubComponentArray[i].asset01
         });
       }
       for (let i = 0; i < objGenDataArray.length; i++) {
@@ -255,7 +255,7 @@ exports.createPackageAsset = async (req, res, next) => {
           serialNumber: objGenDataArray[i].serialNumber,
           replacedAssetNumber: objGenDataArray[i].replacedAssetNumber,
           sector: objGenDataArray[i].sector,
-          asset01: objGenDataArray[i].asset01,
+          asset01: objGenDataArray[i].asset01
         });
       }
       // console.log(packageAsset);
@@ -339,8 +339,7 @@ exports.createPackageAsset = async (req, res, next) => {
             accumulateDepreciationReceivedDate,
           accumulateDepreciationPrice: accumulateDepreciationPrice,
           accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-          accumulateDepreciationCarcassPrice:
-            accumulateDepreciationCarcassPrice,
+          accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice
         });
         console.log("packageAsset :", packageAsset.dataValues._id);
         for (let i = 0; i < baseArrayImageObj.length; i++) {
@@ -348,7 +347,7 @@ exports.createPackageAsset = async (req, res, next) => {
             image:
               arrayImage[(+quantity + +objSubComponentArray.length) * i + index]
                 .filename,
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
         }
         // console.log("saveImageArray",saveImageArray)
@@ -359,7 +358,7 @@ exports.createPackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +objSubComponentArray.length) * i + index
               ].filename,
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
         }
         const getAssetClass = await Type.findOne({ name: type });
@@ -373,7 +372,7 @@ exports.createPackageAsset = async (req, res, next) => {
           ItemCode: el.assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
-          AssetClass: AssetClass,
+          AssetClass: AssetClass
         };
         // console.log(
         //   "dataInsertAssetMasterOfPkAsset",
@@ -399,15 +398,15 @@ exports.createPackageAsset = async (req, res, next) => {
               {
                 AssetNumber: el.assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(price),
-              },
+                TotalLC: parseInt(price)
+              }
             ],
             AssetDocumentAreaJournalCollection: [
               {
                 DepreciationArea: "TFRS",
-                JournalRemarks: "Capitalization-Test",
-              },
-            ],
+                JournalRemarks: "Capitalization-Test"
+              }
+            ]
           };
           // console.log(
           //   "dataInsertCapitalizationOfPkAsset",
@@ -425,12 +424,12 @@ exports.createPackageAsset = async (req, res, next) => {
           // );
           await PackageAsset.update(
             {
-              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry,
+              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry
             },
             {
               where: {
-                _id: packageAsset.dataValues._id,
-              },
+                _id: packageAsset.dataValues._id
+              }
             }
           );
         }
@@ -444,9 +443,9 @@ exports.createPackageAsset = async (req, res, next) => {
             Remarks: "Retiremant on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
-              },
-            ],
+                AssetNumber: el.assetNumber
+              }
+            ]
           };
           const responseCreateRetirementOfPkAsset =
             await sapRetirementService.create(dataInsertRetirement, sessionId);
@@ -552,7 +551,7 @@ exports.createPackageAsset = async (req, res, next) => {
             status,
             reserved: false,
 
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
 
           for (let j = 0; j < baseArrayImageObj.length; j++) {
@@ -561,7 +560,7 @@ exports.createPackageAsset = async (req, res, next) => {
                 arrayImage[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              assetId: componentAssetOfPk.dataValues._id,
+              assetId: componentAssetOfPk.dataValues._id
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -571,7 +570,7 @@ exports.createPackageAsset = async (req, res, next) => {
                 arrayDocument[
                   (+quantity + objSubComponentArray.length) * j + +quantity + i
                 ].filename,
-              assetId: componentAssetOfPk.dataValues._id,
+              assetId: componentAssetOfPk.dataValues._id
             });
           }
           //case1 สร้างแยก
@@ -586,7 +585,7 @@ exports.createPackageAsset = async (req, res, next) => {
             ItemCode: objSubComponentArray[i].assetNumber,
             ItemName: objSubComponentArray[i].productName,
             ItemType: "itFixedAssets",
-            AssetClass: AssetClass,
+            AssetClass: AssetClass
           };
           // console.log("dataInsertAssetMaster", dataInsertAssetMaster);
           const responseCreateAssetMaster = await sapAssetMasterService.create(
@@ -608,15 +607,15 @@ exports.createPackageAsset = async (req, res, next) => {
                 {
                   AssetNumber: objSubComponentArray[i].assetNumber,
                   Quantity: 1,
-                  TotalLC: parseInt(objSubComponentArray[i].price),
-                },
+                  TotalLC: parseInt(objSubComponentArray[i].price)
+                }
               ],
               AssetDocumentAreaJournalCollection: [
                 {
                   DepreciationArea: "TFRS",
-                  JournalRemarks: "Capitalization-Test",
-                },
-              ],
+                  JournalRemarks: "Capitalization-Test"
+                }
+              ]
             };
             // console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -631,12 +630,12 @@ exports.createPackageAsset = async (req, res, next) => {
             // );
             await Asset.update(
               {
-                sapDocEntry: responseCreateCapitalization.data.DocEntry,
+                sapDocEntry: responseCreateCapitalization.data.DocEntry
               },
               {
                 where: {
-                  _id: componentAssetOfPk.dataValues._id,
-                },
+                  _id: componentAssetOfPk.dataValues._id
+                }
               }
             );
           }
@@ -650,9 +649,9 @@ exports.createPackageAsset = async (req, res, next) => {
               Remarks: "Retiremant on Asset Management System",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: objSubComponentArray[i].assetNumber,
-                },
-              ],
+                  AssetNumber: objSubComponentArray[i].assetNumber
+                }
+              ]
             };
             const responseCreateRetirement = await sapRetirementService.create(
               dataInsertRetirement,
@@ -800,7 +799,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       accumulateDepreciationYearUsed,
       accumulateDepreciationCarcassPrice,
 
-      reserved,
+      reserved
     } = req.body;
     // console.log(req.body);
 
@@ -840,7 +839,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       type4,
       type8,
       type13,
-      status,
+      status
     } = inputObject;
     bottomSubComponentDataObject = JSON.parse(bottomSubComponentDataJSON);
     // console.log(bottomSubComponentDataObject)
@@ -871,7 +870,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       );
       let newestAsset = await Asset.findOne({
         order: [["createdAt", "DESC"]],
-        attributes: ["_id", "realAssetId"],
+        attributes: ["_id", "realAssetId"]
       });
       let newestRealAssetId = parseInt(newestAsset.realAssetId) - 1;
       const genDataArray = JSON.parse(genDataJSON);
@@ -962,8 +961,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             accumulateDepreciationReceivedDate,
           accumulateDepreciationPrice: accumulateDepreciationPrice,
           accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-          accumulateDepreciationCarcassPrice:
-            accumulateDepreciationCarcassPrice,
+          accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice
         });
 
         // saveImageAndDocument ///////////////////////////////////////////////////////////
@@ -971,7 +969,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (index == 0) {
             await PackageAssetImage.create({
               image: existArrayImageArray[j].image,
-              packageAssetId: packageAsset.dataValues._id,
+              packageAssetId: packageAsset.dataValues._id
             });
             // saveImageArray.push({ image: existArrayImageArray[j].image });
           } else {
@@ -988,7 +986,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetImage.create({
               image: newImageName,
-              packageAssetId: packageAsset.dataValues._id,
+              packageAssetId: packageAsset.dataValues._id
             });
             // saveImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -1003,7 +1001,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           if (i == 0) {
             await PackageAssetDocument.create({
               document: existArrayDocumentArray[j].document,
-              packageAssetId: packageAsset.dataValues._id,
+              packageAssetId: packageAsset.dataValues._id
             });
             // saveDocumentArray.push({
             //   document: existArrayDocumentArray[j].document,
@@ -1023,7 +1021,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await PackageAssetDocument.create({
               document: newDocumentName,
-              packageAssetId: packageAsset.dataValues._id,
+              packageAssetId: packageAsset.dataValues._id
             });
             // saveDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -1040,7 +1038,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayImage[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
           // saveImageArray.push({
           //   image:
@@ -1057,7 +1055,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               arrayDocument[
                 (+quantity + +bottomSubComponentDataObject.length) * i + index
               ].filename,
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
           // saveDocumentArray.push({
           //   document:
@@ -1077,7 +1075,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           ItemCode: el.assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
-          AssetClass: AssetClass,
+          AssetClass: AssetClass
         };
         console.log(
           "dataInsertAssetMasterOfPkAsset",
@@ -1103,15 +1101,15 @@ exports.updatePackageAsset = async (req, res, next) => {
               {
                 AssetNumber: el.assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(price),
-              },
+                TotalLC: parseInt(price)
+              }
             ],
             AssetDocumentAreaJournalCollection: [
               {
                 DepreciationArea: "TFRS",
-                JournalRemarks: "Capitalization-Test",
-              },
-            ],
+                JournalRemarks: "Capitalization-Test"
+              }
+            ]
           };
           console.log(
             "dataInsertCapitalizationOfPkAsset",
@@ -1129,12 +1127,12 @@ exports.updatePackageAsset = async (req, res, next) => {
           );
           await PackageAsset.update(
             {
-              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry,
+              sapDocEntry: responseCreateCapitalizationOfPkAsset.data.DocEntry
             },
             {
               where: {
-                _id: packageAsset.dataValues._id,
-              },
+                _id: packageAsset.dataValues._id
+              }
             }
           );
         }
@@ -1148,9 +1146,9 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Retiremant on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
-              },
-            ],
+                AssetNumber: el.assetNumber
+              }
+            ]
           };
           const responseCreateRetirementOfPkAsset =
             await sapRetirementService.create(dataInsertRetirement, sessionId);
@@ -1247,7 +1245,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             status: status,
             reserved: false,
 
-            packageAssetId: packageAsset.dataValues._id,
+            packageAssetId: packageAsset.dataValues._id
           });
           for (let j = 0; j < existArrayImageArray.length; j++) {
             // console.log(existArrayImageArray[j].image);
@@ -1263,7 +1261,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetImage.create({
               image: newImageName,
-              assetId: assetCreate.dataValues._id,
+              assetId: assetCreate.dataValues._id
             });
             // saveSubImageArray.push({ image: newImageName });
             // console.log("ImageName", existArrayImageArray[j].image);
@@ -1288,7 +1286,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetDocument.create({
               document: newDocumentName,
-              asset: assetCreate.dataValues._id,
+              asset: assetCreate.dataValues._id
             });
             // saveSubDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -1306,7 +1304,7 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              assetId: assetCreate.dataValues._id,
+              assetId: assetCreate.dataValues._id
             });
           }
           // console.log("saveSubImageArray",saveSubImageArray)
@@ -1318,7 +1316,7 @@ exports.updatePackageAsset = async (req, res, next) => {
                     +quantity +
                     i
                 ].filename,
-              asset: assetCreate.dataValues._id,
+              asset: assetCreate.dataValues._id
             });
           }
           //case1 สร้างแยก
@@ -1326,7 +1324,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             ItemCode: bottomSubComponentDataObject[i].assetNumber,
             ItemName: bottomSubComponentDataObject[i].productName,
             ItemType: "itFixedAssets",
-            AssetClass: AssetClass,
+            AssetClass: AssetClass
           };
           console.log("dataInsertAssetMaster", dataInsertAssetMaster);
           const responseCreateAssetMaster = await sapAssetMasterService.create(
@@ -1348,15 +1346,15 @@ exports.updatePackageAsset = async (req, res, next) => {
                 {
                   AssetNumber: bottomSubComponentDataObject[i].assetNumber,
                   Quantity: 1,
-                  TotalLC: parseInt(bottomSubComponentDataObject[i].price),
-                },
+                  TotalLC: parseInt(bottomSubComponentDataObject[i].price)
+                }
               ],
               AssetDocumentAreaJournalCollection: [
                 {
                   DepreciationArea: "TFRS",
-                  JournalRemarks: "Capitalization-Test",
-                },
-              ],
+                  JournalRemarks: "Capitalization-Test"
+                }
+              ]
             };
             console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -1371,12 +1369,12 @@ exports.updatePackageAsset = async (req, res, next) => {
             );
             await Asset.update(
               {
-                sapDocEntry: responseCreateCapitalization.data.DocEntry,
+                sapDocEntry: responseCreateCapitalization.data.DocEntry
               },
               {
                 where: {
-                  _id: assetCreate.dataValues._id,
-                },
+                  _id: assetCreate.dataValues._id
+                }
               }
             );
           }
@@ -1390,9 +1388,9 @@ exports.updatePackageAsset = async (req, res, next) => {
               Remarks: "Retiremant on Asset Management System",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: bottomSubComponentDataObject[i].assetNumber,
-                },
-              ],
+                  AssetNumber: bottomSubComponentDataObject[i].assetNumber
+                }
+              ]
             };
             const responseCreateRetirement = await sapRetirementService.create(
               dataInsertRetirement,
@@ -1413,18 +1411,17 @@ exports.updatePackageAsset = async (req, res, next) => {
     }
 
     const oldImageArray = await PackageAssetImage.findAll({
-      where: { packageAssetId: packageAssetId },
+      where: { packageAssetId: packageAssetId }
     });
     const oldDocumentArray = PackageAssetDocument.findAll({
-      where: { packageAssetId: packageAssetId },
+      where: { packageAssetId: packageAssetId }
     });
 
     if (arrayImage.length > 0) {
       for (el of arrayImage) {
-        s;
         await PackageAssetImage.create({
           image: el.filename,
-          packageAssetId: packageAssetId,
+          packageAssetId: packageAssetId
         });
         // await PackageAsset.updateOne(
         //   { _id: packageAssetId },
@@ -1437,7 +1434,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       for (el of arrayDocument) {
         await PackageAssetDocument.create({
           document: el.filename,
-          packageAssetId: packageAssetId,
+          packageAssetId: packageAssetId
         });
         // await PackageAsset.updateOne(
         //   { _id: packageAssetId },
@@ -1450,7 +1447,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     let notExistArrayDocument = [];
 
     function getNotExistImage(existArray, oldImageArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.image + obj._id);
+      const existObjects = existArray.map(obj => obj.image + obj._id);
 
       for (let i = 0; i < oldImageArray.length; i++) {
         if (
@@ -1469,7 +1466,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     );
 
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.document + obj._id);
+      const existObjects = existArray.map(obj => obj.document + obj._id);
 
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
@@ -1493,7 +1490,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (notExistArrayImage.length > 0) {
       for (let i = 0; i < notExistArrayImage.length; i++) {
         await PackageAssetImage.destroy({
-          where: { _id: notExistArrayImage[i]._id },
+          where: { _id: notExistArrayImage[i]._id }
         });
         delete_file(`./public/pics/${notExistArrayImage[i].image}`);
       }
@@ -1501,7 +1498,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
         await PackageAssetDocument.destroy({
-          where: { _id: notExistArrayDocument[i]._id },
+          where: { _id: notExistArrayDocument[i]._id }
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
@@ -1580,7 +1577,7 @@ exports.updatePackageAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       const genDataArray = JSON.parse(genDataJSON);
       await SubComponentPkAsset.destroy({
-        where: { packageAssetId: packageAssetId },
+        where: { packageAssetId: packageAssetId }
       });
       for (let i = 0; i < genDataArray.length; i++) {
         await SubComponentPkAsset.create({
@@ -1589,11 +1586,11 @@ exports.updatePackageAsset = async (req, res, next) => {
           serialNumber: genDataArray[i].serialNumber,
           replacedAssetNumber: genDataArray[i].replacedAssetNumber,
           sector: genDataArray[i].sector,
-          asset01: genDataArray[i].asset01,
+          asset01: genDataArray[i].asset01
         });
       }
       await BottomSubComponentDataPkAsset.destroy({
-        where: { packageAssetId: packageAssetId },
+        where: { packageAssetId: packageAssetId }
       });
       for (let i = 0; i < bottomSubComponentDataObject.length; i++) {
         await BottomSubComponentDataPkAsset.create({
@@ -1603,7 +1600,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           assetNumber: bottomSubComponentDataObject[i].assetNumber,
           sector: bottomSubComponentDataObject[i].sector,
           price: bottomSubComponentDataObject[i].price,
-          asset01: bottomSubComponentDataObject[i].asset01,
+          asset01: bottomSubComponentDataObject[i].asset01
         });
       }
     } else {
@@ -1627,15 +1624,15 @@ exports.updatePackageAsset = async (req, res, next) => {
             {
               AssetNumber: packageAssetById.assetNumber,
               Quantity: 1,
-              TotalLC: parseInt(packageAssetById.price),
-            },
+              TotalLC: parseInt(packageAssetById.price)
+            }
           ],
           AssetDocumentAreaJournalCollection: [
             {
               DepreciationArea: "TFRS",
-              JournalRemarks: "Capitalization-Test",
-            },
-          ],
+              JournalRemarks: "Capitalization-Test"
+            }
+          ]
         };
         console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -1650,12 +1647,12 @@ exports.updatePackageAsset = async (req, res, next) => {
         );
         await PackageAsset.update(
           {
-            sapDocEntry: responseCreateCapitalization.data.DocEntry,
+            sapDocEntry: responseCreateCapitalization.data.DocEntry
           },
           {
             where: {
-              _id: packageAssetId,
-            },
+              _id: packageAssetId
+            }
           }
         );
       }
@@ -1671,9 +1668,9 @@ exports.updatePackageAsset = async (req, res, next) => {
           Remarks: "Retirement on Asset Management System",
           AssetDocumentLineCollection: [
             {
-              AssetNumber: packageAssetById.assetNumber,
-            },
-          ],
+              AssetNumber: packageAssetById.assetNumber
+            }
+          ]
         };
         const responseCreateRetirement = await sapRetirementService.create(
           dataInsertRetirement,
@@ -1683,7 +1680,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       }
 
       await BottomSubComponentDataPkAsset.destroy({
-        where: { packageAssetId: packageAssetId },
+        where: { packageAssetId: packageAssetId }
       });
       for (let i = 0; i < bottomSubComponentDataObject.length; i++) {
         await BottomSubComponentDataPkAsset.create({
@@ -1693,7 +1690,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           assetNumber: bottomSubComponentDataObject[i].assetNumber,
           sector: bottomSubComponentDataObject[i].sector,
           price: bottomSubComponentDataObject[i].price,
-          asset01: bottomSubComponentDataObject[i].asset01,
+          asset01: bottomSubComponentDataObject[i].asset01
         });
         let assetById = await Asset.findByPk(
           bottomSubComponentDataObject[i]._id
@@ -1720,15 +1717,15 @@ exports.updatePackageAsset = async (req, res, next) => {
               {
                 AssetNumber: bottomSubComponentDataObject[i].assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(bottomSubComponentDataObject[i].price),
-              },
+                TotalLC: parseInt(bottomSubComponentDataObject[i].price)
+              }
             ],
             AssetDocumentAreaJournalCollection: [
               {
                 DepreciationArea: "TFRS",
-                JournalRemarks: "Capitalization-Test",
-              },
-            ],
+                JournalRemarks: "Capitalization-Test"
+              }
+            ]
           };
           console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -1743,12 +1740,12 @@ exports.updatePackageAsset = async (req, res, next) => {
           );
           await Asset.update(
             {
-              sapDocEntry: responseCreateCapitalization.data.DocEntry,
+              sapDocEntry: responseCreateCapitalization.data.DocEntry
             },
             {
               where: {
-                assetNumber: bottomSubComponentDataObject[i].assetNumber,
-              },
+                assetNumber: bottomSubComponentDataObject[i].assetNumber
+              }
             }
           );
         }
@@ -1763,9 +1760,9 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Retirement on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: bottomSubComponentDataObject[i].assetNumber,
-              },
-            ],
+                AssetNumber: bottomSubComponentDataObject[i].assetNumber
+              }
+            ]
           };
           const responseCreateRetirement = await sapRetirementService.create(
             dataInsertRetirement,
@@ -1784,9 +1781,9 @@ exports.updatePackageAsset = async (req, res, next) => {
           Remarks: "Retirement on Asset Management System",
           AssetDocumentLineCollection: [
             {
-              AssetNumber: packageAssetById.assetNumber,
-            },
-          ],
+              AssetNumber: packageAssetById.assetNumber
+            }
+          ]
         };
         const responseCreateRetirement = await sapRetirementService.create(
           dataInsertRetirement,
@@ -1810,16 +1807,16 @@ exports.getSectorForSearch = async (req, res, next) => {
         [Op.and]: [
           { deletedAt: { [Op.eq]: null } },
           { sector: { [Op.ne]: null } },
-          { sector: { [Op.ne]: "" } },
-        ],
+          { sector: { [Op.ne]: "" } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["sector", "sector"],
-        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
+        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"]
       ],
       group: "sector",
-      raw: true,
+      raw: true
     });
     res.json({ sector });
   } catch (err) {
@@ -1833,8 +1830,8 @@ exports.deletePackageAsset = async (req, res, next) => {
     const { reason } = req.body;
     const packageAssetById = await PackageAsset.findOne({
       where: {
-        _id: packageAssetId,
-      },
+        _id: packageAssetId
+      }
     });
     if (packageAssetById == null)
       return res.json("This packageAsset not found");
@@ -1843,7 +1840,7 @@ exports.deletePackageAsset = async (req, res, next) => {
     } else {
       const packageAsset = await PackageAsset.find({
         where: { _id: packageAssetId },
-        include: [{ model: Asset, as: "assets" }],
+        include: [{ model: Asset, as: "assets" }]
       });
 
       const assets = packageAsset[0].assets;
@@ -1863,7 +1860,7 @@ exports.deletePackageAsset = async (req, res, next) => {
         { reason: reason, deletedAt: new Date() },
 
         {
-          _id: packageAssetId,
+          _id: packageAssetId
         }
       );
 
@@ -1914,7 +1911,7 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
     let queryArray = [];
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
       });
     }
     if (status !== "") {
@@ -1922,16 +1919,16 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
     } else {
       queryArray.push({
         status: {
-          [Op.like]: `%${status}%`,
-        },
+          [Op.like]: `%${status}%`
+        }
       });
     }
     if (dateFrom !== "") {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -1941,8 +1938,8 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -1958,7 +1955,7 @@ exports.getPackageAssetBySearch = async (req, res, next) => {
 
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
     // .sort({ updatedAt: -1 })
     // .skip(page * limit)
@@ -2050,43 +2047,43 @@ exports.getAllPackageAsset = async (req, res, next) => {
           include: [
             {
               model: AssetImage,
-              as: "assetImages",
-            },
+              as: "assetImages"
+            }
           ],
           include: [
             {
               model: AssetDocument,
 
-              as: "assetDocuments",
-            },
-          ],
+              as: "assetDocuments"
+            }
+          ]
         },
         {
           model: PackageAssetImage,
           require: false,
 
-          as: "packageAssetImages",
+          as: "packageAssetImages"
         },
         {
           model: PackageAssetDocument,
           require: false,
 
-          as: "packageAssetDocuments",
+          as: "packageAssetDocuments"
         },
         {
           model: BottomSubComponentDataPkAsset,
           require: false,
 
-          as: "bottomSubComponentDataPackageAssets",
+          as: "bottomSubComponentDataPackageAssets"
         },
         {
           model: SubComponentPkAsset,
           require: false,
 
-          as: "subComponentPackageAssets",
-        },
+          as: "subComponentPackageAssets"
+        }
       ],
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
     //   .sort({ updatedAt: -1 })
     //   .skip(page * limit)
@@ -2116,39 +2113,39 @@ exports.getPackageAssetById = async (req, res, next) => {
           include: [
             {
               model: AssetImage,
-              as: "assetImages",
-            },
+              as: "assetImages"
+            }
           ],
           include: [
             {
               model: AssetDocument,
-              as: "assetDocuments",
-            },
-          ],
+              as: "assetDocuments"
+            }
+          ]
         },
         {
           model: PackageAssetImage,
           require: false,
 
-          as: "packageAssetImages",
+          as: "packageAssetImages"
         },
         {
           model: PackageAssetDocument,
           require: false,
 
-          as: "packageAssetDocuments",
+          as: "packageAssetDocuments"
         },
         {
           model: BottomSubComponentDataPkAsset,
           require: false,
 
-          as: "bottomSubComponentDataPackageAssets",
+          as: "bottomSubComponentDataPackageAssets"
         },
         {
           model: SubComponentPkAsset,
           require: false,
 
-          as: "subComponentPackageAssets",
+          as: "subComponentPackageAssets"
         },
         {
           model: BorrowhasPkAsset,
@@ -2157,9 +2154,9 @@ exports.getPackageAssetById = async (req, res, next) => {
           include: [
             {
               model: Borrow,
-              as: "TB_BORROW",
-            },
-          ],
+              as: "TB_BORROW"
+            }
+          ]
         },
         {
           model: TransferhasPkAsset,
@@ -2168,11 +2165,11 @@ exports.getPackageAssetById = async (req, res, next) => {
           include: [
             {
               model: Transfer,
-              as: "TB_TRANSFER",
-            },
-          ],
-        },
-      ],
+              as: "TB_TRANSFER"
+            }
+          ]
+        }
+      ]
     });
     // console.log(asset);
     // const packageAsset = await PackageAsset.findById({ _id: packageAssetId });
@@ -2187,27 +2184,27 @@ exports.getAllSector = async (req, res, next) => {
     const sector = await PackageAsset.aggregate([
       {
         $match: {
-          $and: [{ deletedAt: { $eq: null } }, { sector: { $ne: null } }],
-        },
+          $and: [{ deletedAt: { $eq: null } }, { sector: { $ne: null } }]
+        }
       },
       {
         $group: {
           _id: { sector: "$sector" },
-          numberOfzipcodes: { $sum: 1 },
-        },
+          numberOfzipcodes: { $sum: 1 }
+        }
       },
       {
         $project: {
           sector: "$_id.sector",
           numberOfzipcodes: "$numberOfzipcodes",
-          _id: 0,
-        },
+          _id: 0
+        }
       },
       {
         $sort: {
-          sector: 1,
-        },
-      },
+          sector: 1
+        }
+      }
     ]);
     res.json({ sector });
   } catch (err) {

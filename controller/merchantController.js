@@ -195,20 +195,21 @@ exports.getMerchantById = async (req, res, next) => {
 exports.createMerchant = async (req, res, next) => {
   try {
     let { input, merchantAddressData, merchantRelationData } = req.body;
+
     const inputData = JSON.parse(input);
     const arrayDocument = req?.files?.arrayDocument || [];
     const merchantAddressArray = JSON.parse(merchantAddressData);
     const merchantRelationArray = JSON.parse(merchantRelationData);
 
-    console.log("------------------------------------------------");
-    console.log("inputData:", inputData);
-    console.log("------------------------------------------------");
-    console.log("arrayDocument:", arrayDocument);
-    console.log("------------------------------------------------");
-    console.log("merchantAddressArray:", merchantAddressArray);
-    console.log("------------------------------------------------");
-    console.log("merchantRelationArray:", merchantRelationArray);
-    console.log("------------------------------------------------");
+    // console.log("------------------------------------------------");
+    // console.log("inputData:", inputData);
+    // console.log("------------------------------------------------");
+    // console.log("arrayDocument:", arrayDocument);
+    // console.log("------------------------------------------------");
+    // console.log("merchantAddressArray:", merchantAddressArray);
+    // console.log("------------------------------------------------");
+    // console.log("merchantRelationArray:", merchantRelationArray);
+    // console.log("------------------------------------------------");
 
     let {
       // ข้อมูลผู้ค้า

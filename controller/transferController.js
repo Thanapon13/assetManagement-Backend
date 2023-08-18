@@ -6,6 +6,7 @@ const {
   asset,
   transferHasAsset,
   transferHasPkAsset,
+  assetImage
 } = require("../models");
 const moment = require("moment/moment");
 
@@ -35,7 +36,7 @@ exports.createTransfer = async (req, res, next) => {
       dateTime_courier,
       name_approver, //ผู้อนุมัติชื่อ //
       dateTime_approver, //ผู้อนุมัติวันที่และเวลา //
-      status,
+      status
     } = inputObject;
     // console.log("inputObject:", inputObject);
 
@@ -51,7 +52,7 @@ exports.createTransfer = async (req, res, next) => {
     let newestTransferDocumentNumber;
     let newestTransfer = await transfer.findOne({
       attributes: ["transferDocumentNumber"],
-      order: [["_id", "DESC"]],
+      order: [["_id", "DESC"]]
     });
     // console.log("newestTransfer:", newestTransfer);
 
@@ -79,7 +80,7 @@ exports.createTransfer = async (req, res, next) => {
         dateTime_courier: new Date(),
         name_approver: name_approver,
         dateTime_approver: dateTime_approver,
-        status: status,
+        status: status
       });
       console.log("transfers:", transfers);
 
@@ -91,7 +92,7 @@ exports.createTransfer = async (req, res, next) => {
         isPackage: saveTransferTableArrayObject[0].isPackage,
         productName: saveTransferTableArrayObject[0].productName,
         amount: saveTransferTableArrayObject[0].amount,
-        transferId: transfersId,
+        transferId: transfersId
       };
 
       // console.log(
@@ -120,16 +121,16 @@ exports.createTransfer = async (req, res, next) => {
               where: {
                 assetNumber: saveTransferTableArrayObject[i].assetNumber,
                 reserved: false,
-                status: "inStock",
+                status: "inStock"
               },
               include: [
                 {
                   model: asset,
                   as: "assets",
                   required: true,
-                  attributes: ["_id"],
-                },
-              ],
+                  attributes: ["_id"]
+                }
+              ]
             });
 
             console.log("packageAssetData:", packageAssetData);
@@ -145,9 +146,9 @@ exports.createTransfer = async (req, res, next) => {
               { reserved: true },
               {
                 where: {
-                  assetNumber: saveTransferTableArrayObject[i].assetNumber,
+                  assetNumber: saveTransferTableArrayObject[i].assetNumber
                 },
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
 
@@ -166,8 +167,8 @@ exports.createTransfer = async (req, res, next) => {
 
                   {
                     where: {
-                      _id: assetId,
-                    },
+                      _id: assetId
+                    }
                   }
                 );
                 console.log("a:", a);
@@ -179,9 +180,9 @@ exports.createTransfer = async (req, res, next) => {
               { reserved: true },
               {
                 where: {
-                  assetNumber: saveTransferTableArrayObject[i].assetNumber,
+                  assetNumber: saveTransferTableArrayObject[i].assetNumber
                 },
-                returning: true,
+                returning: true
               }
             );
 
@@ -215,18 +216,18 @@ exports.createTransfer = async (req, res, next) => {
                 reserved: false,
                 status: "inStock",
                 _id: {
-                  [Op.notIn]: packageAssetIdHasAssetNumberArray,
-                },
+                  [Op.notIn]: packageAssetIdHasAssetNumberArray
+                }
               },
               include: [
                 {
                   model: asset,
                   as: "packageAssets",
                   required: true,
-                  attributes: ["_id"],
-                },
+                  attributes: ["_id"]
+                }
               ],
-              limit: +saveTransferTableArrayObject[i].amount,
+              limit: +saveTransferTableArrayObject[i].amount
             });
             console.log("packageAssetData:", packageAssetData);
 
@@ -242,8 +243,8 @@ exports.createTransfer = async (req, res, next) => {
                 { reserved: true },
                 {
                   where: {
-                    _id: packageAssetId,
-                  },
+                    _id: packageAssetId
+                  }
                 }
               );
 
@@ -262,7 +263,7 @@ exports.createTransfer = async (req, res, next) => {
                     { reserved: true },
                     {
                       where: { _id: assetId },
-                      returning: true,
+                      returning: true
                     }
                   );
                   console.log("ASSET UPDATE:", assetUpdate);
@@ -279,10 +280,10 @@ exports.createTransfer = async (req, res, next) => {
                 reserved: false,
                 status: "inStock",
                 _id: {
-                  [Op.notIn]: assetIdHasAssetNumberArray,
-                },
+                  [Op.notIn]: assetIdHasAssetNumberArray
+                }
               },
-              limit: +saveTransferTableArrayObject[i].amount,
+              limit: +saveTransferTableArrayObject[i].amount
             });
             console.log("ASSET DATA:", assetData);
 
@@ -294,8 +295,8 @@ exports.createTransfer = async (req, res, next) => {
                 { reserved: true },
                 {
                   where: {
-                    _id: assetId,
-                  },
+                    _id: assetId
+                  }
                 }
               );
               console.log("ASSSET ID:", assetId);
@@ -326,7 +327,7 @@ exports.createTransfer = async (req, res, next) => {
         dateTime_courier: new Date(),
         name_approver: name_approver,
         dateTime_approver: dateTime_approver,
-        status: status,
+        status: status
       });
 
       console.log("transfers:", transfers);
@@ -339,7 +340,7 @@ exports.createTransfer = async (req, res, next) => {
 
         const createTransferHasPkAsset = await transferHasPkAsset.create({
           transferId: transfersId,
-          packageAssetId: packageAssetId,
+          packageAssetId: packageAssetId
         });
         console.log("createTransferHasPkAsset:", createTransferHasPkAsset);
       }
@@ -349,7 +350,7 @@ exports.createTransfer = async (req, res, next) => {
 
         const createTransferHasAsset = await transferHasAsset.create({
           transferId: transfersId,
-          assetId: assetId,
+          assetId: assetId
         });
         console.log("createTransferHasAsset:", createTransferHasAsset);
       }
@@ -388,7 +389,7 @@ exports.updateTransfer = async (req, res, next) => {
       dateTime_courier,
       name_approver,
       dateTime_approver,
-      status,
+      status
     } = input;
     // console.log("input:", input);
 
@@ -432,16 +433,16 @@ exports.updateTransfer = async (req, res, next) => {
                 assetNumber: saveTransferTableArray[i].assetNumber,
                 // reserved: false
                 reserved: true,
-                status: "inStock",
+                status: "inStock"
               },
               include: [
                 {
                   model: asset,
                   as: "packageAssets",
                   required: true,
-                  attributes: ["_id"],
-                },
-              ],
+                  attributes: ["_id"]
+                }
+              ]
             });
             // console.log("packageAsset:", packageAsset);
 
@@ -455,9 +456,9 @@ exports.updateTransfer = async (req, res, next) => {
               { reserved: true },
               {
                 where: {
-                  assetNumber: saveTransferTableArray[i].assetNumber,
+                  assetNumber: saveTransferTableArray[i].assetNumber
                 },
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
 
@@ -479,8 +480,8 @@ exports.updateTransfer = async (req, res, next) => {
 
                   {
                     where: {
-                      _id: assetId,
-                    },
+                      _id: assetId
+                    }
                   }
                 );
                 console.log("a:", a);
@@ -493,9 +494,9 @@ exports.updateTransfer = async (req, res, next) => {
               { reserved: true },
               {
                 where: {
-                  assetNumber: saveTransferTableArray[i].assetNumber,
+                  assetNumber: saveTransferTableArray[i].assetNumber
                 },
-                returning: true,
+                returning: true
               }
             );
             console.log("assetUpdate:", assetUpdate);
@@ -524,18 +525,18 @@ exports.updateTransfer = async (req, res, next) => {
                 reserved: true,
                 status: "inStock",
                 _id: {
-                  [Op.notIn]: packageAssetIdHasAssetNumberArray,
-                },
+                  [Op.notIn]: packageAssetIdHasAssetNumberArray
+                }
               },
               include: [
                 {
                   model: asset,
                   as: "packageAssets",
                   required: true,
-                  attributes: ["_id"],
-                },
+                  attributes: ["_id"]
+                }
               ],
-              limit: +saveTransferTableArray[i].amount,
+              limit: +saveTransferTableArray[i].amount
             });
             // console.log("packageAssetData:", packageAssetData);
             // console.log("packageAssetData.length:", packageAssetData.length);
@@ -555,8 +556,8 @@ exports.updateTransfer = async (req, res, next) => {
                 { reserved: true },
                 {
                   where: {
-                    _id: packageAssetId,
-                  },
+                    _id: packageAssetId
+                  }
                 }
               );
 
@@ -575,7 +576,7 @@ exports.updateTransfer = async (req, res, next) => {
                     { reserved: true },
                     {
                       where: { _id: assetId },
-                      returning: true,
+                      returning: true
                     }
                   );
                   console.log("ASSET UPDATE:", assetUpdate);
@@ -592,10 +593,10 @@ exports.updateTransfer = async (req, res, next) => {
                 reserved: true,
                 status: "inStock",
                 _id: {
-                  [Op.notIn]: assetIdHasAssetNumberArray,
-                },
+                  [Op.notIn]: assetIdHasAssetNumberArray
+                }
               },
-              limit: +saveTransferTableArray[i].amount,
+              limit: +saveTransferTableArray[i].amount
             });
             console.log("ASSET DATA:", assetData);
 
@@ -607,8 +608,8 @@ exports.updateTransfer = async (req, res, next) => {
                 { reserved: true },
                 {
                   where: {
-                    _id: assetId,
-                  },
+                    _id: assetId
+                  }
                 }
               );
               // console.log("-------------------------------------");
@@ -633,16 +634,16 @@ exports.updateTransfer = async (req, res, next) => {
             where: {
               productName: deleteAssetArray[i].productName,
               reserved: true,
-              status: "inStock",
+              status: "inStock"
             },
             include: [
               {
                 model: asset,
                 as: "packageAssets",
                 required: true,
-                attributes: ["_id"],
-              },
-            ],
+                attributes: ["_id"]
+              }
+            ]
           });
           // console.log("packageAssetById:", packageAssetById);
           // console.log(
@@ -659,8 +660,8 @@ exports.updateTransfer = async (req, res, next) => {
             { reserved: false },
             {
               where: {
-                _id: packageAssetId,
-              },
+                _id: packageAssetId
+              }
             }
           );
 
@@ -669,8 +670,8 @@ exports.updateTransfer = async (req, res, next) => {
               { reserved: false },
               {
                 where: {
-                  _id: assetInPackageAssetArray[j]._id,
-                },
+                  _id: assetInPackageAssetArray[j]._id
+                }
               }
             );
 
@@ -678,20 +679,20 @@ exports.updateTransfer = async (req, res, next) => {
               {
                 packageAssetIdArray: Sequelize.literal(
                   `array_remove(packageAssetIdArray, ${packageAssetId})`
-                ),
+                )
               },
               {
                 where: {
-                  _id: transferId,
-                },
+                  _id: transferId
+                }
               }
             );
           }
         } else {
           let assetById = await asset.findOne({
             where: {
-              assetNumber: deleteAssetArray[i].assetNumber,
-            },
+              assetNumber: deleteAssetArray[i].assetNumber
+            }
           });
           console.log("assetById:", assetById);
 
@@ -702,8 +703,8 @@ exports.updateTransfer = async (req, res, next) => {
             { reserved: false },
             {
               where: {
-                _id: assetId,
-              },
+                _id: assetId
+              }
             }
           );
 
@@ -711,18 +712,19 @@ exports.updateTransfer = async (req, res, next) => {
             {
               assetIdArray: Sequelize.literal(
                 `array_remove(assetIdArray, ${assetId})`
-              ),
+              )
             },
             {
               where: {
-                _id: transferId,
-              },
+                _id: transferId
+              }
             }
           );
         }
       }
     }
 
+    console.log("-----------------------------------------------------");
     console.log("transferById", transferById);
     transferById.transferSector = transferSector;
     console.log(" transferById.transferSector:", transferSector);
@@ -742,6 +744,7 @@ exports.updateTransfer = async (req, res, next) => {
     console.log(" transferById.name_recorder :", name_recorder);
     transferById.name_courier = name_courier;
     console.log("transferById.name_courier :", name_courier);
+    console.log("-----------------------------------------------------");
 
     if (transferById.status == "saveDraft" && status == "waiting") {
       transferById.dateTime_recorder = new Date();
@@ -766,6 +769,7 @@ exports.updateTransfer = async (req, res, next) => {
     }
 
     transferById.status = status || transferById.status;
+
     await transferById.save();
 
     res.status(200).json({ message: "This transfer id updated successfully" });
@@ -787,16 +791,16 @@ exports.deleteTransfer = async (req, res, next) => {
     const transferData = await transfer.findByPk(transferId, {
       include: [
         { model: transferHasPkAsset, as: "transferHasPkAssets" },
-        { model: transferHasAsset, as: "transferHasAssets" },
-      ],
+        { model: transferHasAsset, as: "transferHasAssets" }
+      ]
     });
     // console.log("transferData:", transferData);
 
     if (transferData.status == "saveDraft") {
       await transfer.destroy({
         where: {
-          _id: transferId,
-        },
+          _id: transferId
+        }
       });
     } else {
       transferData.deletedAt = new Date();
@@ -812,9 +816,9 @@ exports.deleteTransfer = async (req, res, next) => {
             { reserved: false },
             {
               where: {
-                _id: assetId,
+                _id: assetId
               },
-              returning: true,
+              returning: true
             }
           );
         }
@@ -828,12 +832,12 @@ exports.deleteTransfer = async (req, res, next) => {
 
           let packageAssetData = await pkAsset.findOne({
             where: {
-              _id: packageAssetId,
+              _id: packageAssetId
             },
             include: {
               model: asset,
-              as: "packageAssets",
-            },
+              as: "packageAssets"
+            }
           });
           // console.log("packageAssetData:", packageAssetData);
 
@@ -841,9 +845,9 @@ exports.deleteTransfer = async (req, res, next) => {
             { reserved: false },
             {
               where: {
-                _id: packageAssetId,
+                _id: packageAssetId
               },
-              returning: true,
+              returning: true
             }
           );
           console.log("findForUpdatePackageAsset:", findForUpdatePackageAsset);
@@ -857,9 +861,9 @@ exports.deleteTransfer = async (req, res, next) => {
                 { reserved: false },
                 {
                   where: {
-                    _id: assetInPackageArray[j].dataValues._id,
+                    _id: assetInPackageArray[j].dataValues._id
                   },
-                  returning: true,
+                  returning: true
                 }
               );
             }
@@ -902,7 +906,7 @@ exports.getBySearch = async (req, res, next) => {
 
     if (textSearch !== "") {
       whereCondition[typeTextSearch] = {
-        [Op.like]: `%${textSearch}%`,
+        [Op.like]: `%${textSearch}%`
       };
     }
 
@@ -916,18 +920,18 @@ exports.getBySearch = async (req, res, next) => {
     if (dateFrom !== "") {
       whereCondition["createdAt"] = {
         [Op.gte]: modifiedDateFrom,
-        [Op.lte]: Sequelize.literal("CONVERT(date, GETDATE())"),
+        [Op.lte]: Sequelize.literal("CONVERT(date, GETDATE())")
       };
     }
     if (dateTo !== "") {
       whereCondition["createdAt"] = {
-        [Op.lte]: modifiedDateTo,
+        [Op.lte]: modifiedDateTo
       };
     }
     if (dateFrom !== "" && dateTo !== "") {
       whereCondition["createdAt"] = {
         [Op.gte]: modifiedDateFrom,
-        [Op.lte]: modifiedDateTo,
+        [Op.lte]: modifiedDateTo
       };
     }
     if (transferSector !== "") {
@@ -944,11 +948,11 @@ exports.getBySearch = async (req, res, next) => {
       where: whereCondition,
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     const total = await transfer.count({
-      where: whereCondition,
+      where: whereCondition
     });
 
     res.json({ transferData, page: page + 1, limit, total });
@@ -960,7 +964,7 @@ exports.getBySearch = async (req, res, next) => {
 exports.getAllTransfer = async (req, res, next) => {
   try {
     const transfers = await transfer.findAll({
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
     res.status(200).json({ transfers });
   } catch (err) {
@@ -975,19 +979,19 @@ exports.getTransferSectorForSearch = async (req, res, next) => {
         [Sequelize.literal("transferSector"), "transferSector"],
         [
           Sequelize.fn("COUNT", Sequelize.col("transferSector")),
-          "numberOfzicodes",
-        ],
+          "numberOfzicodes"
+        ]
       ],
       where: {
         deletedAt: null,
         transferSector: {
           [Op.not]: null,
-          [Op.not]: "",
-        },
+          [Op.not]: ""
+        }
       },
       group: ["transferSector"],
       raw: true,
-      order: [[Sequelize.literal("transferSector"), "ASC"]],
+      order: [[Sequelize.literal("transferSector"), "ASC"]]
     });
 
     res.status(200).json({ transferSector });
@@ -1000,7 +1004,7 @@ exports.getTransfereeSectorForSearch = async (req, res, next) => {
   try {
     const transfereeSector = await transfer.findAll(
       {
-        attributes: ["transfereeSector"],
+        attributes: ["transfereeSector"]
       },
 
       "COUNT",
@@ -1009,19 +1013,19 @@ exports.getTransfereeSectorForSearch = async (req, res, next) => {
           deletedAt: null,
           transfereeSector: {
             [Op.not]: null,
-            [Op.not]: "",
-          },
+            [Op.not]: ""
+          }
         },
         group: ["transfereeSector"],
         attributes: [
           "transfereeSector",
           [
             Sequelize.fn("COUNT", Sequelize.col("transfereeSector")),
-            "numberOfzipcodes",
-          ],
+            "numberOfzipcodes"
+          ]
         ],
         raw: true,
-        order: [["transfereeSector", "ASC"]],
+        order: [["transfereeSector", "ASC"]]
       }
     );
     console.log("transfereeSector:", transfereeSector);
@@ -1060,18 +1064,18 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
     if (dateFrom !== "") {
       query["createdAt"] = {
         [Op.gte]: dateFrom,
-        [Op.lte]: new Date(),
+        [Op.lte]: new Date()
       };
     }
     if (dateTo !== "") {
       query["createdAt"] = {
-        [Op.lte]: new Date(dateTo),
+        [Op.lte]: new Date(dateTo)
       };
     }
     if (dateFrom !== "" && dateTo !== "") {
       query["createdAt"] = {
         [Op.gte]: dateFrom,
-        [Op.lte]: dateTo,
+        [Op.lte]: dateTo
       };
     }
     if (transferSector !== "") {
@@ -1089,14 +1093,14 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
         {
           model: transferHasAsset,
           as: "transferHasAssets",
-          attributes: ["assetId", "reason", "return", "_id"],
+          attributes: ["assetId", "reason", "return", "_id"]
         },
         {
           model: transferHasPkAsset,
           as: "transferHasPkAssets",
-          attributes: ["packageAssetId", "reason", "return", "_id"],
-        },
-      ],
+          attributes: ["packageAssetId", "reason", "return", "_id"]
+        }
+      ]
     });
 
     query["status"] = { [Op.in]: splitList };
@@ -1104,17 +1108,17 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
 
     const bottomApproveList = await transfer.findAll({
       where: query,
-      order: [["dateTime_approver", "DESC"]],
+      order: [["dateTime_approver", "DESC"]]
     });
 
     const totalWaiting = await transfer.count({
-      where: { status: "waiting" },
+      where: { status: "waiting" }
     });
     const totalApprove = await transfer.count({
-      where: { status: "approve" },
+      where: { status: "approve" }
     });
     const totalReject = await transfer.count({
-      where: { status: "reject" },
+      where: { status: "reject" }
     });
     const totalAll = totalWaiting + totalApprove + totalReject;
 
@@ -1124,7 +1128,7 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
       totalAll,
       totalWaiting,
       totalApprove,
-      totalReject,
+      totalReject
     });
   } catch (err) {
     next(err);
@@ -1146,8 +1150,8 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
           { status: "approve", dateTime_approver: new Date() },
           {
             where: {
-              _id: transferId,
-            },
+              _id: transferId
+            }
           }
         );
         console.log("transferData:", transferData);
@@ -1160,8 +1164,8 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
               { status: "transfered", reserved: false },
               {
                 where: {
-                  _id: assetId,
-                },
+                  _id: assetId
+                }
               }
             );
           }
@@ -1175,16 +1179,16 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
               { status: "transfered", reserved: false },
               {
                 where: {
-                  _id: packageAssetId,
-                },
+                  _id: packageAssetId
+                }
               }
             );
             console.log("packageAsset:", packageAsset);
 
             let assetArray = await asset.findAll({
               where: {
-                packageAssetId,
-              },
+                packageAssetId
+              }
             });
 
             for (let l = 0; l < assetArray.length; l++) {
@@ -1194,8 +1198,8 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
                 { status: "transfered", reserved: false },
                 {
                   where: {
-                    _id: assetId,
-                  },
+                    _id: assetId
+                  }
                 }
               );
               console.log("assetData:", assetData);
@@ -1228,11 +1232,11 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
             dateTime_approver: new Date(),
             reason: topApproveList[i].reason,
             assetIdArray,
-            packageAssetIdArray,
+            packageAssetIdArray
           },
           {
             where: { _id: transferId },
-            returning: true,
+            returning: true
           }
         );
 
@@ -1248,7 +1252,7 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
             await transferHasAsset.update(
               {
                 reason: assetIdArray[i].reason,
-                return: assetIdArray[i].return,
+                return: assetIdArray[i].return
               },
               { where: { _id: assetIdArray[i]._id, transferId: transferId } }
             );
@@ -1266,7 +1270,7 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
 
             let assetArray = await asset.findAll({
               where: { packageAssetId },
-              returning: true,
+              returning: true
             });
 
             for (let l = 0; l < assetArray.length; l++) {
@@ -1280,13 +1284,13 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
             await transferHasPkAsset.update(
               {
                 reason: packageAssetIdArray[i].reason,
-                return: packageAssetIdArray[i].return,
+                return: packageAssetIdArray[i].return
               },
               {
                 where: {
                   _id: packageAssetIdArray[i]._id,
-                  transferId: transferId,
-                },
+                  transferId: transferId
+                }
               }
             );
           }
@@ -1315,11 +1319,11 @@ exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
         dateTime_approver: new Date(),
         reason: topApproveList.reason,
         assetIdArray,
-        packageAssetIdArray,
+        packageAssetIdArray
       },
       {
         where: { _id: transferId },
-        returning: true,
+        returning: true
       }
     );
 
@@ -1345,7 +1349,7 @@ exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
 
         let assetArray = await asset.findAll({
           where: { packageAssetId },
-          returning: true,
+          returning: true
         });
 
         for (let l = 0; l < assetArray.length; l++) {
@@ -1369,13 +1373,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
     const { input } = req.body;
-    console.log("transferId:", transferId);
+    // console.log("transferId:", transferId);
     console.log("input:", input);
 
-    const assetIdArray = input[0].assetIdArray;
-    const packageAssetIdArray = input[0].packageAssetIdArray;
-    // console.log("assetIdArray:", assetIdArray);
-    // console.log("packageAssetIdArray:", packageAssetIdArray);
+    const assetIdArray = input.assetIdArray;
+    const packageAssetIdArray = input.packageAssetIdArray;
+    console.log("assetIdArray:", assetIdArray);
+    console.log("packageAssetIdArray:", packageAssetIdArray);
 
     // for check all reason have value
     const assetIdArrayReason = assetIdArray.every(
@@ -1473,12 +1477,12 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         {
           status: "reject",
           dateTime_approver: new Date(),
-          note: input.note,
+          note: input.note
         },
         {
           where: {
-            _id: transferId,
-          },
+            _id: transferId
+          }
         }
       );
 
@@ -1489,14 +1493,14 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           { status: "inStock", reserved: false },
           {
             where: {
-              _id: assetId,
-            },
+              _id: assetId
+            }
           }
         );
         await transferHasAsset.update(
           {
             reason: el.reason,
-            return: el.return,
+            return: el.return
           },
           { where: { assetId: assetId, transferId: transferId } }
         );
@@ -1511,8 +1515,8 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           { status: "inStock", reserved: false },
           {
             where: {
-              _id: packageAssetId,
-            },
+              _id: packageAssetId
+            }
           }
         );
 
@@ -1525,15 +1529,15 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             { status: "inStock", reserved: false },
             {
               where: {
-                _id: assetId,
-              },
+                _id: assetId
+              }
             }
           );
         }
         await transferHasPkAsset.update(
           {
             reason: el.reason,
-            return: el.return,
+            return: el.return
           },
           { where: { packageAssetId: packageAssetId, transferId: transferId } }
         );
@@ -1550,7 +1554,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             return item;
           }
         })
-        .filter((item) => item !== undefined);
+        .filter(item => item !== undefined);
 
       const packageAssetIdReasonIndices = input[0].packageAssetIdArray
         .map((item, idx) => {
@@ -1558,7 +1562,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             return item;
           }
         })
-        .filter((item) => item !== undefined);
+        .filter(item => item !== undefined);
 
       if (
         assetIdReasonIndices.length > 0 ||
@@ -1576,13 +1580,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             dateTime_approver: new Date(),
             note: input.note,
             assetIdArray,
-            packageAssetIdArray,
+            packageAssetIdArray
           },
           {
             where: {
-              _id: transferId,
+              _id: transferId
             },
-            returning: true,
+            returning: true
           }
         );
 
@@ -1599,16 +1603,16 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
               { status: "inStock", reserved: false },
               {
                 where: {
-                  _id: assetId,
-                },
+                  _id: assetId
+                }
               },
               {
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
             await transferHasAsset.update(
               {
-                reason: reason,
+                reason: reason
               },
               { where: { assetId: assetId, transferId: transferId } }
             );
@@ -1618,11 +1622,11 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
               { status: "transfered", reserved: false },
               {
                 where: {
-                  _id: assetId,
-                },
+                  _id: assetId
+                }
               },
               {
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
           }
@@ -1639,11 +1643,11 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
               { status: "inStock", reserved: false },
               {
                 where: {
-                  _id: packageAssetId,
-                },
+                  _id: packageAssetId
+                }
               },
               {
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
             let assetArray = await asset.findAll({ where: { packageAssetId } });
@@ -1655,20 +1659,20 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
                 { status: "inStock", reserved: false },
                 {
                   where: {
-                    _id: assetId,
-                  },
+                    _id: assetId
+                  }
                 }
               );
             }
             await transferHasPkAsset.update(
               {
-                reason: reason,
+                reason: reason
               },
               {
                 where: {
                   packageAssetId: packageAssetId,
-                  transferId: transferId,
-                },
+                  transferId: transferId
+                }
               }
             );
           } else {
@@ -1677,11 +1681,11 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
               { status: "transfered", reserved: false },
               {
                 where: {
-                  _id: packageAssetId,
-                },
+                  _id: packageAssetId
+                }
               },
               {
-                returnOriginal: false,
+                returnOriginal: false
               }
             );
             let assetArray = await asset.findAll({ where: { packageAssetId } });
@@ -1693,8 +1697,8 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
                 { status: "transfered", reserved: false },
                 {
                   where: {
-                    _id: assetId,
-                  },
+                    _id: assetId
+                  }
                 }
               );
             }
@@ -1729,11 +1733,11 @@ exports.rejectAllTransferApproveDetail = async (req, res, next) => {
         note: input.note,
         reason: input.reason,
         assetIdArray,
-        packageAssetIdArray,
+        packageAssetIdArray
       },
       {
         where: { _id: transferId },
-        returning: true,
+        returning: true
       }
     );
 
@@ -1744,11 +1748,11 @@ exports.rejectAllTransferApproveDetail = async (req, res, next) => {
         await asset.update(
           {
             status: "inStock",
-            reserved: false,
+            reserved: false
           },
           {
             where: { _id: assetId },
-            returning: true,
+            returning: true
           }
         );
       }
@@ -1763,11 +1767,11 @@ exports.rejectAllTransferApproveDetail = async (req, res, next) => {
         await pkAsset.update(
           {
             status: "inStock",
-            reserved: false,
+            reserved: false
           },
           {
             where: { _id: packageAssetId },
-            returning: true,
+            returning: true
           }
         );
 
@@ -1778,11 +1782,11 @@ exports.rejectAllTransferApproveDetail = async (req, res, next) => {
           await asset.update(
             {
               status: "inStock",
-              reserved: false,
+              reserved: false
             },
             {
               where: { _id: assetId },
-              returning: true,
+              returning: true
             }
           );
         }
@@ -1816,11 +1820,11 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
                 "assetNumber",
                 "productName",
                 // "serialNumber",
-                "sector",
+                "sector"
                 // "imageArray"
-              ],
-            },
-          ],
+              ]
+            }
+          ]
         },
         {
           model: transferHasPkAsset,
@@ -1835,13 +1839,13 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
                 "assetNumber",
                 "productName",
                 // "serialNumber",
-                "sector",
+                "sector"
                 // "imageArray"
-              ],
-            },
-          ],
-        },
-      ],
+              ]
+            }
+          ]
+        }
+      ]
     });
 
     res.json({ transferArray });
@@ -1881,13 +1885,13 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
             "partiallyApprove",
             "waitingReturnApprove",
             "partiallyReturn",
-            "done",
-          ],
-        },
+            "done"
+          ]
+        }
       },
       order: [["dateTime_approver", "DESC"]],
       offset: page * limit,
-      limit,
+      limit
     };
 
     if (transfereeSector !== "") {
@@ -1897,19 +1901,19 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
     if (dateFrom !== "") {
       query.where.transferDate = {
         [Op.gte]: modifiedDateFrom,
-        [Op.lte]: moment().endOf("day").format("YYYY-MM-DD"),
+        [Op.lte]: moment().endOf("day").format("YYYY-MM-DD")
       };
     }
 
     if (dateTo !== "") {
       query.where.transferDate = {
-        [Op.lte]: modifiedDateTo,
+        [Op.lte]: modifiedDateTo
       };
     }
 
     if (dateFrom !== "" && dateTo !== "") {
       query.where.transferDate = {
-        [Op.between]: [modifiedDateFrom, modifiedDateTo],
+        [Op.between]: [modifiedDateFrom, modifiedDateTo]
       };
     }
 
@@ -1917,28 +1921,28 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
       if (typeTextSearch === "assetNumber") {
         const assetIds = await asset.findAll({
           where: {
-            assetNumber: { [Op.iLike]: `%${textSearch}%` },
+            assetNumber: { [Op.iLike]: `%${textSearch}%` }
           },
-          attributes: ["_id"],
+          attributes: ["_id"]
         });
 
         const packageAssetIds = await pkAsset.findAll({
           where: {
-            assetNumber: { [Op.iLike]: `%${textSearch}%` },
+            assetNumber: { [Op.iLike]: `%${textSearch}%` }
           },
-          attributes: ["_id"],
+          attributes: ["_id"]
         });
 
-        const assetIdArray = assetIds.map((asset) => asset._id);
-        const packageAssetIdArray = packageAssetIds.map((asset) => asset._id);
+        const assetIdArray = assetIds.map(asset => asset._id);
+        const packageAssetIdArray = packageAssetIds.map(asset => asset._id);
 
         query.where[Op.or] = [
           { assetIdArray: { [Op.contains]: assetIdArray } },
-          { packageAssetIdArray: { [Op.contains]: packageAssetIdArray } },
+          { packageAssetIdArray: { [Op.contains]: packageAssetIdArray } }
         ];
       } else {
         query.where[typeTextSearch] = {
-          [Op.iLike]: `%${textSearch}%`,
+          [Op.iLike]: `%${textSearch}%`
         };
       }
     }
@@ -1964,13 +1968,13 @@ exports.getTransferHistorySector = async (req, res, next) => {
             "partiallyApprove",
             "waitingReturnApprove",
             "partiallyReturn",
-            "done",
-          ],
+            "done"
+          ]
         },
-        deletedAt: null,
+        deletedAt: null
       },
       group: ["transfereeSector"],
-      order: [["transfereeSector", "ASC"]],
+      order: [["transfereeSector", "ASC"]]
     });
 
     console.log("transfereeSectors:", transfereeSectors);
@@ -2001,12 +2005,19 @@ exports.getTransferById = async (req, res, next) => {
                 "_id",
                 "assetNumber",
                 "productName",
-                // "serialNumber",
-                "sector",
+                "serialNumber",
+                "sector"
                 // "imageArray"
               ],
-            },
-          ],
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                  attributes: ["image"]
+                }
+              ]
+            }
+          ]
         },
         {
           model: transferHasPkAsset,
@@ -2021,13 +2032,13 @@ exports.getTransferById = async (req, res, next) => {
                 "assetNumber",
                 "productName",
                 // "serialNumber",
-                "sector",
+                "sector"
                 // "imageArray"
-              ],
-            },
-          ],
-        },
-      ],
+              ]
+            }
+          ]
+        }
+      ]
     });
 
     res.status(200).json({ transferById });
