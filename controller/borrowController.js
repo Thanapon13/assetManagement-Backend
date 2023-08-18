@@ -1593,8 +1593,8 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
     const inputObject = JSON.parse(input);
     // console.log(inputObject);
 
-    const assetIdArray = inputObject.assetIdArray;
-    const packageAssetIdArray = inputObject.packageAssetIdArray;
+    const assetIdArray = inputObject[0].assetIdArray;
+    const packageAssetIdArray = inputObject[0].packageAssetIdArray;
 
     // console.log("borrowId", borrowId);
     // console.log("assetIdArray", assetIdArray);
@@ -1602,12 +1602,87 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
 
     // for check all reason have value
     const assetIdArrayReason = assetIdArray.every(
-      (asset) => asset.reason !== ""
+      (asset) => asset.reason !== "" && asset.reason !== null
     );
     const packageAssetIdArrayReason = packageAssetIdArray.every(
-      (asset) => asset.reason !== ""
+      (asset) => asset.reason !== "" && asset.reason !== null
     );
+    const assetIdArrayUnReason = assetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
+    );
+    const packageAssetIdArrayUnReason = packageAssetIdArray.every(
+      (asset) => asset.reason == "" || asset.reason == null
+    );
+    if (assetIdArrayUnReason && packageAssetIdArrayUnReason) {
+      // approve all
+      await Borrow.update(
+        {
+          status: "approve",
+          dateTime_approver: new Date(),
+          note: inputObject.note,
+          // assetIdArray,
+          // packageAssetIdArray,
+        },
+        { where: { _id: borrowId } }
+      );
+      // for (let i = 0; i < assetIdArray; i++) {
+      //   await BorrowHasAsset.update(
+      //     {
+      //       reason: assetIdArray[i].reason,
+      //       return: assetIdArray[i].return,
+      //     },
+      //     { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
+      //   );
+      // }
+      // for (let i = 0; i < packageAssetIdArray; i++) {
+      //   await BorrowHasPkAsset.update(
+      //     {
+      //       reason: packageAssetIdArray[i].reason,
+      //       return: packageAssetIdArray[i].return,
+      //     },
+      //     {
+      //       where: {
+      //         packageAssetId: packageAssetIdArray[i].packageAssetId,
+      //         borrowId: borrowId,
+      //       },
+      //     }
+      //   );
+      // }
+      for (el of assetIdArray) {
+        // reject
+        let assetId = el.assetId;
+        await Asset.update(
+          { status: "borrowed", reserved: false },
+          { where: { _id: assetId } }
+        );
+      }
 
+      // change all packageAsset status by id
+      for (el of packageAssetIdArray) {
+        let packageAssetId = el.packageAssetId;
+
+        // reject
+        await PackageAsset.update(
+          { status: "borrowed", reserved: false },
+          { where: { _id: packageAssetId } }
+        );
+
+        let assetArray = await Asset.findOne({
+          where: { packageAssetId: packageAssetId },
+        });
+        for (let l = 0; l < assetArray.length; l++) {
+          let assetId = assetArray[l]._id;
+          await Asset.update(
+            { status: "borrowed", reserved: false },
+            { where: { _id: assetId } }
+          );
+        }
+      }
+
+      return res.json({
+        message: "This borrowings has been successfully approved.",
+      });
+    }
     if (assetIdArrayReason && packageAssetIdArrayReason) {
       // reject all
       await Borrow.update(
@@ -1674,7 +1749,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
         }
       }
 
-      res.json({
+      return res.json({
         message: "This borrowings has been successfully rejected.",
       });
     } else {
