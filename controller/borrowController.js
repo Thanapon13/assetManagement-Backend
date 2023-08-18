@@ -8,6 +8,7 @@ const PackageAsset = require("../models").pkAsset;
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const moment = require("moment/moment");
+const { borrowHasPkAsset } = require("../models");
 const BorrowImage = require("../models").borrowImage;
 
 function delete_file(path) {
@@ -1338,7 +1339,7 @@ exports.approveAllWaitingBorrow = async (req, res, next) => {
               reason: assetIdArray[i].reason,
               return: assetIdArray[i].return,
             },
-            { where: { _id: assetIdArray[i]._id } }
+            { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
           );
         }
         for (let i = 0; i < packageAssetIdArray; i++) {
@@ -1347,7 +1348,12 @@ exports.approveAllWaitingBorrow = async (req, res, next) => {
               reason: packageAssetIdArray[i].reason,
               return: packageAssetIdArray[i].return,
             },
-            { where: { _id: packageAssetIdArray[i]._id } }
+            {
+              where: {
+                packageAssetId: packageAssetIdArray[i].packageAssetId,
+                borrowId: borrowId,
+              },
+            }
           );
         }
         if (assetIdArray.length > 0) {
@@ -1425,7 +1431,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
               reason: assetIdArray[i].reason,
               return: assetIdArray[i].return,
             },
-            { where: { _id: assetIdArray[i]._id } }
+            { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
           );
         }
         for (let i = 0; i < packageAssetIdArray; i++) {
@@ -1434,7 +1440,12 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
               reason: packageAssetIdArray[i].reason,
               return: packageAssetIdArray[i].return,
             },
-            { where: { _id: packageAssetIdArray[i]._id } }
+            {
+              where: {
+                packageAssetId: packageAssetIdArray[i].packageAssetId,
+                borrowId: borrowId,
+              },
+            }
           );
         }
         if (assetIdArray.length > 0) {
@@ -1513,7 +1524,7 @@ exports.rejectIndividualWaitingBorrow = async (req, res, next) => {
           reason: assetIdArray[i].reason,
           return: assetIdArray[i].return,
         },
-        { where: { _id: assetIdArray[i]._id } }
+        { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
       );
     }
     for (let i = 0; i < packageAssetIdArray; i++) {
@@ -1522,7 +1533,12 @@ exports.rejectIndividualWaitingBorrow = async (req, res, next) => {
           reason: packageAssetIdArray[i].reason,
           return: packageAssetIdArray[i].return,
         },
-        { where: { _id: packageAssetIdArray[i]._id } }
+        {
+          where: {
+            packageAssetId: packageAssetIdArray[i].packageAssetId,
+            borrowId: borrowId,
+          },
+        }
       );
     }
 
@@ -1610,7 +1626,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
             reason: assetIdArray[i].reason,
             return: assetIdArray[i].return,
           },
-          { where: { _id: assetIdArray[i]._id } }
+          { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
         );
       }
       for (let i = 0; i < packageAssetIdArray; i++) {
@@ -1619,7 +1635,12 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
             reason: packageAssetIdArray[i].reason,
             return: packageAssetIdArray[i].return,
           },
-          { where: { _id: packageAssetIdArray[i]._id } }
+          {
+            where: {
+              packageAssetId: packageAssetIdArray[i].packageAssetId,
+              borrowId: borrowId,
+            },
+          }
         );
       }
       for (el of assetIdArray) {
@@ -1851,7 +1872,7 @@ exports.rejectAllBorrowApproveDetail = async (req, res, next) => {
           reason: assetIdArray[i].reason,
           return: assetIdArray[i].return,
         },
-        { where: { _id: assetIdArray[i]._id } }
+        { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
       );
     }
     for (let i = 0; i < packageAssetIdArray; i++) {
@@ -1860,7 +1881,12 @@ exports.rejectAllBorrowApproveDetail = async (req, res, next) => {
           reason: packageAssetIdArray[i].reason,
           return: packageAssetIdArray[i].return,
         },
-        { where: { _id: packageAssetIdArray[i]._id } }
+        {
+          where: {
+            packageAssetId: packageAssetIdArray[i].packageAssetId,
+            borrowId: borrowId,
+          },
+        }
       );
     }
     if (assetIdArray.length > 0) {
@@ -2022,7 +2048,7 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
             assetNumber: { [Op.like]: `%${textSearch}%` },
           },
         });
-        console.log("assetArray", assetArray);
+        console.log("assetArrayt", assetArray);
         let packageAssetArray = await PackageAsset.findAll({
           where: {
             assetNumber: { [Op.like]: `%${textSearch}%` },
@@ -2033,35 +2059,35 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
         idArray = assetArray
           .concat(packageAssetArray)
           .map((asset) => asset._id);
+        // if (idArray.length > 0) {
+        // queryArray.push({
+        //   [Op.or]: [
+        //     {
+        //       include: {
+        //         model: BorrowHasAsset,
+        //         as: "borrowHasAssets",
+        //         where: { assetId: { [Op.in]: idArray } },
+        //       },
+        //     },
+        //     {
+        //       include: {
+        //         model: BorrowHasPkAsset,
 
-        if (idArray.length > 0) {
-          queryArray.push({
-            [Op.or]: [
-              {
-                include: {
-                  model: BorrowHasAsset,
-                  as: "borrowHasAssets",
-                  where: { assetId: { [Op.in]: idArray } },
-                },
-              },
-              {
-                include: {
-                  model: BorrowHasPkAsset,
-                  where: { packageAssetId: { [Op.in]: idArray } },
-                },
-              },
-            ],
-          });
-          // query["$or"] = [
-          //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
-          //   {
-          //     packageAssetIdArray: {
-          //       $elemMatch: { packageAssetId: { $in: idArray } },
-          //     },
-          //   },
-          // ];
-        }
-        console.log(idArray);
+        //         where: { packageAssetId: { [Op.in]: idArray } },
+        //       },
+        //     },
+        //   ],
+        // });
+        // query["$or"] = [
+        //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
+        //   {
+        //     packageAssetIdArray: {
+        //       $elemMatch: { packageAssetId: { $in: idArray } },
+        //     },
+        //   },
+        // ];
+        // }
+        // console.log(idArray);
       } else {
         queryArray.push({
           [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
@@ -2112,9 +2138,33 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
     console.log(queryArray[0][Op.or], "queryArray");
 
     const borrow = await Borrow.findAll({
-      where: { [Op.and]: queryArray },
-
-      // include: [{ model: Asset, require: false, as: "assets" }],
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+          // require: false,
+        },
+      ],
 
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
@@ -2123,7 +2173,34 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
 
     // console.log(asset)
     // for show how many pages
-    const total = await Borrow.count({ where: { [Op.and]: queryArray } });
+    const total = await Borrow.count({
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+        },
+      ],
+    });
 
     res.json({ borrow, idArray, page: page + 1, limit, total });
   } catch (err) {
@@ -2226,24 +2303,25 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
         idArray = assetArray
           .concat(packageAssetArray)
           .map((asset) => asset._id);
-
+        console.log("idArray : ", idArray);
         if (idArray.length > 0) {
-          queryArray.push({
-            [Op.or]: [
-              {
-                include: {
-                  model: BorrowHasAsset,
-                  where: { assetId: { [Op.in]: idArray } },
-                },
-              },
-              {
-                include: {
-                  model: BorrowHasPkAsset,
-                  where: { packageAssetId: { [Op.in]: idArray } },
-                },
-              },
-            ],
-          });
+          // queryArray.push({
+          //   [Op.or]: [
+          //     {
+          //       include: {
+          //         model: BorrowHasAsset,
+          //         // as: "borrowHasAssets",
+          //         where: { assetId: { [Op.in]: idArray } },
+          //       },
+          //     },
+          //     {
+          //       include: {
+          //         model: BorrowHasPkAsset,
+          //         where: { packageAssetId: { [Op.in]: idArray } },
+          //       },
+          //     },
+          //   ],
+          // });
           // query["$or"] = [
           //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
           //   {
@@ -2309,16 +2387,69 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     console.log(queryArray, "queryArray");
 
     const borrow = await Borrow.findAll({
-      where: { [Op.and]: queryArray },
-      // include: [{ model: Asset, require: false, as: "assets" }],
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: true,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+          // require: true,
+        },
+      ],
+
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      // limit: limit,
     });
 
     // console.log(asset)
     // for show how many pages
-    const total = await Borrow.count({ where: { [Op.and]: queryArray } });
+    const total = await Borrow.count({
+      where: {
+        [Op.and]: queryArray,
+        [Op.or]: [
+          {
+            "$borrowHasAssets.assetId$": {
+              [Op.in]: idArray,
+            },
+          },
+          {
+            "$borrowHasPkAssets.packageAssetId$": {
+              [Op.in]: idArray,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          // require: false,
+        },
+        {
+          model: borrowHasPkAsset,
+          as: "borrowHasPkAssets",
+        },
+      ],
+    });
 
     res.json({ borrow, idArray, page: page + 1, limit, total });
   } catch (err) {
@@ -2732,7 +2863,7 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
             return: assetIdArray[i].return,
             returnDate: assetIdArray[i].returnDate,
           },
-          { where: { assetId: assetIdArray[i].assetId } }
+          { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
         );
       }
       // update borrow has pkAsset
@@ -2743,7 +2874,12 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
             return: packageAssetIdArray[i].return,
             returnDate: packageAssetIdArray[i].returnDate,
           },
-          { where: { assetId: packageAssetIdArray[i].packageAssetId } }
+          {
+            where: {
+              packageAssetId: packageAssetIdArray[i].packageAssetId,
+              borrowId: borrowId,
+            },
+          }
         );
       }
       if (assetIdArraySomeReturn) {
@@ -2820,7 +2956,7 @@ exports.getViewBorrowHistoryByPackageAssetId = async (req, res, next) => {
     const borrows = await Borrow.findOne({
       include: {
         model: BorrowHasPkAsset,
-        as: "borrowHasPkAssets",
+        as: "borrowHasAssets",
         where: { packageAssetId: packageAssetId },
       },
       attributes: [

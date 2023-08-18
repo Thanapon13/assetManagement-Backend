@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const merchantDocumentArray = sequelize.define(
-    "TB_MEERCHANT_DOCUMENTS_ARRAY",
+    "TB_MERCHANT_DOCUMENTS",
     {
       // ด้านล่างเป็นการตั้งค่า attribute ของ table นะครับ
       // ชื่อตัวแปรที่เราใช้เรียกแทน: { type: Sequelize.STRING(50), allowNull: false, field: 'ชื่อของ attribute' }
@@ -10,16 +10,16 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
-        field: "_id"
+        field: "_id",
       },
       document: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        field: "document"
-      }
+        field: "document",
+      },
     },
     {
-      tableName: "TB_MEERCHANT_DOCUMENTS_ARRAY"
+      tableName: "TB_MERCHANT_DOCUMENTS",
     }
   );
 

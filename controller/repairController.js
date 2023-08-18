@@ -9,6 +9,7 @@ const { query } = require("express");
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const fs = require("fs");
+const moment = require("moment/moment");
 
 function delete_file(path) {
   fs.unlink(path, (err) => {
@@ -247,7 +248,7 @@ exports.getBySearch = async (req, res, next) => {
       });
     }
     if (sector !== "") {
-      queryArray.push({ sector: sector });
+      queryArray.push({ courierSector: sector });
     }
     queryArray.push({ deletedAt: { [Op.eq]: null } });
     console.log(queryArray, "queryArray");
@@ -284,7 +285,7 @@ exports.getSectorForSearch = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { courierSector: { [Op.in]: status } },
+          { status: { [Op.in]: status } },
         ],
       },
       attributes: [
@@ -322,7 +323,7 @@ exports.getSectorForSearchDetailRecord = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { courierSector: { [Op.in]: statusOfDetailRecord } },
+          { statusOfDetailRecord: { [Op.in]: statusOfDetailRecord } },
         ],
       },
       attributes: [
@@ -352,7 +353,7 @@ exports.getSectorForSearchHistory = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { courierSector: { [Op.in]: status } },
+          { status: { [Op.in]: status } },
         ],
       },
       attributes: [
@@ -654,7 +655,7 @@ exports.updateRepair = async (req, res, next) => {
       // const borrow = Borrow.create({ ...data })
       return res
         .status(200)
-        .json({ message: "This borrow id updated successfully" });
+        .json({ message: "This repair id updated successfully" });
     }
 
     if (repairInfo.status != "saveDraft") {
@@ -838,7 +839,7 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
       });
     }
     if (sector !== "") {
-      queryArray.push({ sector: sector });
+      queryArray.push({ courierSector: sector });
     }
 
     queryArray.push({ deletedAt: { [Op.eq]: null } });
@@ -947,7 +948,7 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
       status === undefined
     ) {
       queryArray.push({
-        status: {
+        statusOfDetailRecord: {
           [Op.in]: [
             "waiting",
             "waitingRecord",
@@ -1002,7 +1003,7 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
       });
     }
     if (sector !== "") {
-      queryArray.push({ sector: sector });
+      queryArray.push({ courierSector: sector });
     }
     queryArray.push({ deletedAt: { [Op.eq]: null } });
     console.log(queryArray, "queryArray");
@@ -1171,6 +1172,46 @@ exports.updateStatusForGetJobRepair = async (req, res, next) => {
       } else if (status == "cancelOfDetailRecord") {
         query["status"] = "cancel";
         query["statusOfDetailRecord"] = "cancelOfDetailRecord";
+        const repairData = await Repair.findByPk(repairId);
+        console.log("repairData", repairData);
+        if (repairData.assetId == null) {
+          let packageAssetId = repairData.packageAssetId;
+          const packageAssetArray = await PackageAsset.findOne({
+            where: { _id: packageAssetId },
+            attributes: ["_id", "assetNumber"],
+            include: [
+              {
+                model: Asset,
+                as: "assets",
+                attributes: ["_id", "assetNumber"],
+              },
+            ],
+          });
+          await PackageAsset.update(
+            { reserved: false },
+            {
+              where: {
+                assetNumber,
+              },
+            }
+          );
+
+          for (el of packageAssetArray.assets) {
+            // console.log(el._id)
+            await Asset.update({ reserved: false }, { where: { _id: el._id } });
+          }
+        } else {
+          let assetId = repairData.assetId;
+
+          await Asset.update(
+            { reserved: false },
+            {
+              where: {
+                _id: assetId,
+              },
+            }
+          );
+        }
       }
     }
     const repair = await Repair.update(query, { where: { _id: repairId } });
@@ -1185,15 +1226,21 @@ exports.offWorkRepair = async (req, res, next) => {
     const repairId = req.params.repairId;
     const { input } = req.body;
     const { repairResult, mechinicComment } = input;
-
+    let queryInsert = {};
+    const repairData = await Repair.findByPk(repairId);
+    if (repairData.outsourceFlag == "Y") {
+      queryInsert = { statusOutsourceRepair: "complete" };
+    }
     const repair = await Repair.update(
       {
         ...input,
+        ...queryInsert,
         status: "waitingForCheck",
         statusOfDetailRecord: "completeOfDetailRecord",
       },
-      { where: { _id: repairId } }
+      { where: { _id: repairId }, returning: true, plain: true }
     );
+
     res.json({ message: "off work successfully" });
   } catch (err) {
     next(err);
@@ -1209,8 +1256,14 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
         let repairId = topApproveList[i]._id;
         let assetId = topApproveList[i].assetId;
         let packageAssetId = topApproveList[i].packageAssetId;
+        let queryInsert = {};
+        const repairData = await Repair.findByPk(repairId);
+        if (repairData.outsourceFlag == "Y") {
+          queryInsert = { statusOutsourceRepair: "complete" };
+        }
         let repair = await Repair.update(
           {
+            ...queryInsert,
             statusOfDetailRecord: "inProgressOfDetailRecord",
             dateTime_approver: new Date(),
           },
@@ -1219,7 +1272,7 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
         if (assetId) {
           // console.log("assetId", assetId);
           let asset = await Asset.update(
-            { status: "repair", reserved: true },
+            { status: "repair", reserved: false },
 
             { where: { _id: assetId } }
           );
@@ -1228,7 +1281,7 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
         if (packageAssetId) {
           // console.log("packageAssetId", packageAssetId);
           let packageAsset = await PackageAsset.update(
-            { status: "repair", reserved: true },
+            { status: "repair", reserved: false },
             { where: { _id: packageAssetId } }
           );
 
@@ -1264,12 +1317,13 @@ exports.rejectAllWaitingRepair = async (req, res, next) => {
         let repairId = topApproveList[i]._id;
         let assetId = topApproveList[i].assetId;
         let packageAssetId = topApproveList[i].packageAssetId;
+        let reason = topApproveList[i].reason;
         let repair = await Repair.update(
           {
             status: "reject",
             statusOfDetailRecord: "reject",
             dateTime_approver: new Date(),
-            reason: topApproveList[i].reason,
+            reason: reason,
           },
           { where: { _id: repairId } }
         );
@@ -1316,6 +1370,7 @@ exports.rejectIndividualWaitingRepair = async (req, res, next) => {
     let repairId = topApproveList._id;
     let assetId = topApproveList.assetId;
     let packageAssetId = topApproveList.packageAssetId;
+    let reason = topApproveList.reason;
 
     // console.log("transferId", transferId);
     // console.log("assetIdArray", assetIdArray);
@@ -1326,7 +1381,7 @@ exports.rejectIndividualWaitingRepair = async (req, res, next) => {
         status: "reject",
         statusOfDetailRecord: "reject",
         dateTime_approver: new Date(),
-        reason: topApproveList.reason,
+        reason: reason,
       },
       { where: { _id: repairId } }
     );
@@ -1369,8 +1424,14 @@ exports.approveIndividualWaitingRepair = async (req, res, next) => {
     let repairId = topApproveList._id;
     let assetId = topApproveList.assetId;
     let packageAssetId = topApproveList.packageAssetId;
+    let queryInsert = {};
+    const repairData = await Repair.findByPk(repairId);
+    if (repairData.outsourceFlag == "Y") {
+      queryInsert = { statusOutsourceRepair: "complete" };
+    }
     await Repair.update(
       {
+        ...queryInsert,
         statusOfDetailRecord: "inProgressOfDetailRecord",
         dateTime_approver: new Date(),
       },
@@ -1420,7 +1481,6 @@ exports.getBySearchOfHistory = async (req, res, next) => {
     const informRepairIdDocTextSearch =
       req.query.informRepairIdDocTextSearch || "";
     const assetNumberTextSearch = req.query.assetNumberTextSearch || "";
-    const status = req.query.status || "";
     const dateFrom = req.query.dateFrom || "";
     const dateTo = req.query.dateTo || "";
     const sector = req.query.sector || "";
@@ -1459,7 +1519,9 @@ exports.getBySearchOfHistory = async (req, res, next) => {
 
     if (informRepairIdDocTextSearch !== "") {
       queryArray.push({
-        [informRepairIdDoc]: { [Op.like]: `%${informRepairIdDoc}%` },
+        ["informRepairIdDoc"]: {
+          [Op.like]: `%${informRepairIdDocTextSearch}%`,
+        },
       });
     }
 
@@ -1469,11 +1531,11 @@ exports.getBySearchOfHistory = async (req, res, next) => {
 
     if (assetNumberTextSearch !== "") {
       queryArray.push({
-        [assetNumber]: { [Op.like]: `%${assetNumberTextSearch}%` },
+        ["assetNumber"]: { [Op.like]: `%${assetNumberTextSearch}%` },
       });
     }
 
-    queryArray.push({ status: { [Op.in]: ["complete"] } });
+    queryArray.push({ status: { [Op.eq]: "complete" } });
 
     if (dateFrom !== "") {
       queryArray.push({
@@ -1495,7 +1557,7 @@ exports.getBySearchOfHistory = async (req, res, next) => {
       });
     }
     if (sector !== "") {
-      queryArray.push({ sector: sector });
+      queryArray.push({ courierSector: sector });
     }
 
     queryArray.push({ deletedAt: { [Op.eq]: null } });
@@ -1536,15 +1598,6 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
     const packageAsset = packageAssetArray[0];
     let assetInfo = {};
     if (asset.length > 0) {
-      // await Asset.findOneAndUpdate(
-      //   {
-      //     assetNumber,
-      //   },
-      //   { reserved: true },
-      //   {
-      //     returnOriginal: false,
-      //   }
-      // );
       assetInfo = asset[0];
       const historyOfasset = await Asset.findAll({
         where: { _id: assetInfo._id },
@@ -1555,108 +1608,76 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
             where: { [Op.and]: [{ deletedAt: null }, { status: "complete" }] },
             include: [
               {
+                require: false,
                 model: CostOfRepair,
                 as: "costOfRepairArray",
-                // attributes: [
-                // [
-                //   sequelize.fn("SUM", sequelize.col("totalEarn")),
-                //   "sumOfTotalEarn",
-                // ],
-                // [
-                //   sequelize.fn("SUM", sequelize.col("amountExtra")),
-                //   "sumOfamountExtra",
-                // ],
-                // ],
-                group: "repairId",
               },
-              { model: CostOfRepairMan, as: "informRepairManArray" },
+              {
+                require: false,
+                model: CostOfRepairMan,
+                as: "informRepairManArray",
+                attributes: [
+                  [
+                    sequelize.fn("SUM", sequelize.col("totalEarn")),
+                    "totalPrice",
+                  ],
+                ],
+              },
             ],
-            // attributes: [
-            //   ["_id", "_id"],
-            // ],
-            // group: "",
           },
         ],
-        // attributes: [[sequelize.literal("repairAssetId"), "history"]],
       });
-      // const historyOfasset = await Asset.aggregate([
-      //   { $match: { _id: ObjectID(asset[0]._id) } },
-      //   {
-      //     $lookup: {
-      //       from: "repairs",
-      //       let: { assetIds: "$_id" },
-      //       pipeline: [
-      //         {
-      //           $match: {
-      //             $expr: {
-      //               $and: [
-      //                 { $eq: ["$assetId", "$$assetIds"] },
-      //                 { $not: { $gt: ["$deletedAt", null] } },
-      //                 { $eq: ["$status", "complete"] },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           $project: {
-      //             _id: 1,
-      //             informRepairIdDoc: 1,
-      //             problemDetail: 1,
-      //             kind: 1,
-      //             informRepairManArray: 1,
-      //             costOfRepairArray: 1,
-      //             // sumCostOfRepairArray: {
-      //             //   $sum: "$costOfRepairArray.pricePerPiece",
-      //             // },
-      //             // sumCostOfRepairArray2: {
-      //             //   $sum: "$costOfRepairArray.quantity",
-      //             // },
-      //           },
-      //         }, // Specify the fields you want to retrieve
-      //       ],
-      //       as: "assets",
-      //     },
-      //   },
-      // ]);
 
-      res.json({ historyOfasset });
+      return res.json({ historyOfasset });
     } else if (packageAsset) {
       assetInfo = packageAsset;
-
-      const historyOfasset = await packageAsset.aggregate([
-        { $match: { _id: ObjectID(packageAsset._id) } },
-        {
-          $lookup: {
-            from: "repairs",
-            let: { packageAssetIds: "$_id" },
-            pipeline: [
+      let historyOfasset = await PackageAsset.findAll({
+        where: { _id: assetInfo._id },
+        // attributes: ["_id"],
+        include: [
+          {
+            model: Repair,
+            as: "repairPackageAssetId",
+            // attributes: ["_id"],
+            where: { [Op.and]: [{ deletedAt: null }, { status: "complete" }] },
+            include: [
               {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$packageAssetId", "$$packageAssetIds"] },
-                      { $not: { $gt: ["$deletedAt", null] } },
-                      { $eq: ["$status", "complete"] },
-                    ],
-                  },
-                },
+                require: false,
+                model: CostOfRepair,
+                as: "costOfRepairArray",
+                // attributes: ["_id"],
               },
               {
-                $project: {
-                  _id: 1,
-                  informRepairIdDoc: 1,
-                  problemDetail: 1,
-                  kind: 1,
-                  informRepairManArray: 1,
-                },
-              }, // Specify the fields you want to retrieve
+                require: false,
+                model: CostOfRepairMan,
+                as: "informRepairManArray",
+                // attributes: [
+                //   "_id",
+                //   [
+                //     sequelize.fn("SUM", sequelize.col("totalEarn")),
+                //     "totalEarn",
+                //   ],
+                // ],
+              },
             ],
-            as: "assets",
           },
-        },
-      ]);
+        ],
+        // group: [
+        //   "TB_PACKAGE_ASSETS._id",
+        //   "repairPackageAssetId._id",
+        //   "repairPackageAssetId.costOfRepairArray._id",
+        //   "repairPackageAssetId.informRepairManArray._id",
+        // ],
+      });
 
-      res.json({ historyOfasset });
+      // const test = await CostOfRepairMan.findAll({
+      //   where: { repairId: 1 },
+      //   attributes: [
+      //     [sequelize.fn("SUM", sequelize.col("totalEarn")), "totalEarn"],
+      //   ],
+      // });
+
+      return res.json({ historyOfasset });
     }
   } catch (err) {
     next(err);
@@ -1772,6 +1793,7 @@ exports.outSourceRepairRecord = async (req, res, next) => {
       purchaseAmount,
     } = inputObject;
     console.log("inputObject", inputObject);
+    console.log("status : ", status);
     let queryInsert = {};
     queryInsert["statusOfDetailRecord"] = status;
     if (status == "waitingApproval") {
@@ -1781,7 +1803,7 @@ exports.outSourceRepairRecord = async (req, res, next) => {
     const repair = await Repair.update(
       {
         ...inputObject,
-        queryInsert,
+        ...queryInsert,
       },
       { where: { _id: repairId } }
     );
@@ -2074,6 +2096,89 @@ exports.getAssetByAssetNumber = async (req, res, next) => {
     console.log("data", data);
 
     res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getRepairTypeOutsourceForSearchOutsource = async (req, res, next) => {
+  try {
+    const typeOfRepair = await Repair.findAll({
+      where: {
+        [Op.and]: [
+          { outsourceFlag: { [Op.eq]: "Y" } },
+          { deletedAt: { [Op.eq]: null } },
+          { typeOfRepair: { [Op.ne]: null } },
+          { typeOfRepair: { [Op.ne]: "" } },
+        ],
+      },
+      attributes: [
+        // ["_id", "_id"],
+        ["typeOfRepair", "typeOfRepair"],
+        [
+          sequelize.fn("COUNT", sequelize.col("typeOfRepair")),
+          "numberOfzipcodes",
+        ],
+      ],
+      group: "typeOfRepair",
+      raw: true,
+      order: [["typeOfRepair", "ASC"]],
+    });
+    res.json({ typeOfRepair });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBuildingOutsourceForSearchOutsource = async (req, res, next) => {
+  try {
+    const building = await Repair.findAll({
+      where: {
+        [Op.and]: [
+          { outsourceFlag: { [Op.eq]: "Y" } },
+          { deletedAt: { [Op.eq]: null } },
+          { building: { [Op.ne]: null } },
+          { building: { [Op.ne]: "" } },
+        ],
+      },
+      attributes: [
+        // ["_id", "_id"],
+        ["building", "building"],
+        [sequelize.fn("COUNT", sequelize.col("building")), "numberOfzipcodes"],
+      ],
+      group: "building",
+      raw: true,
+      order: [["building", "ASC"]],
+    });
+
+    res.json({ building });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getFloorForSearchOutsource = async (req, res, next) => {
+  try {
+    const floor = await Repair.findAll({
+      where: {
+        [Op.and]: [
+          { outsourceFlag: { [Op.eq]: "Y" } },
+          { deletedAt: { [Op.eq]: null } },
+          { floor: { [Op.ne]: null } },
+          { floor: { [Op.ne]: "" } },
+        ],
+      },
+      attributes: [
+        // ["_id", "_id"],
+        ["floor", "floor"],
+        [sequelize.fn("COUNT", sequelize.col("floor")), "numberOfzipcodes"],
+      ],
+      group: "floor",
+      raw: true,
+      order: [["floor", "ASC"]],
+    });
+
+    res.json({ floor });
   } catch (err) {
     next(err);
   }

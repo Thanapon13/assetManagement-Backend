@@ -8,6 +8,7 @@ const {
   transferHasPkAsset,
   assetImage
 } = require("../models");
+const moment = require("moment/moment");
 
 exports.createTransfer = async (req, res, next) => {
   try {
@@ -905,7 +906,7 @@ exports.getBySearch = async (req, res, next) => {
 
     if (textSearch !== "") {
       whereCondition[typeTextSearch] = {
-        [Sequelize.Op.iLike]: `%${textSearch}%`
+        [Op.like]: `%${textSearch}%`
       };
     }
 
@@ -918,19 +919,19 @@ exports.getBySearch = async (req, res, next) => {
 
     if (dateFrom !== "") {
       whereCondition["createdAt"] = {
-        [Sequelize.Op.gte]: modifiedDateFrom,
-        [Sequelize.Op.lte]: Sequelize.literal("CONVERT(date, GETDATE())")
+        [Op.gte]: modifiedDateFrom,
+        [Op.lte]: Sequelize.literal("CONVERT(date, GETDATE())")
       };
     }
     if (dateTo !== "") {
       whereCondition["createdAt"] = {
-        [Sequelize.Op.lte]: modifiedDateTo
+        [Op.lte]: modifiedDateTo
       };
     }
     if (dateFrom !== "" && dateTo !== "") {
       whereCondition["createdAt"] = {
-        [Sequelize.Op.gte]: modifiedDateFrom,
-        [Sequelize.Op.lte]: modifiedDateTo
+        [Op.gte]: modifiedDateFrom,
+        [Op.lte]: modifiedDateTo
       };
     }
     if (transferSector !== "") {
@@ -984,8 +985,8 @@ exports.getTransferSectorForSearch = async (req, res, next) => {
       where: {
         deletedAt: null,
         transferSector: {
-          [Sequelize.Op.not]: null,
-          [Sequelize.Op.not]: ""
+          [Op.not]: null,
+          [Op.not]: ""
         }
       },
       group: ["transferSector"],
@@ -1247,6 +1248,14 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
               { status: "inStock", reserved: false },
               { where: { _id: assetId }, returning: true }
             );
+
+            await transferHasAsset.update(
+              {
+                reason: assetIdArray[i].reason,
+                return: assetIdArray[i].return
+              },
+              { where: { _id: assetIdArray[i]._id, transferId: transferId } }
+            );
           }
         }
 
@@ -1272,6 +1281,18 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
                 { where: { _id: assetId }, returning: true }
               );
             }
+            await transferHasPkAsset.update(
+              {
+                reason: packageAssetIdArray[i].reason,
+                return: packageAssetIdArray[i].return
+              },
+              {
+                where: {
+                  _id: packageAssetIdArray[i]._id,
+                  transferId: transferId
+                }
+              }
+            );
           }
         }
       }
@@ -1374,9 +1395,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         {
           status: "reject",
           dateTime_approver: new Date(),
-          note: input.note,
-          assetIdArray,
-          packageAssetIdArray
+          note: input.note
         },
         {
           where: {
@@ -1395,6 +1414,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
               _id: assetId
             }
           }
+        );
+        await transferHasAsset.update(
+          {
+            reason: el.reason,
+            return: el.return
+          },
+          { where: { assetId: assetId, transferId: transferId } }
         );
       }
 
@@ -1426,6 +1452,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             }
           );
         }
+        await transferHasPkAsset.update(
+          {
+            reason: el.reason,
+            return: el.return
+          },
+          { where: { packageAssetId: packageAssetId, transferId: transferId } }
+        );
       }
       res.json({
         message: "This transferings has been successfully rejected."
@@ -1495,6 +1528,12 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
                 returnOriginal: false
               }
             );
+            await transferHasAsset.update(
+              {
+                reason: reason
+              },
+              { where: { assetId: assetId, transferId: transferId } }
+            );
           } else {
             // approve
             await asset.update(
@@ -1508,6 +1547,79 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
                 returnOriginal: false
               }
             );
+          }
+        }
+        for (el of packageAssetIdArray) {
+          let packageAssetId = el.packageAssetId;
+          let reason = el.reason;
+          console.log("packageAssetId:", packageAssetId);
+          console.log("reason:", reason);
+
+          if (reason !== "") {
+            // reject
+            await pkAsset.update(
+              { status: "inStock", reserved: false },
+              {
+                where: {
+                  _id: packageAssetId
+                }
+              },
+              {
+                returnOriginal: false
+              }
+            );
+            let assetArray = await asset.findAll({ where: { packageAssetId } });
+            // console.log("assetArray:", assetArray);
+            for (let l = 0; l < assetArray.length; l++) {
+              let assetId = assetArray[l]._id;
+              // reject Asset
+              await asset.update(
+                { status: "inStock", reserved: false },
+                {
+                  where: {
+                    _id: assetId
+                  }
+                }
+              );
+            }
+            await transferHasPkAsset.update(
+              {
+                reason: reason
+              },
+              {
+                where: {
+                  packageAssetId: packageAssetId,
+                  transferId: transferId
+                }
+              }
+            );
+          } else {
+            // approve
+            await pkAsset.update(
+              { status: "transfered", reserved: false },
+              {
+                where: {
+                  _id: packageAssetId
+                }
+              },
+              {
+                returnOriginal: false
+              }
+            );
+            let assetArray = await asset.findAll({ where: { packageAssetId } });
+            // console.log("assetArray:", assetArray);
+            for (let l = 0; l < assetArray.length; l++) {
+              let assetId = assetArray[l]._id;
+              // reject Asset
+              await asset.update(
+                { status: "transfered", reserved: false },
+                {
+                  where: {
+                    _id: assetId
+                  }
+                }
+              );
+            }
           }
         }
       }
@@ -1767,9 +1879,9 @@ exports.getTransferHistorySector = async (req, res, next) => {
     const transfereeSectors = await transfer.findAll({
       attributes: ["transfereeSector"],
       where: {
-        transfereeSector: { [Sequelize.Op.ne]: null },
+        transfereeSector: { [Op.ne]: null },
         status: {
-          [Sequelize.Op.in]: [
+          [Op.in]: [
             "approve",
             "partiallyApprove",
             "waitingReturnApprove",

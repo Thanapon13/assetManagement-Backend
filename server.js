@@ -6,6 +6,18 @@ const cors = require("cors");
 const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
+
+const db = require("./models/index");
+db.sequelize.sync();
+app.use(helmet());
+app.use(cors());
+// app.use(cors({
+//   origin: '*',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 // const authRoute = require("./route/authRoutes");
@@ -50,18 +62,6 @@ const docterTypeRoute = require("./route/docterTypeRoute");
 const medicalFieldRoute = require("./route/medicalFieldRoute");
 const countingUnitRoute = require("./route/countingUnitRoute");
 const user = require("./route/userRoute");
-
-const db = require("./models/index");
-db.sequelize.sync();
-app.use(helmet());
-app.use(cors());
-// app.use(cors({
-//   origin: '*',
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.use("/images", express.static("public/pics"));
 app.use("/documents", express.static("public/documents"));
