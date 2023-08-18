@@ -1,10 +1,11 @@
 const express = require("express");
 const floorController = require("../controller/floorController");
+const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
-router.post("/create", floorController.createFloor);
-router.patch("/update", floorController.updateFloor);
-router.get("/all", floorController.getAllFloor);
-router.delete("/", floorController.deleteFloor);
+router.post("/create", protect, floorController.createFloor);
+router.patch("/update", protect, floorController.updateFloor);
+router.get("/all", protect, floorController.getAllFloor);
+router.delete("/", protect, floorController.deleteFloor);
 
 module.exports = router;

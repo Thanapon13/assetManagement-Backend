@@ -471,22 +471,14 @@ exports.login = async (req, res, next) => {
       (await bcrypt.compare(password, userData.dataValues.password))
     ) {
       const a = delete userData.dataValues.password;
-      console.log("a:", a);
-
-      const token = verfifyAndTokenService.generateAccessToken(
-        userData,
-        accessScreenData
-      );
-      const refreshToken = verfifyAndTokenService.generateRefreshToken(
-        userData,
-        accessScreenData
-      );
-      console.log("token:", token);
-
+      const token = verfifyAndTokenService.generateAccessToken(userData);
+      const refreshToken =
+        verfifyAndTokenService.generateRefreshToken(userData);
       // const decoded = jwt.verify(token, process.env.JWT_SECRET);
       // console.log("decoded", decoded);
 
-      userData.dataValues.lastLoginDate = new Date();
+      userData.lastLoginDate = new Date();
+      userData.loginFlag = true;
       await userData.save();
 
       res.status(200).json({
@@ -700,24 +692,35 @@ function sendEmail(Email, link, userId) {
   });
 }
 
-exports.logout = (req, res) => {
-  console.log(refreshTokens);
-  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
-  res.status(204);
+exports.logout = async (req, res) => {
+  try {
+    const userData = req.user;
+    console.log("userData : ", userData);
+    const userSaveLogout = await user.update(
+      { loginFlag: false },
+      { where: { _id: userData._id }, returning: false }
+    );
+    return res.status(200).json({ message: "Logout Successfully" });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.RefreshToken = (req, res) => {
-  const refreshtoken = req.body.token;
-  console.log("refresh token working");
+exports.RefreshToken = async (req, res) => {
+  try {
+    const refreshtoken = req.body.refreshToken;
+    console.log("refresh token working");
 
-  if (!refreshtoken) {
-    return res.status(403).send("A token is required");
+    if (!refreshtoken) {
+      return res.status(403).send("A token is required");
+    }
+    jwt.verify(refreshtoken, process.env.REFRESH_TOKEN, (err, userData) => {
+      if (err) return res.status(401).send("Invalid Token");
+      userData = userData.userData;
+      const accesstoken = verfifyAndTokenService.generateAccessToken(userData);
+      return res.send({ accesstoken: accesstoken });
+    });
+  } catch (err) {
+    next(err);
   }
-  const responseVerify = verfifyAndTokenService.verify(refreshtoken);
-  console.log("responseVerify", responseVerify);
-  // jwt.verify(refreshtoken, process.env.REFRESH_TOKEN, (err, user) => {
-  //   if (err) return res.status(401).send("Invalid Token");
-  //   const accesstoken =  verfifyAndTokenService(user.user_id);
-  //   return res.send({ token: accesstoken });
-  // });
 };
