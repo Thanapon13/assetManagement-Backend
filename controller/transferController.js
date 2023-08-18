@@ -5,7 +5,8 @@ const {
   pkAsset,
   asset,
   transferHasAsset,
-  transferHasPkAsset
+  transferHasPkAsset,
+  assetImage
 } = require("../models");
 
 exports.createTransfer = async (req, res, next) => {
@@ -722,6 +723,7 @@ exports.updateTransfer = async (req, res, next) => {
       }
     }
 
+    console.log("-----------------------------------------------------");
     console.log("transferById", transferById);
     transferById.transferSector = transferSector;
     console.log(" transferById.transferSector:", transferSector);
@@ -741,6 +743,7 @@ exports.updateTransfer = async (req, res, next) => {
     console.log(" transferById.name_recorder :", name_recorder);
     transferById.name_courier = name_courier;
     console.log("transferById.name_courier :", name_courier);
+    console.log("-----------------------------------------------------");
 
     if (transferById.status == "saveDraft" && status == "waiting") {
       transferById.dateTime_recorder = new Date();
@@ -765,6 +768,7 @@ exports.updateTransfer = async (req, res, next) => {
     }
 
     transferById.status = status || transferById.status;
+
     await transferById.save();
 
     res.status(200).json({ message: "This transfer id updated successfully" });
@@ -1348,13 +1352,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
     const { input } = req.body;
-    console.log("transferId:", transferId);
+    // console.log("transferId:", transferId);
     console.log("input:", input);
 
-    const assetIdArray = input[0].assetIdArray;
-    const packageAssetIdArray = input[0].packageAssetIdArray;
-    // console.log("assetIdArray:", assetIdArray);
-    // console.log("packageAssetIdArray:", packageAssetIdArray);
+    const assetIdArray = input.assetIdArray;
+    const packageAssetIdArray = input.packageAssetIdArray;
+    console.log("assetIdArray:", assetIdArray);
+    console.log("packageAssetIdArray:", packageAssetIdArray);
 
     // for check all reason have value
     const assetIdArrayReason = assetIdArray.every(asset => asset.reason !== "");
@@ -1807,9 +1811,16 @@ exports.getTransferById = async (req, res, next) => {
                 "_id",
                 "assetNumber",
                 "productName",
-                // "serialNumber",
+                "serialNumber",
                 "sector"
                 // "imageArray"
+              ],
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                  attributes: ["image"]
+                }
               ]
             }
           ]

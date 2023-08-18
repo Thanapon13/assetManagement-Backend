@@ -49,6 +49,7 @@ db.docterType = require("./docterTypeModel")(sequelize, Sequelize);
 db.engPrefix = require("./engPrefixModel")(sequelize, Sequelize);
 db.floor = require("./floorModel")(sequelize, Sequelize);
 db.group = require("./groupModel")(sequelize, Sequelize);
+db.subSector = require("./subSectorModel")(sequelize, Sequelize);
 db.personnelTypeCode = require("./personnelTypeCodeModel")(
   sequelize,
   Sequelize

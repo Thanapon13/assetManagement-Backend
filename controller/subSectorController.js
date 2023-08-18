@@ -4,14 +4,12 @@ const createError = require("../utils/createError");
 exports.createSubSector = async (req, res, next) => {
   try {
     const { subSectorArray } = req.body;
-    // const subSectorArrayObject = subSectorArray;
-    const subSectorArrayObject = JSON.parse(subSectorArray);
     const resSubSector = [];
 
-    for (let el of subSectorArrayObject) {
+    for (let el of subSectorArray) {
       try {
         let subSector = await SubSector.create({
-          name: el.name,
+          name: el.name
         });
         resSubSector.push(subSector);
       } catch (err) {
@@ -47,7 +45,7 @@ exports.updateSubSector = async (req, res, next) => {
       }
 
       const existingNameSubSector = await SubSector.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameSubSector", existingNameSubSector);
       // console.log("existingNameSubSector.id", existingNameSubSector.id);
@@ -69,7 +67,7 @@ exports.updateSubSector = async (req, res, next) => {
 exports.getAllSubSector = async (req, res, next) => {
   try {
     const subSector = await SubSector.findAll({
-      attributes: ["_id", "name"],
+      attributes: ["_id", "name"]
     });
     res.json({ subSector });
   } catch (err) {
@@ -82,8 +80,8 @@ exports.deleteSubSector = async (req, res, next) => {
     const _id = req.params.subSectorId;
     let subSector = await SubSector.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
 
     res.json({ message: "delete subSector successfully", subSector });

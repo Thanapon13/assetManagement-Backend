@@ -92,7 +92,7 @@ exports.createAsset = async (req, res, next) => {
       name_approver
     } = req.body;
 
-    console.log(req.body);
+    console.log("req.body:", req.body);
 
     const inputObject = JSON.parse(input);
 
@@ -318,6 +318,7 @@ exports.createAsset = async (req, res, next) => {
           dataInsertAssetMaster,
           sessionId
         );
+        console.log("responseCreateAssetMaster:", responseCreateAssetMaster);
         if (
           depreciationStartDate &&
           depreciationRegisterDate &&

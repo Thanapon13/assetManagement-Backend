@@ -4,15 +4,14 @@ const createError = require("../utils/createError");
 exports.createType8 = async (req, res, next) => {
   try {
     const { type8Array } = req.body;
-    // const type8ArrayObject = type8Array
-    const type8ArrayObject = JSON.parse(type8Array);
+
     const resType8 = [];
 
-    for (let el of type8ArrayObject) {
+    for (let el of type8Array) {
       try {
         let type8 = await Type8.create({
           name: el.name,
-          value: el.value,
+          value: el.value
         });
         resType8.push(type8);
       } catch (err) {
@@ -53,7 +52,7 @@ exports.updateType8 = async (req, res, next) => {
       }
 
       const existingNameType8 = await Type8.findOne({
-        where: { name: name },
+        where: { name: name }
       });
       // console.log("existingNameType8", existingNameType8);
       // console.log("existingNameType8.id", existingNameType8.id);
@@ -62,7 +61,7 @@ exports.updateType8 = async (req, res, next) => {
       }
 
       const existingValueType8 = await Type8.findOne({
-        where: { value: value },
+        where: { value: value }
       });
       // console.log("existingValueType8", existingValueType8);
 
@@ -86,7 +85,7 @@ exports.updateType8 = async (req, res, next) => {
 exports.getAllType8 = async (req, res, next) => {
   try {
     const type8 = await Type8.findAll({
-      attributes: ["_id", "name", "value"],
+      attributes: ["_id", "name", "value"]
     });
     res.json({ type8 });
   } catch (err) {
@@ -99,8 +98,8 @@ exports.deleteType8 = async (req, res, next) => {
     const _id = req.params.type8Id;
     let type8 = await Type8.destroy({
       where: {
-        _id: _id,
-      },
+        _id: _id
+      }
     });
     res.json({ message: "delete type8 successfully", type8 });
   } catch (err) {
