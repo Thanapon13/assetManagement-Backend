@@ -1376,8 +1376,8 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
     // console.log("transferId:", transferId);
     console.log("input:", input);
 
-    const assetIdArray = input.assetIdArray;
-    const packageAssetIdArray = input.packageAssetIdArray;
+    const assetIdArray = input[0].assetIdArray;
+    const packageAssetIdArray = input[0].packageAssetIdArray;
     console.log("assetIdArray:", assetIdArray);
     console.log("packageAssetIdArray:", packageAssetIdArray);
 
@@ -1390,6 +1390,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
     console.log("packageAssetIdArrayReason:", packageAssetIdArrayReason);
 
     if (assetIdArrayReason && packageAssetIdArrayReason) {
+      console.log("rejectAll:");
       // reject all
       await transfer.update(
         {
@@ -1464,8 +1465,10 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         message: "This transferings has been successfully rejected."
       });
     } else {
+      console.log("else:-------------");
       // partially approve or approve
       // check obj in array ,what obj have some value in reason and return to array
+
       const assetIdReasonIndices = input[0].assetIdArray
         .map((item, idx) => {
           if (item.reason !== "") {
@@ -1473,6 +1476,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
           }
         })
         .filter(item => item !== undefined);
+      console.log("assetIdReasonIndices:", assetIdReasonIndices);
 
       const packageAssetIdReasonIndices = input[0].packageAssetIdArray
         .map((item, idx) => {
@@ -1482,6 +1486,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         })
         .filter(item => item !== undefined);
 
+      console.log("packageAssetIdReasonIndices:", packageAssetIdReasonIndices);
       if (
         assetIdReasonIndices.length > 0 ||
         packageAssetIdReasonIndices.length > 0
