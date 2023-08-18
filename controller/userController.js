@@ -714,12 +714,21 @@ exports.RefreshToken = async (req, res) => {
     if (!refreshtoken) {
       return res.status(403).send("A token is required");
     }
-    jwt.verify(refreshtoken, process.env.REFRESH_TOKEN, (err, userData) => {
-      if (err) return res.status(401).send("Invalid Token");
-      userData = userData.userData;
-      const accesstoken = verfifyAndTokenService.generateAccessToken(userData);
-      return res.send({ accesstoken: accesstoken });
-    });
+    jwt.verify(
+      refreshtoken,
+      process.env.REFRESH_TOKEN,
+      async (err, userData) => {
+        if (err) return res.status(401).send("Invalid Token");
+        userData = userData.userData;
+        const User = await user.findByPk(userData._id);
+        if (User.loginFlag === false) {
+          return res.status(401).send("Invalid Token");
+        }
+        const accesstoken =
+          verfifyAndTokenService.generateAccessToken(userData);
+        return res.send({ accesstoken: accesstoken });
+      }
+    );
   } catch (err) {
     next(err);
   }
