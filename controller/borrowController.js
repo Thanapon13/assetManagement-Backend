@@ -1590,7 +1590,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
     const { input } = req.body;
 
     // convert JSON to object
-    const inputObject = JSON.parse(input);
+    // const inputObject = JSON.parse(input);
     // console.log(inputObject);
 
     const assetIdArray = inputObject[0].assetIdArray;
