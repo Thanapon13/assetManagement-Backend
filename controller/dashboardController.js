@@ -34,7 +34,7 @@ exports.getAssetBySearch = async (req, res, next) => {
       const priceTo = parseInt(priceSplit[1]);
       query["price"] = {
         [Op.gte]: priceFrom,
-        [Op.lte]: priceTo
+        [Op.lte]: priceTo,
       };
     }
 
@@ -47,7 +47,7 @@ exports.getAssetBySearch = async (req, res, next) => {
     const assetData = await asset.findAll({
       where: query,
       order: [["updatedAt", "DESC"]],
-      limit: 30
+      limit: 30,
     });
     // console.log("assetData:", assetData);
 
@@ -57,30 +57,36 @@ exports.getAssetBySearch = async (req, res, next) => {
     listStatusOfRepair = ["repair", "saveDraft"];
     queryActiveAsset["status"] = { [Op.notIn]: listStatusOfRepair };
     queryActiveAsset["deletedAt"] = { [Op.eq]: null };
-    queryActiveAsset["distributeApprovalReleaseDate"] = {
-      [Op.eq]: null
+    queryActiveAsset["distributeStatus"] = {
+      [Op.eq]: false,
     };
 
     let activeCount = await asset.count({
-      where: queryActiveAsset
+      where: queryActiveAsset,
     });
 
     let queryDistributionAsset = {};
-    queryDistributionAsset["distributeApprovalReleaseDate"] = {
-      [Op.ne]: null
+    queryDistributionAsset["distributeStatus"] = {
+      [Op.ne]: false,
     };
 
     queryDistributionAsset["status"] = { [Op.ne]: "saveDraft" };
     queryDistributionAsset["deletedAt"] = { [Op.eq]: null };
     const distributionCount = await asset.count({
-      where: queryDistributionAsset
+      where: {
+        distributeStatus: {
+          [Op.ne]: false,
+        },
+        status: { [Op.not]: "saveDraft" },
+        deletedAt: null,
+      },
     });
 
     let queryRepairAsset = {};
     queryRepairAsset["deletedAt"] = { [Op.eq]: null };
     queryRepairAsset["status"] = { [Op.eq]: "repair" };
     const repairCount = await asset.count({
-      where: queryRepairAsset
+      where: queryRepairAsset,
     });
 
     let totalCount = activeCount + repairCount;
@@ -91,7 +97,7 @@ exports.getAssetBySearch = async (req, res, next) => {
       activeCount,
       distributionCount,
       repairCount,
-      assetData
+      assetData,
     });
 
     res.status(200).json({ message: "sadad" });
@@ -138,7 +144,7 @@ exports.getRepairBySearch = async (req, res, next) => {
     const repairData = await repair.findAll({
       where: query,
       order: [["updatedAt", "DESC"]],
-      limit: 30
+      limit: 30,
     });
 
     let listStatusOfRepair = [];
@@ -147,39 +153,39 @@ exports.getRepairBySearch = async (req, res, next) => {
     listStatusOfRepair = ["repair", "saveDraft"];
     queryActiveAsset = {
       status: {
-        [Op.notIn]: listStatusOfRepair
+        [Op.notIn]: listStatusOfRepair,
       },
       deletedAt: {
-        [Op.eq]: null
+        [Op.eq]: null,
       },
-      distributeApprovalReleaseDate: {
-        [Op.eq]: null
-      }
+      distributeStatus: {
+        [Op.eq]: false,
+      },
     };
 
     const activeCount = await asset.count({
       where: {
         status: { [Op.notIn]: listStatusOfRepair },
         deletedAt: null,
-        distributeApprovalReleaseDate: null
-      }
+        distributeStatus: false,
+      },
     });
     console.log("activeCount:", activeCount);
 
     const distributionCount = await asset.count({
       where: {
-        distributeApprovalReleaseDate: { [Op.ne]: null },
+        distributeStatus: { [Op.eq]: true },
         status: { [Op.not]: "saveDraft" },
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     });
     console.log("distributionCount:", distributionCount);
 
     const repairCount = await asset.count({
       where: {
         status: "repair",
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     });
     console.log("repairCount:", repairCount);
 
@@ -190,7 +196,7 @@ exports.getRepairBySearch = async (req, res, next) => {
       activeCount,
       distributionCount,
       repairCount,
-      repairData
+      repairData,
     });
   } catch (err) {
     next(err);

@@ -1426,13 +1426,13 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             }
           }
         );
-        await transferHasAsset.update(
-          {
-            reason: el.reason,
-            return: el.return
-          },
-          { where: { assetId: assetId, transferId: transferId } }
-        );
+        // await transferHasAsset.update(
+        //   {
+        //     reason: el.reason,
+        //     return: el.return,
+        //   },
+        //   { where: { assetId: assetId, transferId: transferId } }
+        // );
       }
 
       // change all packageAsset status by id
@@ -1463,20 +1463,19 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
             }
           );
         }
-        await transferHasPkAsset.update(
-          {
-            reason: el.reason,
-            return: el.return
-          },
-          { where: { packageAssetId: packageAssetId, transferId: transferId } }
-        );
+        // await transferHasPkAsset.update(
+        //   {
+        //     reason: el.reason,
+        //     return: el.return,
+        //   },
+        //   { where: { packageAssetId: packageAssetId, transferId: transferId } }
+        // );
       }
       return res.json({
         message: "This transferings has been successfully approved."
       });
     }
     if (assetIdArrayReason && packageAssetIdArrayReason) {
-      console.log("rejectAll:");
       // reject all
       await transfer.update(
         {
@@ -1551,7 +1550,6 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         message: "This transferings has been successfully rejected."
       });
     } else {
-      console.log("else:-------------");
       // partially approve or approve
       // check obj in array ,what obj have some value in reason and return to array
 
@@ -1908,20 +1906,20 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
     }
 
     if (dateFrom !== "") {
-      query.where.createdAt = {
+      query.where.dateTime_approver = {
         [Op.gte]: modifiedDateFrom,
         [Op.lte]: moment().endOf("day").format("YYYY-MM-DD")
       };
     }
 
     if (dateTo !== "") {
-      query.where.createdAt = {
+      query.where.dateTime_approver = {
         [Op.lte]: modifiedDateTo
       };
     }
 
     if (dateFrom !== "" && dateTo !== "") {
-      query.where.createdAt = {
+      query.where.dateTime_approver = {
         [Op.between]: [modifiedDateFrom, modifiedDateTo]
       };
     }
@@ -1955,7 +1953,7 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
         };
       }
     }
-
+    console.log("query :", query);
     const transferData = await transfer.findAll(query);
     const total = await transfer.count(query);
 
