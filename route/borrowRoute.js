@@ -38,7 +38,10 @@ router.patch(
 
 router.get("/", borrowController.getAllBorrow);
 router.get("/sectorForSearch", borrowController.getSectorForSearch);
-router.get("/sectorForSearchCheckReturnBorrow", borrowController.getSectorForSearchCheckReturnBorrow);
+router.get(
+  "/sectorForSearchCheckReturnBorrow",
+  borrowController.getSectorForSearchCheckReturnBorrow
+);
 router.get("/search", borrowController.getBySearch);
 
 router.get(
@@ -53,7 +56,7 @@ router.get("/BorrowHistorySector", borrowController.getBorrowHistorySector);
 // borrowCheck page
 router.get("/searchBorrowCheck", borrowController.getBySearchBorrowCheck);
 router.get("/borrowCheckSector", borrowController.getBorrowCheckSector);
-// router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
+router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
 router.patch(
   "/borrowCheckSaving/:borrowId",
   upload.fields([{ name: "arrayImage" }]),
@@ -61,7 +64,7 @@ router.patch(
 );
 router.patch(
   "/borrowCheckReturnApprove/:borrowId",
- 
+
   borrowController.updateBorrowCheckReturnApproveById
 );
 
@@ -76,10 +79,10 @@ router.get(
   borrowController.getAllSectorFromBorrow
 );
 
-// router.get(
-//   "/viewBorrowApproveDetailById/:borrowId",
-//   borrowController.getViewBorrowApproveDetailById
-// );
+router.get(
+  "/viewBorrowApproveDetailById/:borrowId",
+  borrowController.getViewBorrowApproveDetailById
+);
 
 router.get(
   "/viewBorrowHistoryByAssetId/:assetId",
