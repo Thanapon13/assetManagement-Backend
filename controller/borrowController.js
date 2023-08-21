@@ -8,7 +8,7 @@ const PackageAsset = require("../models").pkAsset;
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const moment = require("moment/moment");
-const { borrowHasPkAsset } = require("../models");
+const { borrowHasPkAsset, pkAsset } = require("../models");
 const BorrowImage = require("../models").borrowImage;
 
 function delete_file(path) {
@@ -205,10 +205,10 @@ exports.createBorrow = async (req, res, next) => {
             }
             // packageAssetIdArray.push({ packageAssetId });
 
-            if (packageAsset[0].asset.length > 0) {
-              for (let k = 0; k < packageAsset[0].asset.length; k++) {
+            if (packageAsset[0].assets.length > 0) {
+              for (let k = 0; k < packageAsset[0].assets.length; k++) {
                 // console.log(assetId)
-                let assetId = packageAsset[0].asset[k]._id;
+                let assetId = packageAsset[0].assets[k]._id;
                 console.log("assetId", assetId);
                 let a = await Asset.update(
                   { reserved: true },
@@ -560,10 +560,10 @@ exports.updateBorrow = async (req, res, next) => {
             // console.log("packageAsset.asset",packageAsset[0].asset)
             updatePackageAssetIdArray.push({ packageAssetId });
 
-            if (packageAsset[0].asset.length > 0) {
-              for (let k = 0; k < packageAsset[0].asset.length; k++) {
+            if (packageAsset[0].assets.length > 0) {
+              for (let k = 0; k < packageAsset[0].assets.length; k++) {
                 // console.log(assetId)
-                let assetId = packageAsset[0].asset[k]._id;
+                let assetId = packageAsset[0].assets[k]._id;
                 console.log("assetId", assetId);
                 let a = await Asset.update(
                   { reserved: true },
@@ -916,7 +916,7 @@ exports.deleteBorrow = async (req, res, next) => {
           );
           console.log("findForUpdatePackageAsset", findForUpdatePackageAsset);
 
-          let assetInPackageArray = packageAsset[0].asset;
+          let assetInPackageArray = packageAsset[0].assets;
           // console.log("assetInPackageArray",i)
           // console.log(assetInPackageArray)
           if (assetInPackageArray.length > 0) {
@@ -2595,53 +2595,143 @@ exports.getBorrowCheckSector = async (req, res, next) => {
 exports.getBorrowCheckById = async (req, res, next) => {
   try {
     const borrowId = req.params.borrowId;
+    let queryInclude = {};
+    let matchedAssets = [];
+    let matchedPackageAssets = [];
+    let borrowHasAsset = await BorrowHasAsset.findAll({
+      where: { borrowId: borrowId },
+    });
+    let borrowHasPkAsset = await BorrowHasPkAsset.findAll({
+      where: { borrowId: borrowId },
+    });
+    console.log(borrowHasAsset);
+    console.log(borrowHasPkAsset);
+    if (borrowHasAsset.length > 0 && borrowHasPkAsset.length > 0) {
+      queryInclude["include"] = [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          where: { reason: "" },
+          require: false,
+        },
+        {
+          model: BorrowHasPkAsset,
+          as: "borrowHasPkAssets",
+          where: { reason: "" },
 
-    let borrow = await Borrow.aggregate([
-      { $match: { _id: ObjectID(borrowId) } },
-      {
-        $addFields: {
-          assetIdArray: {
-            $filter: {
-              input: "$assetIdArray",
-              cond: { $eq: ["$$this.reason", ""] },
-            },
+          require: false,
+        },
+      ];
+      matchedAssets = await Asset.findAll({
+        include: [
+          {
+            model: BorrowHasAsset,
+            as: "borrowHasAssetsData",
+            where: { borrowId: borrowId, reason: "" },
           },
-          packageAssetIdArray: {
-            $filter: {
-              input: "$packageAssetIdArray",
-              cond: { $eq: ["$$this.reason", ""] },
-            },
+        ],
+      });
+      matchedPackageAssets = await PackageAsset.findAll({
+        include: [
+          {
+            model: BorrowHasPkAsset,
+            as: "borrowHasPkAssetsData",
+            where: { borrowId: borrowId, reason: "" },
           },
+        ],
+      });
+    } else if (borrowHasAsset.length > 0) {
+      queryInclude["include"] = [
+        {
+          model: BorrowHasAsset,
+          as: "borrowHasAssets",
+          where: { reason: "" },
+          require: false,
         },
-      },
-      {
-        $lookup: {
-          from: "assets",
-          localField: "assetIdArray.assetId",
-          foreignField: "_id",
-          as: "matchedAssets",
-        },
-      },
-      {
-        $lookup: {
-          from: "packageassets",
-          localField: "packageAssetIdArray.packageAssetId",
-          foreignField: "_id",
-          as: "matchedPackageAssets",
-        },
-      },
-    ]);
+      ];
+      matchedAssets = await Asset.findAll({
+        include: [
+          {
+            model: BorrowHasAsset,
+            as: "borrowHasAssetsData",
+            where: { borrowId: borrowId, reason: "" },
+          },
+        ],
+      });
+    } else {
+      queryInclude["include"] = [
+        {
+          model: BorrowHasPkAsset,
+          as: "borrowHasPkAssets",
+          where: { reason: "" },
 
-    borrow = borrow[0];
+          require: false,
+        },
+      ];
+      matchedPackageAssets = await PackageAsset.findAll({
+        include: [
+          {
+            model: BorrowHasPkAsset,
+            as: "borrowHasPkAssetsData",
+            where: { borrowId: borrowId, reason: "" },
+          },
+        ],
+      });
+    }
+    console.log("queryInclude : ", queryInclude);
+
+    let borrow = await Borrow.findOne({
+      where: {
+        _id: borrowId,
+      },
+      ...queryInclude,
+    });
+
+    if (borrow == null) {
+      return res.status(200).json({ message: "this borrow not found" });
+    }
+    // let borrow = await Borrow.aggregate([
+    //   { $match: { _id: ObjectID(borrowId) } },
+    //   {
+    //     $addFields: {
+    //       assetIdArray: {
+    //         $filter: {
+    //           input: "$assetIdArray",
+    //           cond: { $eq: ["$$this.reason", ""] },
+    //         },
+    //       },
+    //       packageAssetIdArray: {
+    //         $filter: {
+    //           input: "$packageAssetIdArray",
+    //           cond: { $eq: ["$$this.reason", ""] },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "assets",
+    //       localField: "assetIdArray.assetId",
+    //       foreignField: "_id",
+    //       as: "matchedAssets",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "packageassets",
+    //       localField: "packageAssetIdArray.packageAssetId",
+    //       foreignField: "_id",
+    //       as: "matchedPackageAssets",
+    //     },
+    //   },
+    // ]);
+
+    // borrow = borrow[0];
     // console.log(borrow);
 
-    let assetIdArray = borrow.assetIdArray;
+    let assetIdArray = borrow.borrowHasAssets;
     // console.log(assetIdArray);
-    let packageAssetIdArray = borrow.packageAssetIdArray;
-    // console.log(packageAssetIdArray);
-    let matchedAssets = borrow.matchedAssets;
-    // console.log(matchedAssets);
-    let matchedPackageAssets = borrow.matchedPackageAssets;
+    let packageAssetIdArray = borrow.borrowHasPkAssets;
 
     for (let i = 0; i < matchedAssets.length; i++) {
       if (
@@ -2650,8 +2740,8 @@ exports.getBorrowCheckById = async (req, res, next) => {
         assetIdArray[i]?.return !== undefined ||
         assetIdArray[i]?.return !== ""
       ) {
-        matchedAssets[i].returnDate = assetIdArray[i]?.returnDate;
-        matchedAssets[i].return = assetIdArray[i]?.return;
+        matchedAssets[i].dataValues.returnDate = assetIdArray[i]?.returnDate;
+        matchedAssets[i].dataValues.return = assetIdArray[i]?.return;
       }
     }
     for (let i = 0; i < matchedPackageAssets.length; i++) {
@@ -2661,12 +2751,14 @@ exports.getBorrowCheckById = async (req, res, next) => {
         packageAssetIdArray[i]?.return !== undefined ||
         packageAssetIdArray[i]?.return !== ""
       ) {
-        matchedPackageAssets[i].returnDate = packageAssetIdArray[i]?.returnDate;
-        matchedPackageAssets[i].return = packageAssetIdArray[i]?.return;
+        matchedPackageAssets[i].dataValues.returnDate =
+          packageAssetIdArray[i].returnDate;
+        matchedPackageAssets[i].dataValues.return =
+          packageAssetIdArray[i].return;
       }
     }
 
-    borrow = { ...borrow, matchedAssets, matchedPackageAssets };
+    borrow = { borrow, matchedAssets, matchedPackageAssets };
     // console.log(borrow);
 
     res.json({ borrow });
