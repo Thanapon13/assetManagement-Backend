@@ -1557,18 +1557,18 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
   try {
     const borrowId = req.params.borrowId;
     const { input } = req.body;
-    console.log("input:", input);
 
     // convert JSON to object
     // const inputObject = JSON.parse(input);
-    // console.log(inputObject);
+    // console.log("inputObject:", inputObject);
 
-    const assetIdArray = inputObject[0].assetIdArray;
-    const packageAssetIdArray = inputObject[0].packageAssetIdArray;
+    const assetIdArray = input.assetIdArray;
+    const packageAssetIdArray = input.packageAssetIdArray;
 
     // console.log("borrowId", borrowId);
-    // console.log("assetIdArray", assetIdArray);
-    // console.log("packageAssetIdArray", packageAssetIdArray);
+    console.log("11:");
+    console.log("assetIdArray", assetIdArray);
+    console.log("packageAssetIdArray", packageAssetIdArray);
 
     // for check all reason have value
     const assetIdArrayReason = assetIdArray.every(
@@ -1589,7 +1589,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
         {
           status: "approve",
           dateTime_approver: new Date(),
-          note: inputObject.note
+          note: input.note
           // assetIdArray,
           // packageAssetIdArray,
         },
@@ -2156,35 +2156,6 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
         console.log("packageAssetArray", packageAssetArray);
 
         idArray = assetArray.concat(packageAssetArray).map(asset => asset._id);
-        // if (idArray.length > 0) {
-        // queryArray.push({
-        //   [Op.or]: [
-        //     {
-        //       include: {
-        //         model: BorrowHasAsset,
-        //         as: "borrowHasAssets",
-        //         where: { assetId: { [Op.in]: idArray } },
-        //       },
-        //     },
-        //     {
-        //       include: {
-        //         model: BorrowHasPkAsset,
-
-        //         where: { packageAssetId: { [Op.in]: idArray } },
-        //       },
-        //     },
-        //   ],
-        // });
-        // query["$or"] = [
-        //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
-        //   {
-        //     packageAssetIdArray: {
-        //       $elemMatch: { packageAssetId: { $in: idArray } },
-        //     },
-        //   },
-        // ];
-        // }
-        // console.log(idArray);
       } else {
         queryArray.push({
           [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
