@@ -1972,6 +1972,9 @@ exports.getBySearchOfOutsourceRapair = async (req, res, next) => {
     queryArray.push({
       outsourceFlag: { [Op.eq]: "Y" },
     });
+    queryArray.push({
+      statusOutsourceRepair: { [Op.not]: null },
+    });
 
     if (dateFrom !== "") {
       queryArray.push({
