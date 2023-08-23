@@ -2077,6 +2077,12 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
 
           as: "borrowHasPkAssets",
         },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ],
     });
 
@@ -2769,7 +2775,6 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     });
 
     if (arrayImage.length > 0) {
-      
       for (el of arrayImage) {
         await BorrowImage.create({
           image: el.filename,
