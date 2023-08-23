@@ -2739,10 +2739,15 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     const borrowId = req.params.borrowId;
     const { input, existArrayImage } = req.body;
 
+    // console.log("input:", input);
+    console.log("existArrayImage:", existArrayImage);
+    console.log("borrowId:", borrowId);
+
     // convert JSON to object
     const inputObject = JSON.parse(input);
-    // console.log(inputObject);
+    console.log("inputObject:", inputObject);
     const existArrayImageArray = JSON.parse(existArrayImage);
+    console.log("existArrayImageArray:", existArrayImageArray);
 
     const assetIdArray = inputObject.assetIdArray;
     const packageAssetIdArray = inputObject.packageAssetIdArray;
