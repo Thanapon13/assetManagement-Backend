@@ -1188,6 +1188,12 @@ exports.getBorrowById = async (req, res, next) => {
           require: false,
 
           as: "borrowHasPkAssets"
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages"
         }
       ]
     });
@@ -2139,6 +2145,8 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
     }
 
     let queryArray = [];
+    let queryAssetNumber = {};
+
     let idArray = [];
 
     if (textSearch !== "") {
@@ -2157,6 +2165,20 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
         console.log("packageAssetArray", packageAssetArray);
 
         idArray = assetArray.concat(packageAssetArray).map(asset => asset._id);
+        queryAssetNumber = {
+          [Op.or]: [
+            {
+              "$borrowHasAssets.assetId$": {
+                [Op.in]: idArray
+              }
+            },
+            {
+              "$borrowHasPkAssets.packageAssetId$": {
+                [Op.in]: idArray
+              }
+            }
+          ]
+        };
       } else {
         queryArray.push({
           [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
@@ -2204,23 +2226,13 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
     // queryArray.push({ status: "approve" });
     queryArray.push({ deletedAt: { [Op.eq]: null } });
 
-    console.log(queryArray[0][Op.or], "queryArray");
+    console.log(queryArray, "queryArray");
 
     const borrow = await Borrow.findAll({
       where: {
         [Op.and]: queryArray,
-        [Op.or]: [
-          {
-            "$borrowHasAssets.assetId$": {
-              [Op.in]: idArray
-            }
-          },
-          {
-            "$borrowHasPkAssets.packageAssetId$": {
-              [Op.in]: idArray
-            }
-          }
-        ]
+        // [Op.or] :
+        ...queryAssetNumber
       },
       include: [
         {
@@ -2245,18 +2257,7 @@ exports.getBySearchBorrowHistory = async (req, res, next) => {
     const total = await Borrow.count({
       where: {
         [Op.and]: queryArray,
-        [Op.or]: [
-          {
-            "$borrowHasAssets.assetId$": {
-              [Op.in]: idArray
-            }
-          },
-          {
-            "$borrowHasPkAssets.packageAssetId$": {
-              [Op.in]: idArray
-            }
-          }
-        ]
+        ...queryAssetNumber
       },
       include: [
         {
@@ -2351,7 +2352,7 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     }
 
     let queryArray = [];
-
+    let queryAssetNumber = {};
     let idArray = [];
 
     if (textSearch !== "") {
@@ -2370,35 +2371,20 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
         console.log("packageAssetArray", packageAssetArray);
 
         idArray = assetArray.concat(packageAssetArray).map(asset => asset._id);
-        console.log("idArray : ", idArray);
-        if (idArray.length > 0) {
-          // queryArray.push({
-          //   [Op.or]: [
-          //     {
-          //       include: {
-          //         model: BorrowHasAsset,
-          //         // as: "borrowHasAssets",
-          //         where: { assetId: { [Op.in]: idArray } },
-          //       },
-          //     },
-          //     {
-          //       include: {
-          //         model: BorrowHasPkAsset,
-          //         where: { packageAssetId: { [Op.in]: idArray } },
-          //       },
-          //     },
-          //   ],
-          // });
-          // query["$or"] = [
-          //   { assetIdArray: { $elemMatch: { assetId: { $in: idArray } } } },
-          //   {
-          //     packageAssetIdArray: {
-          //       $elemMatch: { packageAssetId: { $in: idArray } },
-          //     },
-          //   },
-          // ];
-        }
-        console.log(idArray);
+        queryAssetNumber = {
+          [Op.or]: [
+            {
+              "$borrowHasAssets.assetId$": {
+                [Op.in]: idArray
+              }
+            },
+            {
+              "$borrowHasPkAssets.packageAssetId$": {
+                [Op.in]: idArray
+              }
+            }
+          ]
+        };
       } else {
         queryArray.push({
           [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
@@ -2456,18 +2442,7 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     const borrow = await Borrow.findAll({
       where: {
         [Op.and]: queryArray,
-        [Op.or]: [
-          {
-            "$borrowHasAssets.assetId$": {
-              [Op.in]: idArray
-            }
-          },
-          {
-            "$borrowHasPkAssets.packageAssetId$": {
-              [Op.in]: idArray
-            }
-          }
-        ]
+        ...queryAssetNumber
       },
       include: [
         {
@@ -2492,18 +2467,7 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     const total = await Borrow.count({
       where: {
         [Op.and]: queryArray,
-        [Op.or]: [
-          {
-            "$borrowHasAssets.assetId$": {
-              [Op.in]: idArray
-            }
-          },
-          {
-            "$borrowHasPkAssets.packageAssetId$": {
-              [Op.in]: idArray
-            }
-          }
-        ]
+        ...queryAssetNumber
       },
       include: [
         {
