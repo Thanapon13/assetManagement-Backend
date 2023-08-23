@@ -10,7 +10,12 @@ const fs = require("fs");
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const moment = require("moment/moment");
-const { borrowHasPkAsset, borrowHasAssets } = require("../models");
+const {
+  borrowHasPkAsset,
+  borrowHasAssets,
+  assetImage,
+  pkAssetImage,
+} = require("../models");
 const BorrowImage = require("../models").borrowImage;
 
 function delete_file(path) {
@@ -2068,6 +2073,12 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
           include: [
             {
               model: Asset,
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                },
+              ],
             },
           ],
         },
@@ -2076,6 +2087,17 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
           require: false,
 
           as: "borrowHasPkAssets",
+          include: [
+            {
+              model: PackageAsset,
+              include: [
+                {
+                  model: pkAssetImage,
+                  as: "packageAssetImages",
+                },
+              ],
+            },
+          ],
         },
         {
           model: BorrowImage,
