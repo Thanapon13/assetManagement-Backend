@@ -838,9 +838,11 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
       });
     }
     queryAssetArray.push({ deletedAt: { [Op.eq]: null } });
+    queryAssetArray.push({ distributeStatus: { [Op.eq]: false } });
     queryAssetArray.push({ status: { [Op.eq]: "inStock" } });
     queryAssetArray.push({ reserved: { [Op.eq]: false } });
     queryPackageAssetArray.push({ deletedAt: { [Op.eq]: null } });
+    queryAssetArray.push({ distributeStatus: { [Op.eq]: false } });
     queryPackageAssetArray.push({ status: { [Op.eq]: "inStock" } });
     queryPackageAssetArray.push({ reserved: { [Op.eq]: false } });
 

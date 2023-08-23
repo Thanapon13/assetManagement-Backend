@@ -23,7 +23,7 @@ exports.getAssetBySearch = async (req, res, next) => {
       query["status"] = { [Op.notLike]: "saveDraft" };
     }
 
-    query["deliveryDocument"] = { [Op.eq]: null };
+    query["distributeStatus"] = { [Op.eq]: false };
     if (sector !== "") {
       query["sector"] = sector;
     }
@@ -127,7 +127,11 @@ exports.getRepairBySearch = async (req, res, next) => {
     }
 
     if (status !== "") {
-      query["status"] = { [Op.iLike]: `%${status}%`, [Op.not]: "saveDraft" };
+      if (status == "all") {
+        query["status"] = { [Op.not]: "saveDraft" };
+      } else {
+        query["status"] = status;
+      }
     } else {
       query["status"] = { [Op.not]: "saveDraft" };
     }
