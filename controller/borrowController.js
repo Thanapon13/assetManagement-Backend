@@ -2728,6 +2728,7 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
   try {
     const borrowId = req.params.borrowId;
     const { input, existArrayImage } = req.body;
+    console.log("input:", input);
 
     // console.log("input:", input);
     console.log("existArrayImage:", existArrayImage);
