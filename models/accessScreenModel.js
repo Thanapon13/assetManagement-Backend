@@ -15,13 +15,11 @@ module.exports = (sequelize, Sequelize) => {
       name: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        unique: true,
         field: "name",
       },
       order: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        unique: true,
         field: "order",
       },
     },
