@@ -490,6 +490,7 @@ exports.login = async (req, res, next) => {
       await userData.save();
 
       res.status(200).json({
+        userData,
         _id: userData._id,
         email: userData.email,
         role: userData.TB_ROLE,
