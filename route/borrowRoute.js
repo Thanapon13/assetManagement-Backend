@@ -69,17 +69,10 @@ router.get(
 );
 
 // borrowCheck page
-router.get(
-  "/searchBorrowCheck",
-  protect,
-  borrowController.getBySearchBorrowCheck
-);
-router.get(
-  "/borrowCheckSector",
-  protect,
-  borrowController.getBorrowCheckSector
-);
-// router.get("/borrowCheck/:borrowId", borrowController.getBorrowCheckById);
+router.get("/searchBorrowCheck",  protect, borrowController.getBySearchBorrowCheck);
+router.get("/borrowCheckSector",  protect, borrowController.getBorrowCheckSector);
+router.get("/borrowCheck/:borrowId",  protect, borrowController.getBorrowCheckById);
+
 router.patch(
   "/borrowCheckSaving/:borrowId",
   protect,
@@ -89,7 +82,6 @@ router.patch(
 router.patch(
   "/borrowCheckReturnApprove/:borrowId",
   protect,
-
   borrowController.updateBorrowCheckReturnApproveById
 );
 
@@ -105,10 +97,10 @@ router.get(
   borrowController.getAllSectorFromBorrow
 );
 
-// router.get(
-//   "/viewBorrowApproveDetailById/:borrowId",
-//   borrowController.getViewBorrowApproveDetailById
-// );
+router.get(
+  "/viewBorrowApproveDetailById/:borrowId",
+  borrowController.getViewBorrowApproveDetailById
+);
 
 router.get(
   "/viewBorrowHistoryByAssetId/:assetId",

@@ -21,7 +21,7 @@ function delete_file(path) {
 exports.createRepair = async (req, res, next) => {
   try {
     const { input } = req.body;
-    // console.log("input",input);
+    // console.log("input:", input);
 
     let {
       informRepairIdDoc,
@@ -64,11 +64,13 @@ exports.createRepair = async (req, res, next) => {
 
       return res.json({ message: "create repair successfully", repair });
     }
+
     let asset = await Asset.findAll({
       where: { assetNumber },
       attributes: ["_id", "assetNumber"],
     });
-    console.log("asset", asset);
+    console.log("asset:", asset);
+
     const packageAssetArray = await PackageAsset.findAll({
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
@@ -77,28 +79,11 @@ exports.createRepair = async (req, res, next) => {
       ],
     });
     console.log("packageAssetArray", packageAssetArray);
-    // const packageAssetArray = await PackageAsset.aggregate([
-    //   { $match: { assetNumber } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       localField: "_id",
-    //       foreignField: "packageAssetId",
-    //       as: "asset",
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 1,
-    //       assetNumber: 1,
-    //       "asset._id": 1,
-    //     },
-    //   },
-    // ]);
 
-    const packageAsset = packageAssetArray[0];
+    // const packageAsset = packageAssetArray[0];
 
     if (asset.length > 0) {
+      console.log("true-------------:", asset.length);
       await Asset.update(
         { reserved: true },
         {
@@ -107,7 +92,6 @@ exports.createRepair = async (req, res, next) => {
           },
         }
       );
-
       const repair = await Repair.create({
         ...input,
         status: status,
@@ -116,7 +100,8 @@ exports.createRepair = async (req, res, next) => {
       });
 
       res.json({ message: "create repair successfully", repair });
-    } else if (packageAsset) {
+    } else if (packageAssetArray) {
+      console.log("false-------------:", packageAssetArray);
       await PackageAsset.update(
         { reserved: true },
         {
@@ -126,18 +111,18 @@ exports.createRepair = async (req, res, next) => {
         }
       );
 
-      for (el of packageAsset.assets) {
+      for (el of packageAssetArray.assets) {
         // console.log(el._id)
         await Asset.update({ reserved: true }, { where: { _id: el._id } });
       }
 
       //   console.log({...input,status: "waiting"})
-
+      console.log("packageAssetArray._id:", packageAssetArray._id);
       const repair = await Repair.create({
         ...input,
         status,
         statusOfDetailRecord: status,
-        packageAssetId: packageAsset._id,
+        packageAssetId: packageAssetArray._id,
       });
 
       res.json({ message: "create repair successfully", repair });
@@ -1259,7 +1244,7 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
         let queryInsert = {};
         const repairData = await Repair.findByPk(repairId);
         if (repairData.outsourceFlag == "Y") {
-          queryInsert = { statusOutsourceRepair: "complete" };
+          queryInsert = { statusOutsourceRepair: "gotRepair" };
         }
         let repair = await Repair.update(
           {
@@ -1427,7 +1412,7 @@ exports.approveIndividualWaitingRepair = async (req, res, next) => {
     let queryInsert = {};
     const repairData = await Repair.findByPk(repairId);
     if (repairData.outsourceFlag == "Y") {
-      queryInsert = { statusOutsourceRepair: "complete" };
+      queryInsert = { statusOutsourceRepair: "gotRepair" };
     }
     await Repair.update(
       {
@@ -1986,6 +1971,9 @@ exports.getBySearchOfOutsourceRapair = async (req, res, next) => {
     }
     queryArray.push({
       outsourceFlag: { [Op.eq]: "Y" },
+    });
+    queryArray.push({
+      statusOutsourceRepair: { [Op.not]: null },
     });
 
     if (dateFrom !== "") {

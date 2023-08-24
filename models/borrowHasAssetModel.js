@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
       reason: {
         type: Sequelize.STRING(1000),
         allowNull: true,
-        default: "",
+        defaultValue: "",
         field: "reason",
       },
       return: {

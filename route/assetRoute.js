@@ -31,7 +31,7 @@ router.delete(
 
 router.get("/", protect, assetController.getAllAsset);
 
-// router.get("/repairDropdown", assetController.getAllAssetForRepairDropdown);
+router.get("/repairDropdown", assetController.getAllAssetForRepairDropdown);
 
 // router.get("/building", assetController.getAllBuilding);
 

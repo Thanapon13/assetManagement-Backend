@@ -1310,8 +1310,12 @@ exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
     console.log("topApproveList:", topApproveList);
 
     let transferId = topApproveList._id;
-    let assetIdArray = topApproveList.assetIdArray;
-    let packageAssetIdArray = topApproveList.packageAssetIdArray;
+    let assetIdArray = topApproveList.transferHasAssets;
+    let packageAssetIdArray = topApproveList.transferHasPkAssets;
+
+    console.log("transferId:", transferId);
+    console.log("assetIdArray:", assetIdArray);
+    console.log("packageAssetIdArray:", packageAssetIdArray);
 
     await transfer.update(
       {
@@ -1376,8 +1380,8 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
     // console.log("transferId:", transferId);
     console.log("input:", input);
 
-    const assetIdArray = input[0].assetIdArray;
-    const packageAssetIdArray = input[0].packageAssetIdArray;
+    const assetIdArray = input.assetIdArray;
+    const packageAssetIdArray = input.packageAssetIdArray;
     console.log("assetIdArray:", assetIdArray);
     console.log("packageAssetIdArray:", packageAssetIdArray);
 
@@ -1879,10 +1883,98 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
       modifiedDateTo = moment(dateTo).format("YYYY-MM-DD");
     }
 
-    let query = {
-      where: {
-        deletedAt: null,
-        status: status || {
+    // let query = {
+    //   where: {
+    //     deletedAt: null,
+    //     status: status || {
+    //       [Op.in]: [
+    //         "approve",
+    //         "partiallyApprove",
+    //         "waitingReturnApprove",
+    //         "partiallyReturn",
+    //         "done"
+    //       ]
+    //     }
+    //   },
+    //   order: [["dateTime_approver", "DESC"]],
+    //   offset: page * limit,
+    //   limit
+    // };
+    let queryArray = [];
+    let queryAssetNumber = {};
+    let idArray = [];
+
+    if (textSearch !== "") {
+      if (typeTextSearch === "assetNumber") {
+        let assetArray = await asset.findAll({
+          where: {
+            assetNumber: { [Op.like]: `%${textSearch}%` },
+          },
+        });
+        console.log("assetArray", assetArray);
+        let packageAssetArray = await pkAsset.findAll({
+          where: {
+            assetNumber: { [Op.like]: `%${textSearch}%` },
+          },
+        });
+        console.log("packageAssetArray", packageAssetArray);
+
+        idArray = assetArray
+          .concat(packageAssetArray)
+          .map((asset) => asset._id);
+        queryAssetNumber = {
+          [Op.or]: [
+            {
+              "$transferHasAssets.assetId$": {
+                [Op.in]: idArray,
+              },
+            },
+            {
+              "$transferHasPkAssets.packageAssetId$": {
+                [Op.in]: idArray,
+              },
+            },
+          ],
+        };
+      } else {
+        queryArray.push({
+          [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
+        });
+      }
+    }
+    if (transfereeSector !== "") {
+      queryArray.push({
+        transfereeSector: {
+          [Op.eq]: transfereeSector,
+        },
+      });
+    }
+
+    if (dateFrom !== "") {
+      queryArray.push({
+        createdAt: {
+          [Op.gte]: new Date(modifiedDateFrom),
+          [Op.lte]: moment().endOf("day").toDate(),
+        },
+      });
+    }
+    if (dateTo !== "") {
+      queryArray.push({ createdAt: { [Op.lte]: new Date(modifiedDateTo) } });
+    }
+    if (dateFrom !== "" && dateTo !== "") {
+      queryArray.push({
+        createdAt: {
+          [Op.gte]: new Date(modifiedDateFrom),
+          [Op.lte]: new Date(modifiedDateTo),
+        },
+      });
+    }
+
+    if (status !== "") {
+      queryArray.push({ status: status });
+    } else {
+      queryArray.push({
+        status: {
           [Op.in]: [
             "approve",
             "partiallyApprove",
@@ -1891,69 +1983,53 @@ exports.getBySearchTransferHistory = async (req, res, next) => {
             "done",
           ],
         },
+      });
+    }
+
+    queryArray.push({ deletedAt: { [Op.eq]: null } });
+
+    const transferData = await transfer.findAll({
+      where: {
+        [Op.and]: queryArray,
+        ...queryAssetNumber,
       },
-      order: [["dateTime_approver", "DESC"]],
+      include: [
+        {
+          model: transferHasAsset,
+          as: "transferHasAssets",
+          // require: true,
+        },
+        {
+          model: transferHasPkAsset,
+          as: "transferHasPkAssets",
+          // require: true,
+        },
+      ],
+
+      order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit,
-    };
+      // limit: limit,
+    });
+    const total = await transfer.count({
+      where: {
+        [Op.and]: queryArray,
+        ...queryAssetNumber,
+      },
+      include: [
+        {
+          model: transferHasAsset,
+          as: "transferHasAssets",
+          // require: true,
+        },
+        {
+          model: transferHasPkAsset,
+          as: "transferHasPkAssets",
+          // require: true,
+        },
+      ],
+    });
 
-    if (transfereeSector !== "") {
-      query.where.transfereeSector = transfereeSector;
-    }
-
-    if (dateFrom !== "") {
-      query.where.dateTime_approver = {
-        [Op.gte]: modifiedDateFrom,
-        [Op.lte]: moment().endOf("day").format("YYYY-MM-DD"),
-      };
-    }
-
-    if (dateTo !== "") {
-      query.where.dateTime_approver = {
-        [Op.lte]: modifiedDateTo,
-      };
-    }
-
-    if (dateFrom !== "" && dateTo !== "") {
-      query.where.dateTime_approver = {
-        [Op.between]: [modifiedDateFrom, modifiedDateTo],
-      };
-    }
-
-    if (textSearch !== "") {
-      if (typeTextSearch === "assetNumber") {
-        const assetIds = await asset.findAll({
-          where: {
-            assetNumber: { [Op.iLike]: `%${textSearch}%` },
-          },
-          attributes: ["_id"],
-        });
-
-        const packageAssetIds = await pkAsset.findAll({
-          where: {
-            assetNumber: { [Op.iLike]: `%${textSearch}%` },
-          },
-          attributes: ["_id"],
-        });
-
-        const assetIdArray = assetIds.map((asset) => asset._id);
-        const packageAssetIdArray = packageAssetIds.map((asset) => asset._id);
-
-        query.where[Op.or] = [
-          { assetIdArray: { [Op.contains]: assetIdArray } },
-          { packageAssetIdArray: { [Op.contains]: packageAssetIdArray } },
-        ];
-      } else {
-        query.where[typeTextSearch] = {
-          [Op.iLike]: `%${textSearch}%`,
-        };
-      }
-    }
-    console.log("query :", query);
-    const transferData = await transfer.findAll(query);
-    const total = await transfer.count(query);
-
-    res.json({ transferData, page: page + 1, limit, total });
+    res.json({ transferData, idArray, page: page + 1, limit, total });
   } catch (err) {
     next(err);
   }
