@@ -8,6 +8,7 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST, // host ของ db ที่เราสร้างเอาไว้
     dialect: "mssql", // 'mysql' | 'mariadb' | 'postgres' | 'mssql'   พวกนี้ใช่ก็ใช้ได้นะจ๊ะ
+    // port: 50264,
     define: {
       timestamps: true, //ส่วนตรงนี้ก็เป็นการตั้งค่าเพิ่มเติม
     },

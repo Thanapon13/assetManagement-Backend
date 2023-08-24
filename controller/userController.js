@@ -455,6 +455,14 @@ exports.login = async (req, res, next) => {
           model: role,
           as: "TB_ROLE",
           require: false,
+          attributes: ["_id", "roleName"],
+          include: [
+            {
+              model: accessScreen,
+              as: "roleAccessScreen",
+              attributes: ["_id", "name", "order"],
+            },
+          ],
         },
       ],
     });
