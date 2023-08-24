@@ -65,17 +65,10 @@ exports.getAssetBySearch = async (req, res, next) => {
       where: queryActiveAsset,
     });
 
-    let queryDistributionAsset = {};
-    queryDistributionAsset["distributeStatus"] = {
-      [Op.ne]: false,
-    };
-
-    queryDistributionAsset["status"] = { [Op.ne]: "saveDraft" };
-    queryDistributionAsset["deletedAt"] = { [Op.eq]: null };
     const distributionCount = await asset.count({
       where: {
         distributeStatus: {
-          [Op.ne]: false,
+          [Op.eq]: true,
         },
         status: { [Op.not]: "saveDraft" },
         deletedAt: null,
@@ -99,8 +92,6 @@ exports.getAssetBySearch = async (req, res, next) => {
       repairCount,
       assetData,
     });
-
-    res.status(200).json({ message: "sadad" });
   } catch (err) {
     next(err);
   }
@@ -155,45 +146,35 @@ exports.getRepairBySearch = async (req, res, next) => {
     let queryActiveAsset = {};
 
     listStatusOfRepair = ["repair", "saveDraft"];
-    queryActiveAsset = {
-      status: {
-        [Op.notIn]: listStatusOfRepair,
-      },
-      deletedAt: {
-        [Op.eq]: null,
-      },
-      distributeStatus: {
-        [Op.eq]: false,
-      },
+    queryActiveAsset["status"] = { [Op.notIn]: listStatusOfRepair };
+    queryActiveAsset["deletedAt"] = { [Op.eq]: null };
+    queryActiveAsset["distributeStatus"] = {
+      [Op.eq]: false,
     };
 
-    const activeCount = await asset.count({
-      where: {
-        status: { [Op.notIn]: listStatusOfRepair },
-        deletedAt: null,
-        distributeStatus: false,
-      },
+    let activeCount = await asset.count({
+      where: queryActiveAsset,
     });
-    console.log("activeCount:", activeCount);
 
     const distributionCount = await asset.count({
       where: {
-        distributeStatus: { [Op.eq]: true },
+        distributeStatus: {
+          [Op.eq]: true,
+        },
         status: { [Op.not]: "saveDraft" },
         deletedAt: null,
       },
     });
-    console.log("distributionCount:", distributionCount);
 
+    let queryRepairAsset = {};
+    queryRepairAsset["deletedAt"] = { [Op.eq]: null };
+    queryRepairAsset["status"] = { [Op.eq]: "repair" };
     const repairCount = await asset.count({
-      where: {
-        status: "repair",
-        deletedAt: null,
-      },
+      where: queryRepairAsset,
     });
-    console.log("repairCount:", repairCount);
 
-    const totalCount = activeCount + repairCount;
+    let totalCount = activeCount + repairCount;
+    console.log("totalCount:", totalCount);
 
     res.json({
       totalCount,
