@@ -637,7 +637,7 @@ exports.getAssetById = async (req, res, next) => {
         {
           model: transferHasAsset,
           require: false,
-          as: "transferHasAssets",
+          as: "transferHasAssetsData",
           include: [
             {
               model: transfer,
