@@ -92,10 +92,8 @@ exports.createAsset = async (req, res, next) => {
       name_approver
     } = req.body;
 
-    console.log("req.body:", req.body);
-
+    // console.log("input:", input);
     const inputObject = JSON.parse(input);
-
     let {
       engProductName,
       productName,
@@ -149,47 +147,52 @@ exports.createAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       const createdAsset = await asset.create({
         ...inputObject,
-        insuranceStartDate: insuranceStartDate,
-        insuranceExpiredDate: insuranceExpiredDate,
+        insuranceStartDate: insuranceStartDate || "",
+        insuranceExpiredDate: insuranceExpiredDate || "",
 
         //สัญญาจัดซื้อ
-        acquisitionMethod: acquisitionMethod,
-        moneyType: moneyType,
-        deliveryDocument: deliveryDocument,
-        contractNumber: contractNumber,
-        receivedDate: receivedDate,
-        seller: seller,
-        price: price,
-        billNumber: billNumber,
-        purchaseYear: purchaseYear,
-        purchaseDate: purchaseDate,
-        documentDate: documentDate,
+        acquisitionMethod: acquisitionMethod || "",
+        moneyType: moneyType || "",
+        deliveryDocument: deliveryDocument || "",
+        contractNumber: contractNumber || "",
+        receivedDate: receivedDate || "",
+        seller: seller || "",
+        price: price || "",
+        billNumber: billNumber || "",
+        purchaseYear: purchaseYear || "",
+        purchaseDate: purchaseDate || "",
+        documentDate: documentDate || "",
 
         // การจำหน่าย
-        salesDocument: salesDocument,
-        distributeDocumentDate: distributeDocumentDate,
-        distributeApprovalReleaseDate: distributeApprovalReleaseDate,
-        distributeStatus: distributeStatus,
-        distributionNote: distributionNote,
+        salesDocument: salesDocument || "",
+        distributeDocumentDate: distributeDocumentDate || "",
+        distributeApprovalReleaseDate: distributeApprovalReleaseDate || "",
+        distributeStatus: distributeStatus || "",
+        distributionNote: distributionNote || "",
 
         // ค่าเสื่อม
-        depreciationStartDate: depreciationStartDate,
-        depreciationRegisterDate: depreciationRegisterDate,
-        depreciationReceivedDate: depreciationReceivedDate,
-        depreciationPrice: depreciationPrice,
-        depreciationYearUsed: depreciationYearUsed,
-        depreciationCarcassPrice: depreciationCarcassPrice,
+        depreciationStartDate: depreciationStartDate || "",
+        depreciationRegisterDate: depreciationRegisterDate || "",
+        depreciationReceivedDate: depreciationReceivedDate || "",
+        depreciationPrice: depreciationPrice || "",
+        depreciationYearUsed: depreciationYearUsed || "",
+        depreciationCarcassPrice: depreciationCarcassPrice || "",
 
         // ค่าเสื่อมรายปี
-        accumulateDepreciationStartDate: accumulateDepreciationStartDate,
-        accumulateDepreciationRegisterDate: accumulateDepreciationRegisterDate,
-        accumulateDepreciationReceivedDate: accumulateDepreciationReceivedDate,
-        accumulateDepreciationPrice: accumulateDepreciationPrice,
-        accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-        accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice,
+        accumulateDepreciationStartDate: accumulateDepreciationStartDate || "",
+        accumulateDepreciationRegisterDate:
+          accumulateDepreciationRegisterDate || "",
+        accumulateDepreciationReceivedDate:
+          accumulateDepreciationReceivedDate || "",
+        accumulateDepreciationPrice: accumulateDepreciationPrice || "",
+        accumulateDepreciationYearUsed: accumulateDepreciationYearUsed || "",
+        accumulateDepreciationCarcassPrice:
+          accumulateDepreciationCarcassPrice || "",
 
         realAssetId: newestRealAssetId + 1
       });
+      console.log("------------------");
+      // return;
 
       const newAssetId = createdAsset.dataValues._id;
       console.log("newAssetId:", newAssetId);

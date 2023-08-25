@@ -7,7 +7,11 @@ const protect = require("../middleware/authMiddleware");
 router.get("/all", protect, merchantController.getAllMerchant);
 router.get("/search", protect, merchantController.getBySearch);
 router.get("/searchViewOnly", protect, merchantController.getBySearchViewOnly);
-router.get("/getDropdownMerchant", merchantController.getMerchantDropdown);
+router.get(
+  "/getDropdownMerchant",
+  protect,
+  merchantController.getMerchantDropdown
+);
 router.get("/:merchantId", protect, merchantController.getMerchantById);
 router.post(
   "/create",
