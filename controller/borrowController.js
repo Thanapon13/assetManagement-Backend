@@ -1191,7 +1191,11 @@ exports.getBorrowById = async (req, res, next) => {
         {
           model: BorrowHasPkAsset,
           require: false,
-
+          include: [
+            {
+              model: PackageAsset,
+            },
+          ],
           as: "borrowHasPkAssets",
         },
         {
