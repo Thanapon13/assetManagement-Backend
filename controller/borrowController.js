@@ -1185,6 +1185,12 @@ exports.getBorrowById = async (req, res, next) => {
           include: [
             {
               model: Asset,
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                },
+              ],
             },
           ],
         },
@@ -1194,6 +1200,12 @@ exports.getBorrowById = async (req, res, next) => {
           include: [
             {
               model: PackageAsset,
+              include: [
+                {
+                  model: pkAssetImage,
+                  as: "packageAssetImages",
+                },
+              ],
             },
           ],
           as: "borrowHasPkAssets",
