@@ -126,7 +126,12 @@ exports.createUser = async (req, res, next) => {
     if (checkUser) {
       createError("invalid username or password", 400);
     }
-
+    const checkEmail = await user.findOne({
+      where: { email: input.email },
+    });
+    if (checkEmail) {
+      createError("This email already exists", 400);
+    }
     const {
       thaiPrefix,
       thaiFirstName,
