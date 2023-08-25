@@ -414,21 +414,21 @@ exports.deleteAsset = async (req, res, next) => {
       remove.reason = req.body.reason;
       remove.deletedAt = new Date();
       await remove.save();
-      let dataForCancelCapitalization = {
-        CancellationOption: "coByOriginalDocumentDate",
-        Code: remove.AssetNumber
-      };
-      const responseLogin = await sapAuthService.login();
-      const sessionId = responseLogin.data.SessionId;
-      const responseCancelCapitalization =
-        await sapCapitalizationService.cancel(
-          dataForCancelCapitalization,
-          sessionId
-        );
-      const responseCancelAssetMaster = await sapAssetMasterService.cancel(
-        remove.AssetNumber,
-        sessionId
-      );
+      // let dataForCancelCapitalization = {
+      //   CancellationOption: "coByOriginalDocumentDate",
+      //   Code: remove.AssetNumber,
+      // };
+      // const responseLogin = await sapAuthService.login();
+      // const sessionId = responseLogin.data.SessionId;
+      // const responseCancelCapitalization =
+      //   await sapCapitalizationService.cancel(
+      //     dataForCancelCapitalization,
+      //     sessionId
+      //   );
+      // const responseCancelAssetMaster = await sapAssetMasterService.cancel(
+      //   remove.AssetNumber,
+      //   sessionId
+      // );
     }
 
     res.status(200).json({ message: "Delete success" });
@@ -637,7 +637,7 @@ exports.getAssetById = async (req, res, next) => {
         {
           model: transferHasAsset,
           require: false,
-          as: "transferHasAssets",
+          as: "transferHasAssetsData",
           include: [
             {
               model: transfer,

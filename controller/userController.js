@@ -126,7 +126,12 @@ exports.createUser = async (req, res, next) => {
     if (checkUser) {
       createError("invalid username or password", 400);
     }
-
+    const checkEmail = await user.findOne({
+      where: { email: input.email },
+    });
+    if (checkEmail) {
+      createError("This email already exists", 400);
+    }
     const {
       thaiPrefix,
       thaiFirstName,
@@ -490,6 +495,7 @@ exports.login = async (req, res, next) => {
       await userData.save();
 
       res.status(200).json({
+        userData,
         _id: userData._id,
         email: userData.email,
         role: userData.TB_ROLE,

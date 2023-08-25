@@ -13,9 +13,10 @@ const protect = asyncHandler(async (req, res, next) => {
 
       token = req.headers.authorization.split(" ")[1]; // get token from bearer token space to this to array ([bearer token]) spllit by space
       // token = req.headers.authorization;
-
+      console.log("process.env.ACCESS_TOKEN : ", process.env.ACCESS_TOKEN);
       // Verify token
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+      console.log("decoded : ", decoded);
       const decodedObjected = JSON.stringify(decoded.userData);
 
       const decodedObjected2 = JSON.parse(decodedObjected);
@@ -29,14 +30,18 @@ const protect = asyncHandler(async (req, res, next) => {
       }
     } catch (error) {
       console.log(error);
-      res.status(401);
-      throw new Error("Not authorized");
+      var err = new Error("Not authorized");
+      err.statusCode = 401;
+      // res.status(401);
+      throw err;
     }
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error("Not authorized, No token");
+    var err = new Error("Not authorized, No token");
+    err.statusCode = 401;
+    // res.status(401);
+    throw err;
   }
 });
 
