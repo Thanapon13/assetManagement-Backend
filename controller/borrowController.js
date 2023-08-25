@@ -1184,15 +1184,42 @@ exports.getBorrowById = async (req, res, next) => {
           require: false,
           include: [
             {
+<<<<<<< HEAD
               model: Asset
             }
           ]
+=======
+              model: Asset,
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                },
+              ],
+            },
+          ],
+>>>>>>> f693c7a866ef107f30ef7c0272b67517bf2a4fc4
         },
         {
           model: BorrowHasPkAsset,
           require: false,
+<<<<<<< HEAD
 
           as: "borrowHasPkAssets"
+=======
+          include: [
+            {
+              model: PackageAsset,
+              include: [
+                {
+                  model: pkAssetImage,
+                  as: "packageAssetImages",
+                },
+              ],
+            },
+          ],
+          as: "borrowHasPkAssets",
+>>>>>>> f693c7a866ef107f30ef7c0272b67517bf2a4fc4
         },
         {
           model: BorrowImage,
