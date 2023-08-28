@@ -33,6 +33,7 @@ function delete_file(path) {
 
 exports.createAsset = async (req, res, next) => {
   // เหลือ create transfer
+
   try {
     const {
       genDataJSON,
@@ -40,8 +41,33 @@ exports.createAsset = async (req, res, next) => {
       duplicatedArrayImage,
       baseArrayImage,
       baseArrayDocument,
-      duplicatedArrayDocument,
+      duplicatedArrayDocument
+    } = req.body;
 
+    console.log("req.body:", req.body);
+
+    const inputObject = JSON.parse(input);
+
+    let {
+      engProductName,
+      productName,
+      type,
+      kind,
+      unit,
+      brand,
+      model,
+      size,
+      quantity,
+      source,
+      category,
+      acquiredType,
+      group,
+      pricePerUnit,
+      assetGroupNumber,
+      distributeToSector,
+      guaranteedMonth,
+      purposeOfUse,
+      status,
       insuranceStartDate,
       insuranceExpiredDate,
 
@@ -91,30 +117,6 @@ exports.createAsset = async (req, res, next) => {
       name_recorder,
       name_courier,
       name_approver
-    } = req.body;
-
-    // console.log("input:", input);
-    const inputObject = JSON.parse(input);
-    let {
-      engProductName,
-      productName,
-      type,
-      kind,
-      unit,
-      brand,
-      model,
-      size,
-      quantity,
-      source,
-      category,
-      acquiredType,
-      group,
-      pricePerUnit,
-      assetGroupNumber,
-      distributeToSector,
-      guaranteedMonth,
-      purposeOfUse,
-      status
     } = inputObject;
     let otherInputObject = {};
 
@@ -133,14 +135,16 @@ exports.createAsset = async (req, res, next) => {
 
     let newestRealAssetId;
     let newestAsset = await asset.findOne({
-      attributes: ["realAssetId"]
+      attributes: ["realAssetId"],
+      order: [["createdAt", "DESC"]]
     });
+    console.log("newestAsset : ", newestAsset);
+
     if (newestAsset == null) {
       newestRealAssetId = 0;
     } else {
       newestRealAssetId = newestAsset.realAssetId;
     }
-
     if (status != "saveDraft") {
       status = "inStock";
     }
@@ -148,49 +152,7 @@ exports.createAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       const createdAsset = await asset.create({
         ...inputObject,
-        insuranceStartDate: insuranceStartDate || "",
-        insuranceExpiredDate: insuranceExpiredDate || "",
-
-        //สัญญาจัดซื้อ
-        acquisitionMethod: acquisitionMethod || "",
-        moneyType: moneyType || "",
-        deliveryDocument: deliveryDocument || "",
-        contractNumber: contractNumber || "",
-        receivedDate: receivedDate || "",
-        seller: seller || "",
-        price: price || "",
-        billNumber: billNumber || "",
-        purchaseYear: purchaseYear || "",
-        purchaseDate: purchaseDate || "",
-        documentDate: documentDate || "",
-
-        // การจำหน่าย
-        salesDocument: salesDocument || "",
-        distributeDocumentDate: distributeDocumentDate || "",
-        distributeApprovalReleaseDate: distributeApprovalReleaseDate || "",
-        distributeStatus: distributeStatus || "",
-        distributionNote: distributionNote || "",
-
-        // ค่าเสื่อม
-        depreciationStartDate: depreciationStartDate || "",
-        depreciationRegisterDate: depreciationRegisterDate || "",
-        depreciationReceivedDate: depreciationReceivedDate || "",
-        depreciationPrice: depreciationPrice || "",
-        depreciationYearUsed: depreciationYearUsed || "",
-        depreciationCarcassPrice: depreciationCarcassPrice || "",
-
-        // ค่าเสื่อมรายปี
-        accumulateDepreciationStartDate: accumulateDepreciationStartDate || "",
-        accumulateDepreciationRegisterDate:
-          accumulateDepreciationRegisterDate || "",
-        accumulateDepreciationReceivedDate:
-          accumulateDepreciationReceivedDate || "",
-        accumulateDepreciationPrice: accumulateDepreciationPrice || "",
-        accumulateDepreciationYearUsed: accumulateDepreciationYearUsed || "",
-        accumulateDepreciationCarcassPrice:
-          accumulateDepreciationCarcassPrice || "",
-
-        realAssetId: newestRealAssetId + 1
+        realAssetId: parseInt(newestRealAssetId) + 1
       });
       console.log("------------------");
       // return;
@@ -238,7 +200,22 @@ exports.createAsset = async (req, res, next) => {
       }
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
+
       for (let i = 0; i < quantity; i++) {
+        let dataQuery = {
+          params: {
+            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`
+          }
+        };
+        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+          dataQuery,
+          sessionId
+        );
+        if (responseCheckAlreadyAsset.data.value.length > 0) {
+          return res
+            .status(400)
+            .json({ message: "This assetNumber already exists" });
+        }
         const createdAsset = await asset.create({
           assetNumber: genDataArray[i].assetNumber,
           serialNumber: genDataArray[i].serialNumber,
@@ -246,49 +223,8 @@ exports.createAsset = async (req, res, next) => {
           asset01: genDataArray[i].asset01,
           sector: genDataArray[i].sector,
           ...inputObject,
-          insuranceStartDate: insuranceStartDate,
-          insuranceExpiredDate: insuranceExpiredDate,
-
-          //สัญญาจัดซื้อ
-          acquisitionMethod: acquisitionMethod,
-          moneyType: moneyType,
-          deliveryDocument: deliveryDocument,
-          contractNumber: contractNumber,
-          receivedDate: receivedDate,
-          seller: seller,
-          price: price,
-          billNumber: billNumber,
-          purchaseYear: purchaseYear,
-          purchaseDate: purchaseDate,
-          documentDate: documentDate,
-
-          // การจำหน่าย
-          salesDocument: salesDocument,
-          distributeDocumentDate: distributeDocumentDate,
-          distributeApprovalReleaseDate: distributeApprovalReleaseDate,
-          distributeStatus: distributeStatus,
-          distributionNote: distributionNote,
-
-          // ค่าเสื่อม
-          depreciationStartDate: depreciationStartDate,
-          depreciationRegisterDate: depreciationRegisterDate,
-          depreciationReceivedDate: depreciationReceivedDate,
-          depreciationPrice: depreciationPrice,
-          depreciationYearUsed: depreciationYearUsed,
-          depreciationCarcassPrice: depreciationCarcassPrice,
-
-          // ค่าเสื่อมรายปี
-          accumulateDepreciationStartDate: accumulateDepreciationStartDate,
-          accumulateDepreciationRegisterDate:
-            accumulateDepreciationRegisterDate,
-          accumulateDepreciationReceivedDate:
-            accumulateDepreciationReceivedDate,
-          accumulateDepreciationPrice: accumulateDepreciationPrice,
-          accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-          accumulateDepreciationCarcassPrice:
-            accumulateDepreciationCarcassPrice,
-
-          realAssetId: newestRealAssetId + 1
+          reserved: false,
+          realAssetId: parseInt(newestRealAssetId) + 1
         });
         const newAssetId = createdAsset.dataValues._id;
         console.log("newAssetId:", newAssetId);
@@ -949,12 +885,42 @@ exports.getQuantitySelector = async (req, res, next) => {
 exports.updateAsset = async (req, res, next) => {
   try {
     const assetId = req.params.assetId;
-    const {
-      genDataJSON,
-      input,
-      existArrayImage,
-      existArrayDocument,
+    const { genDataJSON, input, existArrayImage, existArrayDocument } =
+      req.body;
+    // console.log(req.body);
 
+    const inputObject = JSON.parse(input);
+
+    // console.log("existArrayImageArray", existArrayImageArray);
+
+    // console.log("inputObject",inputObject)
+
+    // console.log("insuranceStartDate", insuranceStartDate);
+    // console.log("insuranceExpiredDate", insuranceExpiredDate);
+    let {
+      engProductName,
+      productName,
+      type,
+      kind,
+      unit,
+      brand,
+      model,
+      size,
+      quantity,
+      source,
+      sector,
+      category,
+      acquiredType,
+      group,
+      pricePerUnit,
+      assetGroupNumber,
+      distributeToSector,
+      guaranteedMonth,
+      purposeOfUse,
+      asset01,
+      replacedAssetNumber,
+      serialNumber,
+      status,
       insuranceStartDate,
       insuranceExpiredDate,
 
@@ -1006,41 +972,6 @@ exports.updateAsset = async (req, res, next) => {
       name_recorder,
       name_courier,
       name_approver
-    } = req.body;
-    // console.log(req.body);
-
-    const inputObject = JSON.parse(input);
-
-    // console.log("existArrayImageArray", existArrayImageArray);
-
-    // console.log("inputObject",inputObject)
-
-    // console.log("insuranceStartDate", insuranceStartDate);
-    // console.log("insuranceExpiredDate", insuranceExpiredDate);
-    let {
-      engProductName,
-      productName,
-      type,
-      kind,
-      unit,
-      brand,
-      model,
-      size,
-      quantity,
-      source,
-      sector,
-      category,
-      acquiredType,
-      group,
-      pricePerUnit,
-      assetGroupNumber,
-      distributeToSector,
-      guaranteedMonth,
-      purposeOfUse,
-      asset01,
-      replacedAssetNumber,
-      serialNumber,
-      status
     } = inputObject;
     let existArrayImageArray = [];
     let existArrayDocumentArray = [];
@@ -1093,65 +1024,7 @@ exports.updateAsset = async (req, res, next) => {
           replacedAssetNumber: genDataArray[i].replacedAssetNumber,
           asset01: genDataArray[i].asset01,
           sector: genDataArray[i].sector,
-          engProductName,
-          productName,
-          type,
-          kind,
-          unit,
-          brand,
-          model,
-          size,
-          quantity,
-          source,
-          category,
-          acquiredType,
-          group,
-          guaranteedMonth,
-          purposeOfUse,
-          status,
-          pricePerUnit,
-          assetGroupNumber,
-          distributeToSector,
-          insuranceStartDate,
-          insuranceExpiredDate,
-
-          //สัญญาจัดซื้อ
-
-          acquisitionMethod,
-          moneyType,
-          deliveryDocument,
-          contractNumber,
-          receivedDate,
-          seller,
-          price,
-          billNumber,
-          purchaseYear,
-          purchaseDate,
-          documentDate,
-
-          // การจำหน่าย
-          salesDocument,
-          distributeDocumentDate,
-          distributeApprovalReleaseDate,
-          distributeStatus,
-          distributionNote,
-
-          // ค่าเสื่อม
-          depreciationStartDate,
-          depreciationRegisterDate,
-          depreciationReceivedDate,
-          depreciationPrice,
-          depreciationYearUsed,
-          depreciationCarcassPrice,
-
-          // ค่าเสื่อมรายปี
-          accumulateDepreciationStartDate,
-          accumulateDepreciationRegisterDate,
-          accumulateDepreciationReceivedDate,
-          accumulateDepreciationPrice,
-          accumulateDepreciationYearUsed,
-          accumulateDepreciationCarcassPrice,
-
+          ...inputObject,
           reserved: false
         });
         for (let j = 0; j < existArrayImageArray.length; j++) {
@@ -1487,10 +1360,17 @@ exports.updateAsset = async (req, res, next) => {
     assetById.accumulateDepreciationCarcassPrice =
       accumulateDepreciationCarcassPrice;
 
-    assetById.reserved = reserved;
+    assetById.reserved = reserved || false;
     if (status == "saveDraft") {
       const genDataArray = JSON.parse(genDataJSON);
-      assetById.genDataArray = genDataArray;
+      await subComponentAsset.destroy({ where: { assetId: assetId } });
+      for (let i = 0; i < genDataArray.length; i++) {
+        const subComponentData = genDataArray[i];
+        await subComponentAsset.create({
+          ...subComponentData,
+          assetId: assetId
+        });
+      }
     }
 
     console.log("assetById", assetById);
