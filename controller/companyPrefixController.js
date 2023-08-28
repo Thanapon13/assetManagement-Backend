@@ -5,10 +5,9 @@ exports.createCompanyPrefix = async (req, res, next) => {
   try {
     const { companyPrefixArray } = req.body;
     // const companyPrefixArrayObject = companyPrefixArray;
-    const companyPrefixArrayObject = JSON.parse(companyPrefixArray);
     const resCompanyPrefix = [];
 
-    for (let el of companyPrefixArrayObject) {
+    for (let el of companyPrefixArray) {
       try {
         let companyPrefix = await CompanyPrefix.create({
           name: el.name,
@@ -33,12 +32,10 @@ exports.createCompanyPrefix = async (req, res, next) => {
 exports.updateCompanyPrefix = async (req, res, next) => {
   try {
     const { companyPrefixArray } = req.body;
-    // const companyPrefixArrayObject = companyPrefixArray;
-    const companyPrefixArrayObject = JSON.parse(companyPrefixArray);
     const resCompanyPrefix = [];
 
-    for (let i = 0; i < companyPrefixArrayObject.length; i++) {
-      const { _id, name } = companyPrefixArrayObject[i];
+    for (let i = 0; i < companyPrefixArray.length; i++) {
+      const { _id, name } = companyPrefixArray[i];
       const companyPrefix = await CompanyPrefix.findByPk(_id);
 
       if (!companyPrefix) {
@@ -70,11 +67,7 @@ exports.updateCompanyPrefix = async (req, res, next) => {
 
 exports.getAllCompanyPrefix = async (req, res, next) => {
   try {
-    const companyPrefix = await CompanyPrefix.destroy({
-      where: {
-        _id: _id,
-      },
-    });
+    const companyPrefix = await CompanyPrefix.findAll();
     res.json({ companyPrefix });
   } catch (err) {
     next(err);
