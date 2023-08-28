@@ -352,7 +352,7 @@ exports.updateUser = async (req, res, next) => {
     const userById = await user.findOne({
       where: { _id: userId },
       attributes: { exclude: ["password"] },
-      include: [{ model: role, as: "TBM_ROLE" }],
+      include: [{ model: role, as: "TB_ROLE" }],
     });
     console.log("userById:", userById);
     // console.log("input:", input);
