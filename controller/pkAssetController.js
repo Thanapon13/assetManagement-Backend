@@ -44,11 +44,40 @@ exports.createPackageAsset = async (req, res, next) => {
     const {
       genDataJSON,
       input,
-
       // file
       baseArrayImage,
       baseArrayDocument,
+      bottomSubComponentDataJSON,
+    } = req.body;
+    // console.log(req.body);
 
+    const inputObject = JSON.parse(input);
+    // console.log("inputObject", inputObject);
+    let {
+      engProductName,
+      productName,
+      type,
+      kind,
+      // realAssetId,
+      unit,
+      brand,
+      model,
+      size,
+      quantity,
+      source,
+      category,
+      acquiredType,
+      group,
+      pricePerUnit,
+      guaranteedMonth,
+      purposeOfUse,
+      assetGroupNumber,
+      type4,
+      type8,
+      type13,
+      allSector,
+
+      status,
       insuranceStartDate,
       insuranceExpiredDate,
 
@@ -87,38 +116,6 @@ exports.createPackageAsset = async (req, res, next) => {
       accumulateDepreciationPrice,
       accumulateDepreciationYearUsed,
       accumulateDepreciationCarcassPrice,
-
-      bottomSubComponentDataJSON,
-    } = req.body;
-    // console.log(req.body);
-
-    const inputObject = JSON.parse(input);
-    // console.log("inputObject", inputObject);
-    let {
-      engProductName,
-      productName,
-      type,
-      kind,
-      // realAssetId,
-      unit,
-      brand,
-      model,
-      size,
-      quantity,
-      source,
-      category,
-      acquiredType,
-      group,
-      pricePerUnit,
-      guaranteedMonth,
-      purposeOfUse,
-      assetGroupNumber,
-      type4,
-      type8,
-      type13,
-      allSector,
-
-      status,
     } = inputObject;
 
     // console.log(req.body);
@@ -159,69 +156,8 @@ exports.createPackageAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       let packageAsset = await PackageAsset.create({
         realAssetId: newestRealAssetId + 1,
-        engProductName: engProductName,
-        productName: productName,
-        type: type,
-        kind: kind,
-        unit: unit,
-        brand: brand,
-        model: model,
-        size: size,
-        quantity: quantity,
-        source: source,
-        category: category,
-        acquiredType: acquiredType,
-        group: group,
-        pricePerUnit: pricePerUnit,
-        guaranteedMonth: guaranteedMonth,
-        purposeOfUse: purposeOfUse,
-        assetGroupNumber: assetGroupNumber,
-        type4: type4,
-        type8: type8,
-        type13: type13,
-        allSector: allSector,
-
-        status: status,
         reserved: false,
-
-        insuranceStartDate: insuranceStartDate,
-        insuranceExpiredDate: insuranceExpiredDate,
-
-        //สัญญาจัดซื้อ
-        acquisitionMethod: acquisitionMethod,
-        moneyType: moneyType,
-        deliveryDocument: deliveryDocument,
-        contractNumber: contractNumber,
-        receivedDate: receivedDate,
-        seller: seller,
-        price: price,
-        billNumber: billNumber,
-        purchaseYear: purchaseYear,
-        purchaseDate: purchaseDate,
-        documentDate: documentDate,
-
-        // การจำหน่าย
-        salesDocument: salesDocument,
-        distributeDocumentDate: distributeDocumentDate,
-        distributeApprovalReleaseDate: distributeApprovalReleaseDate,
-        distributeStatus: distributeStatus,
-        distributionNote: distributionNote,
-
-        // ค่าเสื่อม
-        depreciationStartDate: depreciationStartDate,
-        depreciationRegisterDate: depreciationRegisterDate,
-        depreciationReceivedDate: depreciationReceivedDate,
-        depreciationPrice: depreciationPrice,
-        depreciationYearUsed: depreciationYearUsed,
-        depreciationCarcassPrice: depreciationCarcassPrice,
-
-        // ค่าเสื่อมรายปี
-        accumulateDepreciationStartDate: accumulateDepreciationStartDate,
-        accumulateDepreciationRegisterDate: accumulateDepreciationRegisterDate,
-        accumulateDepreciationReceivedDate: accumulateDepreciationReceivedDate,
-        accumulateDepreciationPrice: accumulateDepreciationPrice,
-        accumulateDepreciationYearUsed: accumulateDepreciationYearUsed,
-        accumulateDepreciationCarcassPrice: accumulateDepreciationCarcassPrice,
+        ...inputObject,
       });
       for (let i = 0; i < baseArrayImageObj.length; i++) {
         await PackageAssetImage.create({
@@ -1857,7 +1793,6 @@ exports.deletePackageAsset = async (req, res, next) => {
       // change delete function
       await PackageAsset.update(
         { reason: reason, deletedAt: new Date() },
-
         {
           where: {
             _id: packageAssetId,
