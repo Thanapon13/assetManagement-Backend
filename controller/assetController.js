@@ -1014,6 +1014,20 @@ exports.updateAsset = async (req, res, next) => {
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
       for (let i = 0; i < quantity; i++) {
+        let dataQuery = {
+          params: {
+            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
+          },
+        };
+        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+          dataQuery,
+          sessionId
+        );
+        if (responseCheckAlreadyAsset.data.value.length > 0) {
+          return res
+            .status(400)
+            .json({ message: "This assetNumber already exists" });
+        }
         newestRealAssetId = newestRealAssetId + 1;
         const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
