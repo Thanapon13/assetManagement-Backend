@@ -153,6 +153,7 @@ exports.createPackageAsset = async (req, res, next) => {
     } else {
       newestRealAssetId = parseInt(newestAsset.realAssetId);
     }
+    console.log("newestRealAssetId :", newestRealAssetId);
     if (status == "saveDraft") {
       let packageAsset = await PackageAsset.create({
         realAssetId: newestRealAssetId + 1,
@@ -206,6 +207,20 @@ exports.createPackageAsset = async (req, res, next) => {
         // console.log(`Package${index+1}`)
 
         // console.log("saveDocumentArray",saveDocumentArray)
+        let dataQuery = {
+          params: {
+            $filter: `ItemCode eq '${el.assetNumber}'`,
+          },
+        };
+        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+          dataQuery,
+          sessionId
+        );
+        if (responseCheckAlreadyAsset.data.value.length > 0) {
+          return res
+            .status(400)
+            .json({ message: "This assetNumber already exists" });
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId + 1,
           assetNumber: el.assetNumber,
@@ -696,47 +711,6 @@ exports.updatePackageAsset = async (req, res, next) => {
       input,
       existArrayImage,
       existArrayDocument,
-
-      insuranceStartDate,
-      insuranceExpiredDate,
-
-      //สัญญาจัดซื้อ
-      acquisitionMethod,
-      moneyType,
-      deliveryDocument,
-      contractNumber,
-      receivedDate,
-      seller,
-      price,
-      billNumber,
-      purchaseYear,
-      purchaseDate,
-      documentDate,
-
-      // การจำหน่าย
-      salesDocument,
-      distributeDocumentDate,
-      distributeApprovalReleaseDate,
-      distributeStatus,
-      distributionNote,
-
-      // ค่าเสื่อม
-      depreciationStartDate,
-      depreciationRegisterDate,
-      depreciationReceivedDate,
-      depreciationPrice,
-      depreciationYearUsed,
-      depreciationCarcassPrice,
-
-      // ค่าเสื่อมรายปี
-      accumulateDepreciationStartDate,
-      accumulateDepreciationRegisterDate,
-      accumulateDepreciationReceivedDate,
-      accumulateDepreciationPrice,
-      accumulateDepreciationYearUsed,
-      accumulateDepreciationCarcassPrice,
-
-      reserved,
     } = req.body;
     // console.log(req.body);
 
@@ -777,6 +751,46 @@ exports.updatePackageAsset = async (req, res, next) => {
       type8,
       type13,
       status,
+      insuranceStartDate,
+      insuranceExpiredDate,
+
+      //สัญญาจัดซื้อ
+      acquisitionMethod,
+      moneyType,
+      deliveryDocument,
+      contractNumber,
+      receivedDate,
+      seller,
+      price,
+      billNumber,
+      purchaseYear,
+      purchaseDate,
+      documentDate,
+
+      // การจำหน่าย
+      salesDocument,
+      distributeDocumentDate,
+      distributeApprovalReleaseDate,
+      distributeStatus,
+      distributionNote,
+
+      // ค่าเสื่อม
+      depreciationStartDate,
+      depreciationRegisterDate,
+      depreciationReceivedDate,
+      depreciationPrice,
+      depreciationYearUsed,
+      depreciationCarcassPrice,
+
+      // ค่าเสื่อมรายปี
+      accumulateDepreciationStartDate,
+      accumulateDepreciationRegisterDate,
+      accumulateDepreciationReceivedDate,
+      accumulateDepreciationPrice,
+      accumulateDepreciationYearUsed,
+      accumulateDepreciationCarcassPrice,
+
+      reserved,
     } = inputObject;
     bottomSubComponentDataObject = JSON.parse(bottomSubComponentDataJSON);
     // console.log(bottomSubComponentDataObject)
@@ -823,11 +837,20 @@ exports.updatePackageAsset = async (req, res, next) => {
       for (let O = 0; O < genDataArray.length; O++) {
         let el = genDataArray[O];
         let index = O;
-        // genDataArray.forEach(async (el, index) => {
-        // let saveImageArray = [];
-        // let saveDocumentArray = [];
-        // console.log(`Package${index+1}`)
-
+        let dataQuery = {
+          params: {
+            $filter: `ItemCode eq '${el.assetNumber}'`,
+          },
+        };
+        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+          dataQuery,
+          sessionId
+        );
+        if (responseCheckAlreadyAsset.data.value.length > 0) {
+          return res
+            .status(400)
+            .json({ message: "This assetNumber already exists" });
+        }
         newestRealAssetId = newestRealAssetId + 1;
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId,
