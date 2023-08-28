@@ -16,6 +16,7 @@ const AssetDocument = require("../models").assetDocument;
 const { Op } = require("sequelize");
 const sequelize = require("sequelize");
 const fs = require("fs");
+const moment = require("moment/moment");
 const sapAuthService = require("../services/sap/auth");
 const sapAssetMasterService = require("../services/sap/assetMaster");
 const sapCapitalizationService = require("../services/sap/capitalization");
