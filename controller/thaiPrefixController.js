@@ -5,10 +5,9 @@ exports.createThaiPrefix = async (req, res, next) => {
   try {
     const { thaiPrefixArray } = req.body;
     // const thaiPrefixArrayObject = thaiPrefixArray;
-    const thaiPrefixArrayObject = JSON.parse(thaiPrefixArray);
     const resThaiPrefix = [];
 
-    for (let el of thaiPrefixArrayObject) {
+    for (let el of thaiPrefixArray) {
       try {
         let thaiPrefix = await ThaiPrefix.create({
           name: el.name,
@@ -34,11 +33,10 @@ exports.updateThaiPrefix = async (req, res, next) => {
   try {
     const { thaiPrefixArray } = req.body;
     // const thaiPrefixArrayObject = thaiPrefixArray;
-    const thaiPrefixArrayObject = JSON.parse(thaiPrefixArray);
     const resThaiPrefix = [];
 
-    for (let i = 0; i < thaiPrefixArrayObject.length; i++) {
-      const { _id, name } = thaiPrefixArrayObject[i];
+    for (let i = 0; i < thaiPrefixArray.length; i++) {
+      const { _id, name } = thaiPrefixArray[i];
       const thaiPrefix = await ThaiPrefix.findByPk(_id);
 
       if (!thaiPrefix) {
