@@ -427,7 +427,7 @@ module.exports = (sequelize, Sequelize) => {
         field: "price",
       },
       billNumber: {
-        type: Sequelize.DATE,
+        type: Sequelize.STRING(100),
         allowNull: true,
         field: "billNumber",
       },

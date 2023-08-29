@@ -86,24 +86,15 @@ exports.createTransfer = async (req, res, next) => {
 
       let transfersId = transfers.dataValues._id;
       console.log("transfersId:", transfersId);
-
-      const createSubComponentTransferData = {
-        assetNumber: saveTransferTableArrayObject[0].assetNumber,
-        isPackage: saveTransferTableArrayObject[0].isPackage,
-        productName: saveTransferTableArrayObject[0].productName,
-        amount: saveTransferTableArrayObject[0].amount,
-        transferId: transfersId,
-      };
-
-      // console.log(
-      //   "createSubComponentTransferData:",
-      //   createSubComponentTransferData
-      // );
-
-      let subComponentTransfers = await subComponentTransfer.create(
-        createSubComponentTransferData
-      );
-      console.log("subComponentTransfers:", subComponentTransfers);
+      for (let i = 0; i < saveTransferTableArrayObject.length; i++) {
+        let subComponentTransfers = await subComponentTransfer.create({
+          assetNumber: saveTransferTableArrayObject[i].assetNumber,
+          isPackage: saveTransferTableArrayObject[i].isPackage,
+          productName: saveTransferTableArrayObject[i].productName,
+          amount: saveTransferTableArrayObject[i].amount,
+          transferId: transfersId,
+        });
+      }
     } else {
       for (let i = 0; i < saveTransferTableArrayObject.length; i++) {
         // if have specific assetNumber
@@ -2116,6 +2107,11 @@ exports.getTransferById = async (req, res, next) => {
               ],
             },
           ],
+        },
+        {
+          model: subComponentTransfer,
+          as: "subComponentTransfers",
+          require: false,
         },
       ],
     });
