@@ -82,7 +82,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "unit",
       },
-      quguaranteedMonthantity: {
+      quantity: {
         type: Sequelize.INTEGER(10),
         allowNull: true,
         field: "quantity",
