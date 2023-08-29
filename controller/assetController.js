@@ -1490,10 +1490,12 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
         "depreciationYearUsed",
       ],
     });
-    if (assetByAssetNumber == null) {
+    console.log("assetByAssetNumber : ", assetByAssetNumber);
+    if (assetByAssetNumber === null) {
+      console.log(12312312);
       const pkAssetByAssetNumber = await pkAsset.findOne({
         where: { assetNumber },
-        include: [{ model: asset, require: false, as: "assets" }],
+        include: [{ model: asset, as: "assets" }],
         attributes: [
           "_id",
           "realAssetId",
@@ -1501,13 +1503,15 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
           "productName",
           "price",
           "depreciationStartDate",
-          "depreciationRegisterDate",
-          "depreciationReceivedDate",
+          // "depreciationRegisterDate",
+          // "depreciationReceivedDate",
           "depreciationYearUsed",
         ],
       });
-      if (pkAssetByAssetNumber == null) {
-        return res.status(200).json({ message: "Invalid AssetNumber" });
+      console.log("pkAssetByAssetNumber : ", pkAssetByAssetNumber);
+
+      if (pkAssetByAssetNumber === null) {
+        return res.status(412).json({ message: "Invalid AssetNumber" });
       }
       assetData = pkAssetByAssetNumber;
     } else {
