@@ -148,7 +148,6 @@ exports.createAsset = async (req, res, next) => {
     if (status != "saveDraft") {
       status = "inStock";
     }
-
     if (status == "saveDraft") {
       const createdAsset = await asset.create({
         ...inputObject,
@@ -194,7 +193,7 @@ exports.createAsset = async (req, res, next) => {
       const getAssetClass = await Type.findOne({ name: type });
       let AssetClass;
       if (getAssetClass == null) {
-        AssetClass = "1209010101.101";
+        AssetClass = "1206160101.101";
       } else {
         AssetClass = getAssetClass.value;
       }
@@ -223,6 +222,7 @@ exports.createAsset = async (req, res, next) => {
           asset01: genDataArray[i].asset01,
           sector: genDataArray[i].sector,
           ...inputObject,
+          depreciationStartDate: depreciationStartDate,
           reserved: false,
           realAssetId: parseInt(newestRealAssetId) + 1
         });
@@ -1009,7 +1009,7 @@ exports.updateAsset = async (req, res, next) => {
       const getAssetClass = await Type.findOne({ name: type });
       let AssetClass;
       if (getAssetClass == null) {
-        AssetClass = "1209010101.101";
+        AssetClass = "1206160101.101";
       } else {
         AssetClass = getAssetClass.value;
       }
@@ -1031,6 +1031,7 @@ exports.updateAsset = async (req, res, next) => {
             .json({ message: "This assetNumber already exists" });
         }
         newestRealAssetId = newestRealAssetId + 1;
+        console.log("depreciationStartDates : ", depreciationStartDate);
         const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
           assetNumber: genDataArray[i].assetNumber,
@@ -1478,26 +1479,24 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
       return res.status(412).json({ message: "Validation Failed" });
     }
     let assetData;
-    const assetByAssetNumber = await asset.findOne({
-      where: { assetNumber },
-      attributes: [
-        "_id",
-        "realAssetId",
-        "assetNumber",
-        "productName",
-        "price",
-        "depreciationStartDate",
-        "depreciationRegisterDate",
-        "depreciationReceivedDate",
-        "depreciationYearUsed"
-      ]
-    });
-    console.log("assetByAssetNumber : ", assetByAssetNumber);
-    if (assetByAssetNumber === null) {
-      console.log(12312312);
-      const pkAssetByAssetNumber = await pkAsset.findOne({
+    const responseLogin = await sapAuthService.login();
+    const sessionId = responseLogin.data.SessionId;
+    let dataQueryCheckAlreadyAsset = {
+      params: {
+        $filter: `ItemCode eq '${assetNumber}'`
+      }
+    };
+    const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+      dataQueryCheckAlreadyAsset,
+      sessionId
+    );
+    if (responseCheckAlreadyAsset.data.value.length == 0) {
+      return res
+        .status(204)
+        .json({ message: "This assetNumber does not exist." });
+    } else {
+      const assetByAssetNumber = await asset.findOne({
         where: { assetNumber },
-        include: [{ model: asset, as: "assets" }],
         attributes: [
           "_id",
           "realAssetId",
@@ -1505,22 +1504,37 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
           "productName",
           "price",
           "depreciationStartDate",
-          // "depreciationRegisterDate",
-          // "depreciationReceivedDate",
+          "depreciationRegisterDate",
+          "depreciationReceivedDate",
           "depreciationYearUsed"
         ]
       });
-      console.log("pkAssetByAssetNumber : ", pkAssetByAssetNumber);
+      if (assetByAssetNumber === null) {
+        const pkAssetByAssetNumber = await pkAsset.findOne({
+          where: { assetNumber },
+          // include: [{ model: asset, as: "assets" }],
+          attributes: [
+            "_id",
+            "realAssetId",
+            "assetNumber",
+            "productName",
+            "price",
+            "depreciationStartDate",
+            "depreciationRegisterDate",
+            "depreciationReceivedDate",
+            "depreciationYearUsed"
+          ]
+        });
 
-      if (pkAssetByAssetNumber === null) {
-        return res.status(412).json({ message: "Invalid AssetNumber" });
+        if (pkAssetByAssetNumber === null) {
+          return res.status(412).json({ message: "This AssetNumber No Data" });
+        }
+        assetData = pkAssetByAssetNumber;
+      } else {
+        assetData = assetByAssetNumber;
       }
-      assetData = pkAssetByAssetNumber;
-    } else {
-      assetData = assetByAssetNumber;
     }
-    const responseLogin = await sapAuthService.login();
-    const sessionId = responseLogin.data.SessionId;
+
     let dataQuery = {};
     let dataDepreciationValueArray = [];
     const currentYear = new Date();
@@ -1585,7 +1599,6 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
     depreciationBookValue = assetData.price - depreciationCumulativePrice;
     return res.status(200).json({
       assetData: assetData,
-      // data: responsegetDepreciation.data.value,
       depreciationPresentMonth,
       depreciationCumulativePrice,
       depreciationYearPrice,
