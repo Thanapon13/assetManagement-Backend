@@ -316,7 +316,7 @@ exports.createPackageAsset = async (req, res, next) => {
         const getAssetClass = await Type.findOne({ name: type });
         let AssetClass;
         if (getAssetClass == null) {
-          AssetClass = "1209010101.101";
+          AssetClass = "1206160101.101";
         } else {
           AssetClass = getAssetClass.value;
         }
@@ -529,7 +529,7 @@ exports.createPackageAsset = async (req, res, next) => {
           const getAssetClass = await Type.findOne({ name: type });
           let AssetClass;
           if (getAssetClass == null) {
-            AssetClass = "1209010101.101";
+            AssetClass = "1206160101.101";
           } else {
             AssetClass = getAssetClass.value;
           }
@@ -619,7 +619,7 @@ exports.createPackageAsset = async (req, res, next) => {
           //   ItemCode: objSubComponentArray[i].assetNumber,
           //   ItemName: objSubComponentArray[i].productName,
           //   ItemType: "itFixedAssets",
-          //   AssetClass: "1209010101.101",
+          //   AssetClass: "1206160101.101",
           // };
           // console.log("dataInsertAssetMaster", dataInsertAssetMaster);
           // const responseCreateAssetMaster = await sapAssetMasterService.create(
@@ -830,7 +830,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       const getAssetClass = await Type.findOne({ name: type });
       let AssetClass;
       if (getAssetClass == null) {
-        AssetClass = "1209010101.101";
+        AssetClass = "1206160101.101";
       } else {
         AssetClass = getAssetClass.value;
       }
@@ -1568,7 +1568,7 @@ exports.updatePackageAsset = async (req, res, next) => {
       const responseLogin = await sapAuthService.login();
       let sessionId = responseLogin.data.SessionId;
       if (
-        packageAssetById.sapDocEntry &&
+        packageAssetById.sapDocEntry == null &&
         depreciationStartDate &&
         depreciationRegisterDate &&
         depreciationReceivedDate
@@ -1663,7 +1663,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         assetById.save();
         // ลงทะเบียนค่าเสื่อม
         if (
-          packageAssetById.sapDocEntry == null &&
+          // packageAssetById.sapDocEntry == null &&
           depreciationStartDate &&
           depreciationRegisterDate &&
           depreciationReceivedDate

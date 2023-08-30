@@ -172,17 +172,17 @@ module.exports = (sequelize, Sequelize) => {
       depreciationStartDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "depreciationStartDate",
       },
       depreciationRegisterDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "depreciationRegisterDate",
       },
       depreciationReceivedDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: "insuranceExpiredDate",
+        field: "depreciationReceivedDate",
       },
       depreciationPrice: {
         type: Sequelize.INTEGER(50),
