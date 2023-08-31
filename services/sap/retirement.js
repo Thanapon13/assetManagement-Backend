@@ -39,3 +39,4 @@ async function create(data, sessionId, routeId) {
     throw error;
   }
 }
+module.exports = { create };

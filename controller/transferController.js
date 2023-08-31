@@ -1103,13 +1103,13 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
     });
 
     const totalWaiting = await transfer.count({
-      where: { status: "waiting" },
+      where: { status: "waiting", deletedAt: null },
     });
     const totalApprove = await transfer.count({
-      where: { status: "approve" },
+      where: { status: "approve", deletedAt: null },
     });
     const totalReject = await transfer.count({
-      where: { status: "reject" },
+      where: { status: "reject" , deletedAt: null},
     });
     const totalAll = totalWaiting + totalApprove + totalReject;
 

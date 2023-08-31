@@ -19,7 +19,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       isPackage: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
+        allowNull: true,
         field: "isPackage",
       },
       productName: {
