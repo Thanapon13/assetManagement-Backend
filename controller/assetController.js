@@ -325,6 +325,14 @@ exports.createAsset = async (req, res, next) => {
             sessionId
           );
           console.log("responseCreateRetirement : ", responseCreateRetirement);
+          await asset.update(
+            { status: "distributed" },
+            {
+              where: {
+                _id: newAssetId,
+              },
+            }
+          );
         }
       }
     }
@@ -1193,6 +1201,14 @@ exports.updateAsset = async (req, res, next) => {
             sessionId
           );
           console.log("responseCreateRetirement : ", responseCreateRetirement);
+          await asset.update(
+            { status: "distributed" },
+            {
+              where: {
+                _id: assetCreated.dataValues._id,
+              },
+            }
+          );
         }
         // await Transfer.create({
         //   transferDocumentNumber: newestTransferDocumentNumber + 1,
@@ -1307,7 +1323,7 @@ exports.updateAsset = async (req, res, next) => {
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
-
+    let oldDistributeStatus = assetById.distributeStatus;
     assetById.status = status ?? assetById.status;
     assetById.engProductName = engProductName;
     assetById.productName = productName;
@@ -1440,7 +1456,11 @@ exports.updateAsset = async (req, res, next) => {
         }
       );
     }
-    if (assetById.status != "saveDraft" && distributeStatus === true) {
+    if (
+      assetById.status != "saveDraft" &&
+      distributeStatus === true &&
+      oldDistributeStatus !== true
+    ) {
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
       let dataInsertRetirement = {
@@ -1461,6 +1481,14 @@ exports.updateAsset = async (req, res, next) => {
         sessionId
       );
       console.log("responseCreateRetirement : ", responseCreateRetirement);
+      await asset.update(
+        { status: "distributed" },
+        {
+          where: {
+            _id: assetId,
+          },
+        }
+      );
     }
     res.status(200).json({ message: "This asset id updated successfully" });
   } catch (err) {

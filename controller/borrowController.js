@@ -1158,15 +1158,25 @@ exports.getBySearchTopBorrowApprove = async (req, res, next) => {
       where: { [Op.and]: queryArray },
       order: [["updatedAt", "DESC"]],
     });
-    // .sort({
-    //   dateTime_approver: -1,
-    // });
+    const totalWaiting = await Borrow.count({
+      where: { status: "waiting", deletedAt: null },
+    });
+    const totalApprove = await Borrow.count({
+      where: { status: "approve", deletedAt: null },
+    });
+    const totalReject = await Borrow.count({
+      where: { status: "reject", deletedAt: null },
+    });
+    const totalAll = totalWaiting + totalApprove + totalReject;
 
-    // console.log(asset)
-    // for show how many pages
-    // const total = await Borrow.countDocuments(query);
-
-    res.json({ topApproveList, bottomApproveList });
+    res.json({
+      topApproveList,
+      bottomApproveList,
+      totalAll,
+      totalWaiting,
+      totalApprove,
+      totalReject,
+    });
   } catch (err) {
     next(err);
   }

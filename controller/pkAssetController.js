@@ -120,8 +120,8 @@ exports.createPackageAsset = async (req, res, next) => {
 
     // console.log(req.body);
 
-    // console.log("baseArrayImage", baseArrayImage);
-    //  console.log("baseArrayDocument", baseArrayDocument);
+    console.log("baseArrayImage", baseArrayImage);
+    console.log("baseArrayDocument", baseArrayDocument);
     // console.log("duplicatedArrayImage", duplicatedArrayImage);
 
     const baseArrayImageObj = JSON.parse(baseArrayImage);
@@ -132,7 +132,6 @@ exports.createPackageAsset = async (req, res, next) => {
     const objGenDataArray = JSON.parse(genDataJSON);
 
     const arrayImage = req?.files?.arrayImage || [];
-    // console.log("arrayImage.length",arrayImage.length)
     console.log("arrayImage:", arrayImage);
     const arrayDocument = req?.files?.arrayDocument || [];
     // console.log("arrayDocument.length",arrayDocument.length)
@@ -401,22 +400,24 @@ exports.createPackageAsset = async (req, res, next) => {
           };
           const responseCreateRetirementOfPkAsset =
             await sapRetirementService.create(dataInsertRetirement, sessionId);
-          // console.log(
-          //   "responseCreateRetirementOfPkAsset : ",
-          //   responseCreateRetirementOfPkAsset
-          // );
+          await PackageAsset.update(
+            { status: "distributed" },
+            {
+              where: {
+                _id: packageAsset.dataValues._id,
+              },
+            }
+          );
         }
         for (
-          let i = index * quantity;
-          i < (index + 1) * quantity && i < objSubComponentArray.length;
+          let i =
+            index * (objSubComponentArray.length / objGenDataArray.length);
+          i <
+            (index + 1) *
+              (objSubComponentArray.length / objGenDataArray.length) &&
+          i < objSubComponentArray.length;
           i++
         ) {
-          //   let saveSubImageArray = [];
-          //   let saveSubDocumentArray = [];
-          // console.log(`Asset${i+1}`)
-          // console.log("packageAsset._id",packageAsset._id)
-
-          // console.log("saveSubDocumentArray",saveSubDocumentArray)
           const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
@@ -608,6 +609,14 @@ exports.createPackageAsset = async (req, res, next) => {
             const responseCreateRetirement = await sapRetirementService.create(
               dataInsertRetirement,
               sessionId
+            );
+            await Asset.update(
+              { status: "distributed", distributeStatus: true },
+              {
+                where: {
+                  _id: componentAssetOfPk.dataValues._id,
+                },
+              }
             );
             // console.log(
             //   "responseCreateRetirement : ",
@@ -1117,6 +1126,14 @@ exports.updatePackageAsset = async (req, res, next) => {
             "responseCreateRetirementOfPkAsset : ",
             responseCreateRetirementOfPkAsset
           );
+          await PackageAsset.update(
+            { status: "distributed" },
+            {
+              where: {
+                _id: packageAsset.dataValues._id,
+              },
+            }
+          );
         }
         for (
           let i = index * lengthOfBaseBottomSubComponentData;
@@ -1361,6 +1378,14 @@ exports.updatePackageAsset = async (req, res, next) => {
               "responseCreateRetirement : ",
               responseCreateRetirement
             );
+            await Asset.update(
+              { status: "distributed", distributeStatus: true },
+              {
+                where: {
+                  _id: assetCreate.dataValues._id,
+                },
+              }
+            );
           }
         }
       }
@@ -1464,6 +1489,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
+    let oldDistributeStatus = packageAssetById.distributeStatus;
     packageAssetById.status = status ?? packageAssetById.status;
     packageAssetById.engProductName = engProductName;
     packageAssetById.productName = productName;
@@ -1617,7 +1643,8 @@ exports.updatePackageAsset = async (req, res, next) => {
           }
         );
       }
-      if (distributeStatus === true) {
+      console.log("oldDistributeStatus : ", oldDistributeStatus);
+      if (distributeStatus === true && oldDistributeStatus !== true) {
         const responseLogin = await sapAuthService.login();
         sessionId = responseLogin.data.SessionId;
         let dataInsertRetirement = {
@@ -1638,32 +1665,42 @@ exports.updatePackageAsset = async (req, res, next) => {
           sessionId
         );
         console.log("responseCreateRetirement : ", responseCreateRetirement);
+        await PackageAsset.update(
+          { status: "distributed" },
+          {
+            where: {
+              _id: packageAssetId,
+            },
+          }
+        );
       }
-
-      await BottomSubComponentDataPkAsset.destroy({
+      const assetOfPackageAsset = await Asset.findAll({
         where: { packageAssetId: packageAssetId },
       });
-      for (let i = 0; i < bottomSubComponentDataObject.length; i++) {
-        await BottomSubComponentDataPkAsset.create({
-          packageAssetId: packageAssetId,
-          serialNumber: bottomSubComponentDataObject[i].serialNumber,
-          productName: bottomSubComponentDataObject[i].productName,
-          assetNumber: bottomSubComponentDataObject[i].assetNumber,
-          sector: bottomSubComponentDataObject[i].sector,
-          price: bottomSubComponentDataObject[i].price,
-          asset01: bottomSubComponentDataObject[i].asset01,
-        });
-        let assetById = await Asset.findByPk(
-          bottomSubComponentDataObject[i]._id
-        );
+      // await BottomSubComponentDataPkAsset.destroy({
+      //   where: { packageAssetId: packageAssetId },
+      // });
+      for (let i = 0; i < assetOfPackageAsset.length; i++) {
+        // await BottomSubComponentDataPkAsset.create({
+        //   packageAssetId: packageAssetId,
+        //   serialNumber: bottomSubComponentDataObject[i].serialNumber,
+        //   productName: bottomSubComponentDataObject[i].productName,
+        //   assetNumber: bottomSubComponentDataObject[i].assetNumber,
+        //   sector: bottomSubComponentDataObject[i].sector,
+        //   price: bottomSubComponentDataObject[i].price,
+        //   asset01: bottomSubComponentDataObject[i].asset01,
+        // });
+        // let assetById = await Asset.findByPk(
+        //   bottomSubComponentDataObject[i]._id
+        // );
         // console.log(assetById)
-        assetById.serialNumber = bottomSubComponentDataObject[i].serialNumber;
-        assetById.pricePerUnit = bottomSubComponentDataObject[i].pricePerUnit;
-        assetById.asset01 = bottomSubComponentDataObject[i].asset01;
-        assetById.save();
+        // assetById.serialNumber = bottomSubComponentDataObject[i].serialNumber;
+        // assetById.pricePerUnit = bottomSubComponentDataObject[i].pricePerUnit;
+        // assetById.asset01 = bottomSubComponentDataObject[i].asset01;
+        // assetById.save();
         // ลงทะเบียนค่าเสื่อม
         if (
-          // packageAssetById.sapDocEntry == null &&
+          assetOfPackageAsset[i].sapDocEntry == null &&
           depreciationStartDate &&
           depreciationRegisterDate &&
           depreciationReceivedDate
@@ -1676,9 +1713,9 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Capitalization",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                AssetNumber: assetOfPackageAsset[i].assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(bottomSubComponentDataObject[i].price),
+                TotalLC: parseInt(assetOfPackageAsset[i].price),
               },
             ],
             AssetDocumentAreaJournalCollection: [
@@ -1705,13 +1742,16 @@ exports.updatePackageAsset = async (req, res, next) => {
             },
             {
               where: {
-                assetNumber: bottomSubComponentDataObject[i].assetNumber,
+                _id: assetOfPackageAsset[i]._id,
               },
             }
           );
         }
         //ตัดจำหน่าย
-        if (distributeStatus === true) {
+        if (
+          distributeStatus === true &&
+          assetOfPackageAsset[i].distributeStatus != true
+        ) {
           let dataInsertRetirement = {
             PostingDate: distributeDocumentDate.split("T")[0],
             DocumentDate: distributeDocumentDate.split("T")[0],
@@ -1721,7 +1761,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Retirement on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                AssetNumber: assetOfPackageAsset[i].assetNumber,
               },
             ],
           };
@@ -1730,27 +1770,15 @@ exports.updatePackageAsset = async (req, res, next) => {
             sessionId
           );
           console.log("responseCreateRetirement : ", responseCreateRetirement);
-        }
-      }
-      if (distributeStatus === true) {
-        let dataInsertRetirement = {
-          PostingDate: dateNow,
-          DocumentDate: dateNow,
-          AssetValueDate: dateNow,
-          DocumentType: "adtScrapping",
-          BPLId: "1",
-          Remarks: "Retirement on Asset Management System",
-          AssetDocumentLineCollection: [
+          await Asset.update(
+            { status: "distributed", distributeStatus: true },
             {
-              AssetNumber: packageAssetById.assetNumber,
-            },
-          ],
-        };
-        const responseCreateRetirement = await sapRetirementService.create(
-          dataInsertRetirement,
-          sessionId
-        );
-        console.log("responseCreateRetirement : ", responseCreateRetirement);
+              where: {
+                _id: assetOfPackageAsset[i]._id,
+              },
+            }
+          );
+        }
       }
     }
     await packageAssetById.save();
