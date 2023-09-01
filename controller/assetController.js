@@ -679,7 +679,6 @@ exports.getByProductSelector = async (req, res, next) => {
     queryPackageAssetArray.push({ reserved: { [Op.eq]: false } });
 
     // Filter for packageAssetId
-    queryAssetArray.push({ packageAssetId: { [Op.eq]: null } });
 
     console.log(queryAssetArray, "queryAssetArray");
     console.log(queryPackageAssetArray, "queryPackageAssetArray");
@@ -690,19 +689,31 @@ exports.getByProductSelector = async (req, res, next) => {
         [sequelize.fn("COUNT", sequelize.col("*")), "quantity"],
       ],
       group: "productName",
-      raw: false,
     });
     console.log(2342, assetData);
+
+    // attributes: [
+    //   'productName',
+    //   [sequelize.fn('COUNT', sequelize.col('*')), 'quantity'],
+    //   [sequelize.fn('GROUP_CONCAT', sequelize.col('*')), 'results'], // Note: This will concatenate all fields; adjust as needed
+    // ],
     let packageAssetData = await pkAsset.findAll({
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
         [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],
+        [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName",
-      raw: true,
     });
-
+    // assetData = assetData.map((data) => ({
+    //   ...data.dataValues,
+    //   isPackage: false,
+    // }));
+    // packageAssetData = packageAssetData.map((data) => ({
+    //   ...data.dataValues,
+    //   isPackage: true,
+    // }));
     // let asset = await Asset.aggregate([
     //   { $match: query },
     //   {
@@ -793,7 +804,6 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
     queryPackageAssetArray.push({ reserved: { [Op.eq]: false } });
 
     // Filter for packageAssetId
-    queryAssetArray.push({ packageAssetId: { [Op.eq]: null } });
     // query["packageAssetId"] = { $exists: false };
 
     console.log(queryAssetArray, "queryAssetArray");
@@ -805,6 +815,14 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
       where: { [Op.and]: queryPackageAssetArray },
     });
 
+    assetData = assetData.map((data) => ({
+      ...data.dataValues,
+      isPackage: false,
+    }));
+    packageAssetData = packageAssetData.map((data) => ({
+      ...data.dataValues,
+      isPackage: true,
+    }));
     assetData = assetData.concat(packageAssetData);
 
     console.log(assetData.length);
@@ -1689,6 +1707,29 @@ exports.getAllAssetForRepairDropdown = async (req, res, next) => {
     });
 
     res.json({ assets: processedAssets });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAssetNumberByDropdowmSearch = async (req, res, next) => {
+  try {
+    const textSearch = req.params.textSearch || "";
+    let assetData = await asset.findAll({
+      where: {
+        assetNumber: { [Op.like]: `${textSearch}%` },
+        deletedAt: { [Op.eq]: null },
+        distributeStatus: { [Op.eq]: false },
+      },
+      attributes: ["_id", "assetNumber"],
+    });
+
+    let pkAssetData = await pkAsset.findAll({
+      where: { assetNumber: { [Op.like]: `${textSearch}%` } },
+      attributes: ["_id", "assetNumber"],
+    });
+    assetData = assetData.concat(pkAssetData);
+    res.json({ assets: assetData });
   } catch (err) {
     next(err);
   }
