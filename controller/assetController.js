@@ -701,7 +701,7 @@ exports.getByProductSelector = async (req, res, next) => {
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],
+        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],//
         // [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName",
