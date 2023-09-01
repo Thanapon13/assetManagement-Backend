@@ -701,7 +701,7 @@ exports.getByProductSelector = async (req, res, next) => {
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],//
+        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"], //
         // [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName",
@@ -1729,6 +1729,18 @@ exports.getAssetNumberByDropdowmSearch = async (req, res, next) => {
       attributes: ["_id", "assetNumber"],
     });
     assetData = assetData.concat(pkAssetData);
+    assetData.sort((a, b) => {
+      const A = a.assetNumber.toLowerCase();
+      const B = b.assetNumber.toLowerCase();
+
+      if (A < B) {
+        return -1;
+      }
+      if (A > B) {
+        return 1;
+      }
+      return 0;
+    });
     res.json({ assets: assetData });
   } catch (err) {
     next(err);
