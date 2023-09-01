@@ -66,6 +66,11 @@ router.get(
   protect,
   assetController.getDepreciationByAssetNumber
 );
+router.get(
+  "/getAssetNumberByDropdowmSearch",
+  protect,
+  assetController.getAssetNumberByDropdowmSearch
+);
 
 router.get("/:assetId", protect, assetController.getAssetById);
 
