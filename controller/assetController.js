@@ -702,7 +702,7 @@ exports.getByProductSelector = async (req, res, next) => {
       attributes: [
         ["productName", "_id"],
         [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"],
-        [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
+        // [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName",
     });
