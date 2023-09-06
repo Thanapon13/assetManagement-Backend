@@ -13,10 +13,10 @@ const protect = asyncHandler(async (req, res, next) => {
 
       token = req.headers.authorization.split(" ")[1]; // get token from bearer token space to this to array ([bearer token]) spllit by space
       // token = req.headers.authorization;
-      console.log("process.env.ACCESS_TOKEN : ", process.env.ACCESS_TOKEN);
+      // console.log("process.env.ACCESS_TOKEN : ", process.env.ACCESS_TOKEN);
       // Verify token
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
-      console.log("decoded : ", decoded);
+      // console.log("decoded : ", decoded);
       const decodedObjected = JSON.stringify(decoded.userData);
 
       const decodedObjected2 = JSON.parse(decodedObjected);

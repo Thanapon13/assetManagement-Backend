@@ -159,6 +159,12 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "replacedAssetNumber",
       },
+      replacedAssetFlag: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        field: "replacedAssetFlag",
+      },
       pricePerUnit: {
         type: Sequelize.STRING(100),
         allowNull: true,

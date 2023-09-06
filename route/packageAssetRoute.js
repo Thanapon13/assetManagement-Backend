@@ -23,9 +23,13 @@ router.delete(
   protect,
   packageAssetController.deletePackageAsset
 );
-
-router.get("/", protect, packageAssetController.getAllPackageAsset);
 router.get(
+  "/getAssetNumberAlreadyDistribution",
+  protect,
+  packageAssetController.getAssetNumberAlreadyDistribution
+);
+router.get("/", protect, packageAssetController.getAllPackageAsset);
+router.get( 
   "/sectorForSearch",
   protect,
   packageAssetController.getSectorForSearch

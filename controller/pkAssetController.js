@@ -220,6 +220,15 @@ exports.createPackageAsset = async (req, res, next) => {
             .status(400)
             .json({ message: "This assetNumber already exists" });
         }
+        if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
+          const assetOfreplacedData = await PackageAsset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: el.replacedAssetNumber },
+              returning: true,
+            }
+          );
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId + 1,
           assetNumber: el.assetNumber,
@@ -418,17 +427,30 @@ exports.createPackageAsset = async (req, res, next) => {
           i < objSubComponentArray.length;
           i++
         ) {
+          if (
+            objSubComponentArray[i].replacedAssetNumber != null &&
+            objSubComponentArray[i].replacedAssetNumber != ""
+          ) {
+            const assetOfreplacedData = await Asset.update(
+              { replacedAssetFlag: true },
+              {
+                where: {
+                  assetNumber: objSubComponentArray[i].replacedAssetNumber,
+                },
+                returning: true,
+              }
+            );
+          }
           const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
             // engProductName,
             productName: objSubComponentArray[i].productName,
             assetNumber: objSubComponentArray[i].assetNumber,
-            sector: objSubComponentArray[i].sector,
             pricePerUnit: objSubComponentArray[i].price,
             asset01: objSubComponentArray[i].asset01,
 
-            // sector: el.sector,
+            sector: el.sector,
             replacedAssetNumber: objSubComponentArray[i].replacedAssetNumber,
             type: type,
             kind: kind,
@@ -861,6 +883,15 @@ exports.updatePackageAsset = async (req, res, next) => {
             .json({ message: "This assetNumber already exists" });
         }
         newestRealAssetId = newestRealAssetId + 1;
+        if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
+          const assetOfreplacedData = await PackageAsset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: el.replacedAssetNumber },
+              returning: true,
+            }
+          );
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId,
           assetNumber: el.assetNumber,
@@ -1147,18 +1178,33 @@ exports.updatePackageAsset = async (req, res, next) => {
 
           // console.log("saveSubDocumentArray",saveSubDocumentArray)
           // newestRealAssetId = newestRealAssetId + 1;
+          if (
+            bottomSubComponentDataObject[i].replacedAssetNumber != null &&
+            bottomSubComponentDataObject[i].replacedAssetNumber != ""
+          ) {
+            const assetOfreplacedData = await Asset.update(
+              { replacedAssetFlag: true },
+              {
+                where: {
+                  assetNumber:
+                    bottomSubComponentDataObject[i].replacedAssetNumber,
+                },
+                returning: true,
+              }
+            );
+          }
           let assetCreate = await Asset.create({
             realAssetId: newestRealAssetId,
             serialNumber: bottomSubComponentDataObject[i].serialNumber,
             // engProductName,
             productName: bottomSubComponentDataObject[i].productName,
             assetNumber: bottomSubComponentDataObject[i].assetNumber,
-            sector: bottomSubComponentDataObject[i].sector,
             pricePerUnit: bottomSubComponentDataObject[i].price,
             asset01: bottomSubComponentDataObject[i].asset01,
 
             sector: el.sector,
-            replacedAssetNumber: el.replacedAssetNumber,
+            replacedAssetNumber:
+              bottomSubComponentDataObject[i].replacedAssetNumber,
             type: type,
             kind: kind,
             unit: unit,
@@ -2194,6 +2240,25 @@ exports.getAllSector = async (req, res, next) => {
       },
     ]);
     res.json({ sector });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAssetNumberAlreadyDistribution = async (req, res, next) => {
+  try {
+    const textSearch = req.query.textSearch || "";
+    let packageAssetData = await PackageAsset.findAll({
+      where: {
+        assetNumber: { [Op.like]: `${textSearch}%` },
+        deletedAt: { [Op.eq]: null },
+        distributeStatus: { [Op.eq]: true },
+        replacedAssetFlag: { [Op.eq]: false },
+      },
+      attributes: ["_id", "assetNumber"],
+    });
+
+    res.json({ packageAssets: packageAssetData });
   } catch (err) {
     next(err);
   }
