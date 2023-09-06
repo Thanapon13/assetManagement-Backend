@@ -124,6 +124,7 @@ exports.createAsset = async (req, res, next) => {
 
     const baseArrayImageObj = JSON.parse(baseArrayImage);
     const baseArrayDocumentObj = JSON.parse(baseArrayDocument);
+    console.log("baseArrayDocumentObj---", baseArrayDocumentObj);
     const arrayImage = req?.files?.arrayImage || [];
     const arrayDocument = req?.files?.arrayDocument || [];
     console.log("xx", arrayImage);
@@ -170,10 +171,11 @@ exports.createAsset = async (req, res, next) => {
         // console.log("Uploaded roomImage:", roomImage);
       }
 
+      console.log("baseArrayDocumentObj:", baseArrayDocumentObj);
       for (let d = 0; d < baseArrayDocumentObj.length; d++) {
         const documentArray = arrayDocument[d];
 
-        // console.log("documentArray:", documentArray);
+        console.log("documentArray:");
         await assetDocument.create({
           document: documentArray.filename,
           assetId: newAssetId
@@ -215,6 +217,7 @@ exports.createAsset = async (req, res, next) => {
             .status(400)
             .json({ message: "This assetNumber already exists" });
         }
+        console.log("genDataArray:I", i, genDataArray[i]);
         const createdAsset = await asset.create({
           assetNumber: genDataArray[i].assetNumber,
           serialNumber: genDataArray[i].serialNumber,
@@ -237,10 +240,10 @@ exports.createAsset = async (req, res, next) => {
             assetId: newAssetId
           });
         }
-
+        console.log("baseArrayDocumentObj01:", baseArrayDocumentObj);
         for (let j = 0; j < baseArrayDocumentObj.length; j++) {
           const documentArray = arrayDocument[quantity * j + i];
-
+          console.log("arrayDoc2:", documentArray);
           await assetDocument.create({
             document: documentArray.filename,
             assetId: newAssetId
@@ -1731,6 +1734,18 @@ exports.getAssetNumberByDropdowmSearch = async (req, res, next) => {
       attributes: ["_id", "assetNumber"]
     });
     assetData = assetData.concat(pkAssetData);
+    assetData.sort((a, b) => {
+      const A = a.assetNumber.toLowerCase();
+      const B = b.assetNumber.toLowerCase();
+
+      if (A < B) {
+        return -1;
+      }
+      if (A > B) {
+        return 1;
+      }
+      return 0;
+    });
     res.json({ assets: assetData });
   } catch (err) {
     next(err);

@@ -1819,6 +1819,13 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               { where: { _id: assetId } }
             );
           }
+          await BorrowHasAsset.update(
+            {
+              reason: reason,
+              return: el.return,
+            },
+            { where: { assetId: assetId, borrowId: borrowId } }
+          );
         }
 
         // change all packageAsset status by id
@@ -1864,6 +1871,18 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               );
             }
           }
+          await BorrowHasPkAsset.update(
+            {
+              reason: reason,
+              return: el.return,
+            },
+            {
+              where: {
+                packageAssetId: packageAssetId,
+                borrowId: borrowId,
+              },
+            }
+          );
         }
 
         res.json({
