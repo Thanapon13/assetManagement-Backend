@@ -2499,15 +2499,23 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
       queryArray.push({ sector: sector });
     }
     if (status !== "") {
-      queryArray.push({ status: status });
+      if (status == "all") {
+        queryArray.push({
+          status: {
+            [Op.in]: ["waitingReturnApprove", "done"]
+          }
+        });
+      } else {
+        queryArray.push({ status: status });
+      }
     } else {
       queryArray.push({
         status: {
-          [Op.in]: ["approve", "partiallyApprove", "done"]
+          [Op.in]: ["waitingReturnApprove", "done"]
         }
       });
     }
-    queryArray.push({ status: "approve" });
+    // queryArray.push({ status: "approve" });
     queryArray.push({ deletedAt: { [Op.eq]: null } });
 
     console.log(queryArray, "queryArray");
