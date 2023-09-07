@@ -99,6 +99,11 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "phoneNumber",
       },
+      name_courier: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+        field: "name_courier",
+      },
       courierSector: {
         type: Sequelize.STRING(100),
         allowNull: true,
