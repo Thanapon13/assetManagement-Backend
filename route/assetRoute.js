@@ -72,6 +72,12 @@ router.get(
   assetController.getAssetNumberByDropdowmSearch
 );
 
+router.get(
+  "/getRunningAssetNumber",
+  protect,
+  assetController.getRunningAssetNumber
+);
+
 router.get("/:assetId", protect, assetController.getAssetById);
 
 module.exports = router;

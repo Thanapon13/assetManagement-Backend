@@ -1746,3 +1746,39 @@ exports.getAssetNumberByDropdowmSearch = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getRunningAssetNumber = async (req, res, next) => {
+  try {
+    const assetNumber = req.query.assetNumber;
+    if (!assetNumber) {
+      return res.json({ message: "กรอก assetNumber" });
+    }
+    // const responseLogin = await sapAuthService.login();
+    // const sessionId = responseLogin.data.SessionId;
+    // const dataGetRunningAssetMaster = {
+    //   params: { $filter: `ItemCode eq '${assetNumber}/'` },
+    // };
+    // const responseCreateAssetMaster = await sapAssetMasterService.read(
+    //   dataGetRunningAssetMaster,
+    //   sessionId
+    // );
+    let countAsset = await asset.count({
+      where: {
+        assetNumber: {
+          [Op.and]: [{ [Op.notLike]: `%)` }, { [Op.like]: `${assetNumber}/%` }],
+        },
+      },
+    });
+    let countPkAsset = await pkAsset.count({
+      where: { assetNumber: { [Op.like]: `${assetNumber}/%` } },
+    });
+
+    let count = countAsset + countPkAsset;
+    count++;
+    res.json({
+      assetNumber: `${assetNumber}/${count.toString().padStart(4, "0")}`,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
