@@ -1544,7 +1544,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
       // partially approve or approve
       // check obj in array ,what obj have some value in reason and return to array
 
-      const assetIdReasonIndices = input[0].assetIdArray
+      const assetIdReasonIndices = input.assetIdArray
         .map((item, idx) => {
           if (item.reason !== "") {
             return item;
@@ -1553,7 +1553,7 @@ exports.partiallyApproveTransferApproveDetail = async (req, res, next) => {
         .filter((item) => item !== undefined);
       console.log("assetIdReasonIndices:", assetIdReasonIndices);
 
-      const packageAssetIdReasonIndices = input[0].packageAssetIdArray
+      const packageAssetIdReasonIndices = input.packageAssetIdArray
         .map((item, idx) => {
           if (item.reason !== "") {
             return item;
