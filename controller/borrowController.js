@@ -1159,13 +1159,13 @@ exports.getBySearchTopBorrowApprove = async (req, res, next) => {
       order: [["updatedAt", "DESC"]]
     });
     const totalWaiting = await Borrow.count({
-      where: { status: "waiting", deletedAt: null },
+      where: { status: "waiting", deletedAt: null }
     });
     const totalApprove = await Borrow.count({
-      where: { status: "approve", deletedAt: null },
+      where: { status: "approve", deletedAt: null }
     });
     const totalReject = await Borrow.count({
-      where: { status: "reject", deletedAt: null },
+      where: { status: "reject", deletedAt: null }
     });
     const totalAll = totalWaiting + totalApprove + totalReject;
 
@@ -1175,7 +1175,7 @@ exports.getBySearchTopBorrowApprove = async (req, res, next) => {
       totalAll,
       totalWaiting,
       totalApprove,
-      totalReject,
+      totalReject
     });
   } catch (err) {
     next(err);
@@ -1822,7 +1822,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
           await BorrowHasAsset.update(
             {
               reason: reason,
-              return: el.return,
+              return: el.return
             },
             { where: { assetId: assetId, borrowId: borrowId } }
           );
@@ -1874,13 +1874,13 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
           await BorrowHasPkAsset.update(
             {
               reason: reason,
-              return: el.return,
+              return: el.return
             },
             {
               where: {
                 packageAssetId: packageAssetId,
-                borrowId: borrowId,
-              },
+                borrowId: borrowId
+              }
             }
           );
         }
@@ -3159,7 +3159,7 @@ exports.getViewBorrowHistoryByPackageAssetId = async (req, res, next) => {
     const borrows = await Borrow.findOne({
       include: {
         model: BorrowHasPkAsset,
-        as: "borrowHasAssets",
+        as: "borrowHasPkAssets",
         where: { packageAssetId: packageAssetId }
       },
       attributes: [
