@@ -3163,7 +3163,7 @@ exports.getViewBorrowHistoryByPackageAssetId = async (req, res, next) => {
     const borrows = await Borrow.findOne({
       include: {
         model: BorrowHasPkAsset,
-        as: "borrowHasAssets",
+        as: "borrowHasPkAssets",
         where: { packageAssetId: packageAssetId },
       },
       attributes: [
