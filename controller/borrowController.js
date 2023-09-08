@@ -2662,6 +2662,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
 
           require: false,
         },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2689,6 +2695,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
           where: { reason: "" },
           require: false,
         },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2707,6 +2719,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
           where: { reason: "" },
 
           require: false,
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
         },
       ];
       matchedPackageAssets = await PackageAsset.findAll({

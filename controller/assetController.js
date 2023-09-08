@@ -188,8 +188,11 @@ exports.createAsset = async (req, res, next) => {
         });
       }
     } else {
+      console.log("type : ", type);
       const getAssetClass = await Type.findOne({ name: type });
       let AssetClass;
+      console.log("getAssetClass : ", getAssetClass);
+
       if (getAssetClass == null) {
         AssetClass = "1206160101.101";
       } else {
@@ -1775,7 +1778,7 @@ exports.getRunningAssetNumber = async (req, res, next) => {
 
     let count = countAsset + countPkAsset;
     count++;
-  
+
     res.json({
       assetNumber: `${count.toString().padStart(4, "0")}`,
     });
@@ -1783,7 +1786,6 @@ exports.getRunningAssetNumber = async (req, res, next) => {
     next(err);
   }
 };
-
 
 // let runningAssetNumber;
 // const responseLogin = await sapAuthService.login();
