@@ -1819,6 +1819,13 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               { where: { _id: assetId } }
             );
           }
+          await BorrowHasAsset.update(
+            {
+              reason: reason,
+              return: el.return,
+            },
+            { where: { assetId: assetId, borrowId: borrowId } }
+          );
         }
 
         // change all packageAsset status by id
@@ -1864,6 +1871,18 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               );
             }
           }
+          await BorrowHasPkAsset.update(
+            {
+              reason: reason,
+              return: el.return,
+            },
+            {
+              where: {
+                packageAssetId: packageAssetId,
+                borrowId: borrowId,
+              },
+            }
+          );
         }
 
         res.json({
@@ -2484,15 +2503,23 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
       queryArray.push({ sector: sector });
     }
     if (status !== "") {
-      queryArray.push({ status: status });
+      if (status == "all") {
+        queryArray.push({
+          status: {
+            [Op.in]: ["waitingReturnApprove", "done"],
+          },
+        });
+      } else {
+        queryArray.push({ status: status });
+      }
     } else {
       queryArray.push({
         status: {
-          [Op.in]: ["approve", "partiallyApprove", "done"],
+          [Op.in]: ["waitingReturnApprove", "done"],
         },
       });
     }
-    queryArray.push({ status: "approve" });
+    // queryArray.push({ status: "approve" });
     queryArray.push({ deletedAt: { [Op.eq]: null } });
 
     console.log(queryArray, "queryArray");
@@ -2635,6 +2662,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
 
           require: false,
         },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2662,6 +2695,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
           where: { reason: "" },
           require: false,
         },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2680,6 +2719,12 @@ exports.getBorrowCheckById = async (req, res, next) => {
           where: { reason: "" },
 
           require: false,
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
         },
       ];
       matchedPackageAssets = await PackageAsset.findAll({
@@ -3144,7 +3189,7 @@ exports.getViewBorrowHistoryByPackageAssetId = async (req, res, next) => {
     const borrows = await Borrow.findOne({
       include: {
         model: BorrowHasPkAsset,
-        as: "borrowHasAssets",
+        as: "borrowHasPkAssets",
         where: { packageAssetId: packageAssetId },
       },
       attributes: [

@@ -1445,9 +1445,10 @@ exports.updatePackageAsset = async (req, res, next) => {
     const oldImageArray = await PackageAssetImage.findAll({
       where: { packageAssetId: packageAssetId },
     });
-    const oldDocumentArray = PackageAssetDocument.findAll({
+    const oldDocumentArray = await PackageAssetDocument.findAll({
       where: { packageAssetId: packageAssetId },
     });
+    console.log("oldDocumentArray : ", oldDocumentArray[0]);
 
     if (arrayImage.length > 0) {
       for (el of arrayImage) {
@@ -1527,6 +1528,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         delete_file(`./public/pics/${notExistArrayImage[i].image}`);
       }
     }
+    console.log("notExistArrayDocument : ", notExistArrayDocument);
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
         await PackageAssetDocument.destroy({
