@@ -31,6 +31,14 @@ function delete_file(path) {
   });
 }
 
+
+function duplicate_file(pathRead, pathWrite) {
+  var inStr = fs.createReadStream(pathRead);
+  var outStr = fs.createWriteStream(pathWrite);
+
+  inStr.pipe(outStr);
+}
+
 exports.createAsset = async (req, res, next) => {
   // เหลือ create transfer
 
