@@ -4,11 +4,9 @@ const createError = require("../utils/createError");
 exports.createHospital = async (req, res, next) => {
   try {
     const { hospitalArray } = req.body;
-    // const hospitalArrayObject = hospitalArray;
-    const hospitalArrayObject = JSON.parse(hospitalArray);
     const resHospital = [];
 
-    for (let el of hospitalArrayObject) {
+    for (let el of hospitalArray) {
       try {
         let hospital = await Hospital.create({
           name: el.name,
@@ -33,12 +31,10 @@ exports.createHospital = async (req, res, next) => {
 exports.updateHospital = async (req, res, next) => {
   try {
     const { hospitalArray } = req.body;
-    // const hospitalArrayObject = hospitalArray;
-    const hospitalArrayObject = JSON.parse(hospitalArray);
     const resHospital = [];
 
-    for (let i = 0; i < hospitalArrayObject.length; i++) {
-      const { _id, name } = hospitalArrayObject[i];
+    for (let i = 0; i < hospitalArray.length; i++) {
+      const { _id, name } = hospitalArray[i];
       const hospital = await Hospital.findByPk(_id);
 
       if (!hospital) {

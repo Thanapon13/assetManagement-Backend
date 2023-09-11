@@ -5,10 +5,9 @@ exports.createMedicalField = async (req, res, next) => {
   try {
     const { medicalFieldArray } = req.body;
     // const medicalFieldArrayObject = medicalFieldArray;
-    const medicalFieldArrayObject = JSON.parse(medicalFieldArray);
     const resMedicalField = [];
 
-    for (let el of medicalFieldArrayObject) {
+    for (let el of medicalFieldArray) {
       try {
         let medicalField = await MedicalField.create({
           name: el.name,
@@ -34,11 +33,10 @@ exports.updateMedicalField = async (req, res, next) => {
   try {
     const { medicalFieldArray } = req.body;
     // const medicalFieldArrayObject = medicalFieldArray;
-    const medicalFieldArrayObject = JSON.parse(medicalFieldArray);
     const resMedicalField = [];
 
-    for (let i = 0; i < medicalFieldArrayObject.length; i++) {
-      const { _id, name } = medicalFieldArrayObject[i];
+    for (let i = 0; i < medicalFieldArray.length; i++) {
+      const { _id, name } = medicalFieldArray[i];
       const medicalField = await MedicalField.findByPk(_id);
 
       if (!medicalField) {
