@@ -2811,13 +2811,13 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     const { input, existArrayImage } = req.body;
     console.log(".....:", req.body);
 
-    // console.log("input:", input);
+    console.log("input:", input);
     // console.log("existArrayImage:", existArrayImage);
-    // console.log("borrowId:", borrowId);
+    console.log("borrowId:", borrowId);
 
     // convert JSON to object
     const inputObject = JSON.parse(input);
-    // console.log("inputObject:", inputObject);
+    console.log("inputObject:", inputObject);
     const existArrayImageArray = JSON.parse(existArrayImage);
     // console.log("existArrayImageArray:", existArrayImageArray);
 
@@ -2942,10 +2942,13 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
 
     // convert JSON to object
     const inputObject = JSON.parse(input);
-    // console.log(inputObject);
+    console.log("inputObject:", inputObject);
 
     const assetIdArray = inputObject.assetIdArray;
     const packageAssetIdArray = inputObject.packageAssetIdArray;
+
+    console.log("assetIdArray", assetIdArray);
+    console.log("packageAssetIdArray", packageAssetIdArray);
 
     // console.log("existArrayImage", existArrayImage);
     // console.log("arrayImage", arrayImage);
@@ -2956,9 +2959,6 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
     // }
 
     // console.log("borrowId", borrowId);
-
-    // console.log("assetIdArray", assetIdArray);
-    // console.log("packageAssetIdArray", packageAssetIdArray);
 
     //
     const borrowById = await Borrow.findByPk(borrowId);

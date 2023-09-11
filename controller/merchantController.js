@@ -196,20 +196,28 @@ exports.createMerchant = async (req, res, next) => {
   try {
     let { input, merchantAddressData, merchantRelationData } = req.body;
 
+
+    console.log("------------------------------------------------");
+    console.log("input:",input);
+    console.log("merchantAddressData:",merchantAddressData);
+    console.log("merchantRelationData:",merchantRelationData);
+    console.log(" req?.files?.arrayDocument:", req?.files?.arrayDocument);
+    console.log("------------------------------------------------");
+    
     const inputData = JSON.parse(input);
     const arrayDocument = req?.files?.arrayDocument || [];
     const merchantAddressArray = JSON.parse(merchantAddressData);
     const merchantRelationArray = JSON.parse(merchantRelationData);
 
-    // console.log("------------------------------------------------");
-    // console.log("inputData:", inputData);
-    // console.log("------------------------------------------------");
-    // console.log("arrayDocument:", arrayDocument);
-    // console.log("------------------------------------------------");
-    // console.log("merchantAddressArray:", merchantAddressArray);
-    // console.log("------------------------------------------------");
-    // console.log("merchantRelationArray:", merchantRelationArray);
-    // console.log("------------------------------------------------");
+    console.log("------------------------------------------------");
+    console.log("inputData:", inputData);
+    console.log("------------------------------------------------");
+    console.log("arrayDocument:", arrayDocument);
+    console.log("------------------------------------------------");
+    console.log("merchantAddressArray:", merchantAddressArray);
+    console.log("------------------------------------------------");
+    console.log("merchantRelationArray:", merchantRelationArray);
+    console.log("------------------------------------------------");
 
     let {
       // ข้อมูลผู้ค้า
@@ -311,6 +319,12 @@ exports.updateMerchant = async (req, res, next) => {
       merchantRelationData,
       existArrayDocument
     } = req.body;
+
+console.log("input:",input);
+console.log("merchantAddressData:",merchantAddressData);
+console.log("merchantRelationData:",merchantRelationData);
+console.log("existArrayDocument:",existArrayDocument);
+
     const merchantAddressArray = JSON.parse(merchantAddressData);
     const merchantRelationArray = JSON.parse(merchantRelationData);
     const inputObject = JSON.parse(input);
@@ -418,11 +432,15 @@ exports.updateMerchant = async (req, res, next) => {
       }
     );
     const oldMerchantAddress = await merchantAddress.findAll({
-      where: { repairId: repairId }
+      where: { merchantId: merchantId }
     });
+    console.log("oldMerchantAddress:", oldMerchantAddress);
+
     const oldMerchantRelation = await merchantRelation.findAll({
-      where: { repairId: repairId }
+      where: { merchantId: merchantId }
     });
+    console.log("oldMerchantRelation:", oldMerchantRelation);
+
     let notExistArrayMerchantAddress = [];
     let notExistArrayMerchantRelation = [];
 
@@ -475,9 +493,11 @@ exports.updateMerchant = async (req, res, next) => {
     }
 
     for (let i = 0; i < merchantAddressArray.length; i++) {
+      console.log("merchantAddressArray---", merchantAddressArray);
       const merchantAddressInfo = await merchantAddress.findByPk(
         merchantAddressArray[i]._id
       );
+      console.log("merchantAddressInfo--", merchantAddressInfo);
       if (!merchantAddressInfo) {
         await merchantAddress.create({
           address: merchantAddressInfo[i].address,
@@ -489,7 +509,7 @@ exports.updateMerchant = async (req, res, next) => {
           district: merchantAddressInfo[i].district,
           subDistrict: merchantAddressInfo[i].subDistrict,
           postalCode: merchantAddressInfo[i].postalCode,
-          merchantId: merchantId
+          merchantId: merchantId 
         });
       } else {
         await merchantAddress.update(
