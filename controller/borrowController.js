@@ -1269,7 +1269,9 @@ exports.getBorrowById = async (req, res, next) => {
     //     },
     //   },
     // ]);
-
+    if (borrow == null) {
+      return res.status(404).json({ message: "this borrow not found" });
+    }
     res.json({ borrow: borrow });
   } catch (err) {
     next(err);
@@ -2152,7 +2154,9 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
         },
       ],
     });
-
+    if (borrowArray == null) {
+      return res.status(404).json({ message: "This borrow not found" });
+    }
     const borrow = borrowArray;
     console.log("borrow:", borrow);
     const approveArray = [];
@@ -2747,7 +2751,7 @@ exports.getBorrowCheckById = async (req, res, next) => {
     });
 
     if (borrow == null) {
-      return res.status(200).json({ message: "this borrow not found" });
+      return res.status(404).json({ message: "this borrow not found" });
     }
     // let borrow = await Borrow.aggregate([
     //   { $match: { _id: ObjectID(borrowId) } },

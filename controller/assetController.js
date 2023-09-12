@@ -31,7 +31,6 @@ function delete_file(path) {
   });
 }
 
-
 function duplicate_file(pathRead, pathWrite) {
   var inStr = fs.createReadStream(pathRead);
   var outStr = fs.createWriteStream(pathWrite);
@@ -612,7 +611,7 @@ exports.getAssetById = async (req, res, next) => {
       // ],
     });
     if (assetData == null) {
-      return res.json({ message: "This asset not found" });
+      return res.status(404).json({ message: "This asset not found" });
     }
     // const asset = await Asset.findById({ _id: assetId });
     res.json({ asset: assetData });

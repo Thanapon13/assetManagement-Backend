@@ -406,68 +406,9 @@ exports.getRepairById = async (req, res, next) => {
         },
       ],
     });
-    // const repair = await Repair.aggregate([
-    //   { $match: { _id: ObjectID(RepairId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       let: { assetIds: "$assetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$_id", "$$assetIds"] },
-    //                 // { $in: ["$_id", "$$assetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             _id: 1,
-    //             assetNumber: 1,
-    //             productName: 1,
-    //             serialNumber: 1,
-    //             sector: 1,
-    //             imageArray: 1,
-    //           },
-    //         }, // Specify the fields you want to retrieve
-    //       ],
-    //       as: "assets",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "packageassets",
-    //       let: { packageAssetIds: "$packageAssetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$_id", "$$packageAssetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             _id: 1,
-    //             assetNumber: 1,
-    //             productName: 1,
-    //             serialNumber: 1,
-    //             sector: 1,
-    //             imageArray: 1,
-    //           },
-    //         }, // Specify the fields you want to retrieve
-    //       ],
-    //       as: "packageAssets",
-    //     },
-    //   },
-    // ]);
+    if (repair == null) {
+      return res.status(404).json({ message: "This repair not found" });
+    }
 
     res.json({ repair: repair });
   } catch (err) {

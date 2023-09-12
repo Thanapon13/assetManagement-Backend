@@ -185,7 +185,9 @@ exports.getMerchantById = async (req, res, next) => {
         },
       ],
     });
-
+    if (merchantData == 0) {
+      return res.status(404).json({ message: "This merchant not found" });
+    }
     res.status(200).json({ merchantData });
   } catch (err) {
     next(err);
@@ -418,10 +420,10 @@ exports.updateMerchant = async (req, res, next) => {
       }
     );
     const oldMerchantAddress = await merchantAddress.findAll({
-      where: { repairId: repairId },
+      where: { merchantId: merchantId },
     });
     const oldMerchantRelation = await merchantRelation.findAll({
-      where: { repairId: repairId },
+      where: { merchantId: merchantId },
     });
     let notExistArrayMerchantAddress = [];
     let notExistArrayMerchantRelation = [];

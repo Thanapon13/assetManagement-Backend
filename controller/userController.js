@@ -107,6 +107,10 @@ exports.getUserById = async (req, res, next) => {
         as: "TB_ROLE",
       },
     });
+    if (userData == null) {
+      return res.status(404).json({ message: "This user not found" });
+    }
+
     res.status(200).json({ userData });
   } catch (err) {
     next(err);

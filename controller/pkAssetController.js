@@ -2160,6 +2160,9 @@ exports.getPackageAssetById = async (req, res, next) => {
         },
       ],
     });
+    if (packageAsset == null) {
+      return res.status(404).json({ message: "This PkAsset not found" });
+    }
     // console.log(asset);
     // const packageAsset = await PackageAsset.findById({ _id: packageAssetId });
     res.json({ packageAsset });
