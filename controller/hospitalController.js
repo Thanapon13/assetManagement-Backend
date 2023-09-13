@@ -5,8 +5,9 @@ exports.createHospital = async (req, res, next) => {
   try {
     const { hospitalArray } = req.body;
     const resHospital = [];
+    const hospitalArrayObject = JSON.parse(hospitalArray);
 
-    for (let el of hospitalArray) {
+    for (let el of hospitalArrayObject) {
       try {
         let hospital = await Hospital.create({
           name: el.name,
@@ -32,9 +33,10 @@ exports.updateHospital = async (req, res, next) => {
   try {
     const { hospitalArray } = req.body;
     const resHospital = [];
+    const hospitalArrayObject = JSON.parse(hospitalArray);
 
-    for (let i = 0; i < hospitalArray.length; i++) {
-      const { _id, name } = hospitalArray[i];
+    for (let i = 0; i < hospitalArrayObject.length; i++) {
+      const { _id, name } = hospitalArrayObject[i];
       const hospital = await Hospital.findByPk(_id);
 
       if (!hospital) {
@@ -46,7 +48,7 @@ exports.updateHospital = async (req, res, next) => {
       });
       // console.log("existingNameHospital", existingNameHospital);
       // console.log("existingNameHospital.id", existingNameHospital.id);
-      if (existingNameHospital && existingNameHospital.id !== _id) {
+      if (existingNameHospital && existingNameHospital._id !== _id) {
         throw createError(`Hospital with name '${name}' already exists`, 400);
       }
 

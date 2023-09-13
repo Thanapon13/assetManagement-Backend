@@ -52,7 +52,7 @@ exports.updatePersonnelTypeCode = async (req, res, next) => {
       // console.log("existingNamePersonnelTypeCode.id", existingNamePersonnelTypeCode.id);
       if (
         existingNamePersonnelTypeCode &&
-        existingNamePersonnelTypeCode.id !== _id
+        existingNamePersonnelTypeCode._id !== _id
       ) {
         throw createError(
           `PersonnelTypeCode with name '${name}' already exists`,

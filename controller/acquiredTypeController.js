@@ -4,10 +4,11 @@ const createError = require("../utils/createError");
 exports.createAcquiredType = async (req, res, next) => {
   try {
     const { acquiredTypeArray } = req.body;
+    const acquiredTypeArrayObject = JSON.parse(acquiredTypeArray);
 
     const resAcquiredType = [];
 
-    for (let el of acquiredTypeArray) {
+    for (let el of acquiredTypeArrayObject) {
       try {
         let acquiredType = await AcquiredType.create({
           name: el.name

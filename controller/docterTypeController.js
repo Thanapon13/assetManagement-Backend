@@ -50,7 +50,7 @@ exports.updateDocterType = async (req, res, next) => {
       });
       // console.log("existingNameDocterType", existingNameDocterType);
       // console.log("existingNameDocterType.id", existingNameDocterType.id);
-      if (existingNameDocterType && existingNameDocterType.id !== _id) {
+      if (existingNameDocterType && existingNameDocterType._id !== _id) {
         throw createError(`DocterType with name '${name}' already exists`, 400);
       }
 

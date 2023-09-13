@@ -4,10 +4,10 @@ const createError = require("../utils/createError");
 exports.createThaiPrefix = async (req, res, next) => {
   try {
     const { thaiPrefixArray } = req.body;
-    // const thaiPrefixArrayObject = thaiPrefixArray;
+    const thaiPrefixArrayObject = JSON.parse(thaiPrefixArray);
     const resThaiPrefix = [];
 
-    for (let el of thaiPrefixArray) {
+    for (let el of thaiPrefixArrayObject) {
       try {
         let thaiPrefix = await ThaiPrefix.create({
           name: el.name,
@@ -32,11 +32,11 @@ exports.createThaiPrefix = async (req, res, next) => {
 exports.updateThaiPrefix = async (req, res, next) => {
   try {
     const { thaiPrefixArray } = req.body;
-    // const thaiPrefixArrayObject = thaiPrefixArray;
+    const thaiPrefixArrayObject = JSON.parse(thaiPrefixArray);
     const resThaiPrefix = [];
 
-    for (let i = 0; i < thaiPrefixArray.length; i++) {
-      const { _id, name } = thaiPrefixArray[i];
+    for (let i = 0; i < thaiPrefixArrayObject.length; i++) {
+      const { _id, name } = thaiPrefixArrayObject[i];
       const thaiPrefix = await ThaiPrefix.findByPk(_id);
 
       if (!thaiPrefix) {
@@ -48,7 +48,7 @@ exports.updateThaiPrefix = async (req, res, next) => {
       });
       // console.log("existingNameThaiPrefix", existingNameThaiPrefix);
       // console.log("existingNameThaiPrefix.id", existingNameThaiPrefix.id);
-      if (existingNameThaiPrefix && existingNameThaiPrefix.id !== _id) {
+      if (existingNameThaiPrefix && existingNameThaiPrefix._id !== _id) {
         throw createError(`ThaiPrefix with name '${name}' already exists`, 400);
       }
 

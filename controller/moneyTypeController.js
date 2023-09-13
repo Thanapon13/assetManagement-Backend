@@ -4,12 +4,14 @@ const createError = require("../utils/createError");
 exports.createMoneyType = async (req, res, next) => {
   try {
     const { moneyTypeArray } = req.body;
+    const moneyTypeArrayObject = JSON.parse(moneyTypeArray);
+
     const resMoneyType = [];
 
-    for (let el of moneyTypeArray) {
+    for (let el of moneyTypeArrayObject) {
       try {
         let moneyType = await MoneyType.create({
-          name: el.name
+          name: el.name,
         });
         resMoneyType.push(moneyType);
       } catch (err) {
@@ -45,11 +47,11 @@ exports.updateMoneyType = async (req, res, next) => {
       }
 
       const existingNameMoneyType = await MoneyType.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       // console.log("existingNameMoneyType", existingNameMoneyType);
       // console.log("existingNameMoneyType.id", existingNameMoneyType.id);
-      if (existingNameMoneyType && existingNameMoneyType.id !== _id) {
+      if (existingNameMoneyType && existingNameMoneyType._id !== _id) {
         throw createError(`MoneyType with name '${name}' already exists`, 400);
       }
 
@@ -67,7 +69,7 @@ exports.updateMoneyType = async (req, res, next) => {
 exports.getAllMoneyType = async (req, res, next) => {
   try {
     const moneyType = await MoneyType.findAll({
-      attributes: ["_id", "name"]
+      attributes: ["_id", "name"],
     });
     res.json({ moneyType });
   } catch (err) {
@@ -80,8 +82,8 @@ exports.deleteMoneyType = async (req, res, next) => {
     const _id = req.params.moneyTypeId;
     let moneyType = await MoneyType.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
 
     res.json({ message: "delete moneyType successfully", moneyType });

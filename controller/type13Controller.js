@@ -4,13 +4,15 @@ const createError = require("../utils/createError");
 exports.createType13 = async (req, res, next) => {
   try {
     const { type13Array } = req.body;
+    const type13ArrayObject = JSON.parse(type13Array);
+
     const resType13 = [];
 
-    for (el of type13Array) {
+    for (el of type13ArrayObject) {
       try {
         let type13 = await Type13.create({
           name: el.name,
-          value: el.value
+          value: el.value,
         });
         resType13.push(type13);
       } catch (err) {
@@ -51,20 +53,20 @@ exports.updateType13 = async (req, res, next) => {
       }
 
       const existingNameType13 = await Type13.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       console.log("existingNameType13", existingNameType13);
       // console.log("existingNameType13.id", existingNameType13.id);
-      if (existingNameType13 && existingNameType13.id !== _id) {
+      if (existingNameType13 && existingNameType13._id !== _id) {
         throw createError(`Type13 with name '${name}' already exists`, 400);
       }
 
       const existingValueType13 = await Type13.findOne({
-        where: { value: value }
+        where: { value: value },
       });
       // console.log("existingValueType13", existingValueType13);
 
-      if (existingValueType13 && existingValueType13.id !== _id) {
+      if (existingValueType13 && existingValueType13._id !== _id) {
         const error = new Error(`Value '${value}' already exists.`);
         error.statusCode = 400;
         throw error;
@@ -84,7 +86,7 @@ exports.updateType13 = async (req, res, next) => {
 exports.getAllType13 = async (req, res, next) => {
   try {
     const type13 = await Type13.findAll({
-      attributes: ["_id", "name", "value"]
+      attributes: ["_id", "name", "value"],
     });
     res.json({ type13 });
   } catch (err) {
@@ -97,8 +99,8 @@ exports.deleteType13 = async (req, res, next) => {
     const _id = req.params.type13Id;
     let type13 = await Type13.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
 
     res.json({ message: "delete type13 successfully", type13 });

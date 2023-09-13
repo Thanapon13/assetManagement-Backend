@@ -4,10 +4,11 @@ const createError = require("../utils/createError");
 exports.createCategory = async (req, res, next) => {
   try {
     const { categoryArray } = req.body;
+    const categoryArrayObject = JSON.parse(categoryArray);
 
     const resCategory = [];
 
-    for (let el of categoryArray) {
+    for (let el of categoryArrayObject) {
       try {
         let category = await Category.create({
           name: el.name,
@@ -56,7 +57,7 @@ exports.updateCategory = async (req, res, next) => {
       });
       // console.log("existingNameCategory", existingNameCategory);
       // console.log("existingNameCategory.id", existingNameCategory.id);
-      if (existingNameCategory && existingNameCategory.id !== _id) {
+      if (existingNameCategory && existingNameCategory._id !== _id) {
         throw createError(`Category with name '${name}' already exists`, 400);
       }
 
@@ -65,7 +66,7 @@ exports.updateCategory = async (req, res, next) => {
       });
       // console.log("existingValueCategory", existingValueCategory);
 
-      if (existingValueCategory && existingValueCategory.id !== _id) {
+      if (existingValueCategory && existingValueCategory._id !== _id) {
         const error = new Error(`Value '${value}' already exists.`);
         error.statusCode = 400;
         throw error;

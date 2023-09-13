@@ -120,6 +120,11 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "typeOfRepair",
       },
+      problemDetail: {
+        type: Sequelize.STRING(1000),
+        allowNull: true,
+        field: "problemDetail",
+      },
       repairSector: {
         type: Sequelize.STRING(100),
         allowNull: true,
