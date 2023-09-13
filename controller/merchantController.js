@@ -154,7 +154,7 @@ exports.getMerchantDropdown = async (req, res, next) => {
         status: { [Op.ne]: "saveDraft" },
         deletedAt: { [Op.eq]: null },
       },
-      attributes: ["realMerchantId", "companyName", "name"],
+      attributes: ["_id", "realMerchantId", "companyName", "name"],
       order: [["realMerchantId", "DESC"]],
     });
     res.status(200).json({ merchant: merchants });
@@ -315,20 +315,22 @@ exports.updateMerchant = async (req, res, next) => {
     const merchantRelationArray = JSON.parse(merchantRelationData);
     const inputObject = JSON.parse(input);
 
+    console.log(merchantId);
+    console.log(inputObject);
     let existArrayDocumentArray;
     if (existArrayDocument) {
       existArrayDocumentArray = JSON.parse(existArrayDocument);
     }
     const arrayDocument = req?.files?.arrayDocument || [];
 
-    console.log("-------------------------------");
-    console.log("merchantId:", merchantId);
-    console.log("merchantAddressArray:", merchantAddressArray);
-    console.log("merchantRelationArray:", merchantRelationArray);
-    console.log("inputObject:", inputObject);
-    console.log("arrayDocument:", arrayDocument);
-    console.log("existArrayDocumentArray:", existArrayDocumentArray);
-    console.log("-------------------------------");
+    // console.log("-------------------------------");
+    // console.log("merchantId:", merchantId);
+    // console.log("merchantAddressArray:", merchantAddressArray);
+    // console.log("merchantRelationArray:", merchantRelationArray);
+    // console.log("inputObject:", inputObject);
+    // console.log("arrayDocument:", arrayDocument);
+    // console.log("existArrayDocumentArray:", existArrayDocumentArray);
+    // console.log("-------------------------------");
 
     let {
       // ข้อมูลผู้ค้า
@@ -354,13 +356,13 @@ exports.updateMerchant = async (req, res, next) => {
     const merchantInfo = await merchantDocumentArray.findAll({
       where: { merchantId: merchantId },
     });
-    console.log("merchantInfo:", merchantInfo);
+    // console.log("merchantInfo:", merchantInfo);
 
     const oldDocumentArray = merchantInfo;
-    console.log("oldDocumentArray:", oldDocumentArray);
+    // console.log("oldDocumentArray:", oldDocumentArray);
 
+    // console.log("arrayDocument:", arrayDocument);
     if (arrayDocument.length > 0) {
-      // console.log("arrayDocument:", arrayDocument);
       for (el of arrayDocument) {
         await merchantDocumentArray.create({
           document: el.filename,
@@ -368,12 +370,13 @@ exports.updateMerchant = async (req, res, next) => {
         });
       }
     }
+    console.log("existarray", existArrayDocument);
 
     let notExistArrayDocument = [];
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
       const existObjects = existArray.map((obj) => obj.document + obj._id);
-      console.log("existObjects:", existObjects);
-      console.log("oldDocumentArray----:", oldDocumentArray);
+      // console.log("existObjects:", existObjects);
+      // console.log("oldDocumentArray----:", oldDocumentArray);
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
           !existObjects.includes(
@@ -383,7 +386,7 @@ exports.updateMerchant = async (req, res, next) => {
           notExistArray.push(oldDocumentArray[i]);
         }
       }
-      console.log("notExistArray----:", notExistArray);
+      // console.log("notExistArray----:", notExistArray);
       return notExistArray;
     }
 
@@ -394,8 +397,9 @@ exports.updateMerchant = async (req, res, next) => {
         notExistArrayDocument
       );
     }
-    console.log("notExistArrayDocument:", notExistArrayDocument);
-    console.log("existArrayDocumentArray:", existArrayDocumentArray);
+    console.log("notExist", notExistArrayDocument);
+    // console.log("notExistArrayDocument:", notExistArrayDocument);
+    // console.log("existArrayDocumentArray:", existArrayDocumentArray);
 
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
@@ -418,10 +422,10 @@ exports.updateMerchant = async (req, res, next) => {
       }
     );
     const oldMerchantAddress = await merchantAddress.findAll({
-      where: { repairId: repairId },
+      where: { merchantId: merchantId },
     });
     const oldMerchantRelation = await merchantRelation.findAll({
-      where: { repairId: repairId },
+      where: { merchantId: merchantId },
     });
     let notExistArrayMerchantAddress = [];
     let notExistArrayMerchantRelation = [];
@@ -452,8 +456,8 @@ exports.updateMerchant = async (req, res, next) => {
         notExistArrayMerchantRelation
       );
     }
-    console.log("notExistArrayMerchantAddress", notExistArrayMerchantAddress);
-    console.log("notExistArrayMerchantRelation", notExistArrayMerchantRelation);
+    // console.log("notExistArrayMerchantAddress", notExistArrayMerchantAddress);
+    // console.log("notExistArrayMerchantRelation", notExistArrayMerchantRelation);
 
     if (notExistArrayMerchantAddress.length > 0) {
       for (let i = 0; i < notExistArrayMerchantAddress.length; i++) {
@@ -473,36 +477,38 @@ exports.updateMerchant = async (req, res, next) => {
         });
       }
     }
+    // console.log("merchantAddressArray", merchantAddressArray);
 
     for (let i = 0; i < merchantAddressArray.length; i++) {
       const merchantAddressInfo = await merchantAddress.findByPk(
         merchantAddressArray[i]._id
       );
+      // console.log("MerchantAddressInfo", merchantAddressInfo);
       if (!merchantAddressInfo) {
         await merchantAddress.create({
-          address: merchantAddressInfo[i].address,
-          group: merchantAddressInfo[i].group,
-          village: merchantAddressInfo[i].village,
-          alley: merchantAddressInfo[i].alley,
-          street: merchantAddressInfo[i].street,
-          province: merchantAddressInfo[i].province,
-          district: merchantAddressInfo[i].district,
-          subDistrict: merchantAddressInfo[i].subDistrict,
-          postalCode: merchantAddressInfo[i].postalCode,
+          address: merchantAddressArray[i].address,
+          group: merchantAddressArray[i].group,
+          village: merchantAddressArray[i].village,
+          alley: merchantAddressArray[i].alley,
+          street: merchantAddressArray[i].street,
+          province: merchantAddressArray[i].province,
+          district: merchantAddressArray[i].district,
+          subDistrict: merchantAddressArray[i].subDistrict,
+          postalCode: merchantAddressArray[i].postalCode,
           merchantId: merchantId,
         });
       } else {
         await merchantAddress.update(
           {
-            address: merchantAddressInfo[i].address,
-            group: merchantAddressInfo[i].group,
-            village: merchantAddressInfo[i].village,
-            alley: merchantAddressInfo[i].alley,
-            street: merchantAddressInfo[i].street,
-            province: merchantAddressInfo[i].province,
-            district: merchantAddressInfo[i].district,
-            subDistrict: merchantAddressInfo[i].subDistrict,
-            postalCode: merchantAddressInfo[i].postalCode,
+            address: merchantAddressArray[i].address,
+            group: merchantAddressArray[i].group,
+            village: merchantAddressArray[i].village,
+            alley: merchantAddressArray[i].alley,
+            street: merchantAddressArray[i].street,
+            province: merchantAddressArray[i].province,
+            district: merchantAddressArray[i].district,
+            subDistrict: merchantAddressArray[i].subDistrict,
+            postalCode: merchantAddressArray[i].postalCode,
           },
           { where: { _id: merchantAddressArray[i]._id } }
         );
