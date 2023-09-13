@@ -220,7 +220,7 @@ exports.createAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         const createdAsset = await asset.create({
@@ -1022,7 +1022,7 @@ exports.updateAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         newestRealAssetId = newestRealAssetId + 1;

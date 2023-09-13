@@ -71,7 +71,7 @@ exports.createRepair = async (req, res, next) => {
     });
     console.log("asset:", asset);
 
-    const packageAssetArray = await PackageAsset.findAll({
+    const packageAssetArray = await PackageAsset.findOne({
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
       include: [
@@ -449,7 +449,7 @@ exports.deleteRepair = async (req, res, next) => {
         // for (let i = 0; i < transfer.packageAssetIdArray.length; i++) {
         let packageAssetId = repair.packageAssetId;
         // console.log(packageAssetId)
-        let packageAsset = await PackageAsset.findAll({
+        let packageAsset = await PackageAsset.findOne({
           where: { _id: packageAssetId },
           include: [{ model: Asset, as: "assets", attributes: ["_id"] }],
         });
@@ -475,7 +475,7 @@ exports.deleteRepair = async (req, res, next) => {
         );
         console.log("findForUpdatePackageAsset", findForUpdatePackageAsset);
 
-        let assetInPackageArray = packageAsset[0].asset;
+        let assetInPackageArray = packageAsset.assets;
         // console.log("assetInPackageArray",i)
         // console.log(assetInPackageArray)
         if (assetInPackageArray.length > 0) {
