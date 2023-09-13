@@ -700,67 +700,28 @@ exports.getByProductSelector = async (req, res, next) => {
       ],
       group: "productName",
     });
-    console.log(2342, assetData);
 
-    // attributes: [
-    //   'productName',
-    //   [sequelize.fn('COUNT', sequelize.col('*')), 'quantity'],
-    //   [sequelize.fn('GROUP_CONCAT', sequelize.col('*')), 'results'], // Note: This will concatenate all fields; adjust as needed
-    // ],
     let packageAssetData = await pkAsset.findAll({
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
         [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"], //
-        // [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName",
     });
-    // assetData = assetData.map((data) => ({
-    //   ...data.dataValues,
-    //   isPackage: false,
-    // }));
-    // packageAssetData = packageAssetData.map((data) => ({
-    //   ...data.dataValues,
-    //   isPackage: true,
-    // }));
-    // let asset = await Asset.aggregate([
-    //   { $match: query },
-    //   {
-    //     $group: {
-    //       _id: "$productName",
-    //       quantity: { $sum: 1 },
-    //       results: { $push: "$$ROOT" },
-    //     },
-    //   },
-    //   // {
-    //   //   $sort: {
-    //   //     createdAt: -1,
-    //   //   },
-    //   // },
-    // ]);
-
-    // let packageAsset = await PackageAsset.aggregate([
-    //   { $match: queryPackageAsset },
-    //   {
-    //     $group: {
-    //       _id: "$productName",
-    //       quantity: { $sum: 1 },
-    //       results: { $push: "$$ROOT" },
-    //     },
-    //   },
-    //   // {
-    //   //   $sort: {
-    //   //     createdAt: -1,
-    //   //   },
-    //   // },
-    // ]);
-
     assetData = assetData.concat(packageAssetData);
-
-    console.log(assetData.length);
-    // console.log(asset.length);
-
+    if (assetData.length != 0) {
+      for (let i = 0; i < assetData.length; i++) {
+        let assetData2 = await asset.findAll({
+          where: { [Op.and]: queryAssetArray },
+        });
+        let packageAssetData2 = await pkAsset.findAll({
+          where: { [Op.and]: queryPackageAssetArray },
+        });
+        assetData2 = assetData2.concat(packageAssetData2);
+        assetData[i].setDataValue("results", assetData2);
+      }
+    }
     res.json({ asset: assetData });
   } catch (err) {
     next(err);

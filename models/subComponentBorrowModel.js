@@ -32,6 +32,21 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         field: "amount",
       },
+      // brand: {
+      //   type: Sequelize.STRING(100),
+      //   allowNull: true,
+      //   field: "brand",
+      // },
+      // unit: {
+      //   type: Sequelize.STRING(100),
+      //   allowNull: true,
+      //   field: "unit",
+      // },
+      // pricePerUnit: {
+      //   type: Sequelize.INTEGER,
+      //   allowNull: true,
+      //   field: "pricePerUnit",
+      // },
     },
 
     {

@@ -160,7 +160,7 @@ module.exports = (sequelize, Sequelize) => {
         field: "replacedAssetNumber",
       },
       pricePerUnit: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.INTEGER,
         allowNull: true,
         field: "pricePerUnit",
       },

@@ -1189,6 +1189,11 @@ exports.getBorrowById = async (req, res, next) => {
       where: { _id: borrowId },
       include: [
         {
+          model: SubComponentBorrow,
+          as: "subComponentBorrows",
+          require: false,
+        },
+        {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
           require: false,
@@ -1228,49 +1233,28 @@ exports.getBorrowById = async (req, res, next) => {
         },
       ],
     });
-    // const borrow = await Borrow.aggregate([
-    //   { $match: { _id: ObjectID(borrowId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       let: { assetIds: "$assetIdArray.assetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $in: ["$_id", "$$assetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "assets",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "packageassets",
-    //       let: { packageAssetIds: "$packageAssetIdArray.packageAssetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $in: ["$_id", "$$packageAssetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "packageAssets",
-    //     },
-    //   },
-    // ]);
+
     if (borrow == null) {
       return res.status(404).json({ message: "this borrow not found" });
+    }
+
+    if (borrow && borrow.subComponentBorrows) {
+      const subComponentBorrows = borrow.subComponentBorrows;
+      for (const subComponentBorrow of subComponentBorrows) {
+        if (subComponentBorrow.isPackage == false) {
+          const assets = await Asset.findOne({
+            where: { assetNumber: subComponentBorrow.assetNumber },
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+          });
+          subComponentBorrow.setDataValue("assets", assets);
+        }else{
+          const assets = await PackageAsset.findOne({
+            where: { assetNumber: subComponentBorrow.assetNumber },
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+          });
+          subComponentBorrow.setDataValue("assets", assets);
+        }
+      }
     }
     res.json({ borrow: borrow });
   } catch (err) {
@@ -1328,7 +1312,8 @@ exports.approveAllWaitingBorrow = async (req, res, next) => {
     const { topApproveList } = req.body;
     console.log(topApproveList);
     // convert JSON to object
-    const topApproveListObject = JSON.parse(topApproveList);
+    // const topApproveListObject = JSON.parse(topApproveList);
+    const topApproveListObject = topApproveList;
 
     for (let i = 0; i < topApproveListObject.length; i++) {
       if (topApproveListObject[i].checked) {
@@ -1412,9 +1397,9 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
     console.log("topApproveList:", topApproveList);
-
+    const topApproveListObject = topApproveList;
     // convert JSON to object
-    const topApproveListObject = JSON.parse(topApproveList);
+    // const topApproveListObject = JSON.parse(topApproveList);
     console.log("topApproveListObject:", topApproveListObject);
 
     for (let i = 0; i < topApproveListObject.length; i++) {
