@@ -280,13 +280,13 @@ db.repair.hasMany(db.costOfRepairMan, {
   foreignKey: { name: "repairId", field: "repairId" },
   onDelete: "cascade",
 });
-db.asset.hasOne(db.repair, {
+db.asset.hasMany(db.repair, {
   as: "repairAssetId",
   foreignKey: "assetId",
   constraints: false,
   // foreignKey: { name: "assetId", field: "assetId" },
 });
-db.pkAsset.hasOne(db.repair, {
+db.pkAsset.hasMany(db.repair, {
   as: "repairPackageAssetId",
   foreignKey: "packageAssetId",
   constraints: false,

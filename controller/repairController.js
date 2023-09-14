@@ -206,6 +206,7 @@ exports.getBySearch = async (req, res, next) => {
             "waitingForCheck",
             "inProgress",
             "complete",
+            "reject",
             "cancel",
           ],
         },
@@ -1525,8 +1526,9 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
     let assetInfo = {};
     if (asset.length > 0) {
       assetInfo = asset[0];
-      const historyOfasset = await Asset.findAll({
+      let historyOfasset = await Asset.findOne({
         where: { _id: assetInfo._id },
+
         include: [
           {
             model: Repair,
@@ -1542,17 +1544,28 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
                 require: false,
                 model: CostOfRepairMan,
                 as: "informRepairManArray",
-                attributes: [
-                  [
-                    sequelize.fn("SUM", sequelize.col("totalEarn")),
-                    "totalPrice",
-                  ],
-                ],
               },
             ],
           },
         ],
       });
+      for (const repairAssetId of historyOfasset.repairAssetId) {
+        let costTotalOfRepairArray = 0;
+        for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
+          costTotalOfRepairArray =
+            costTotalOfRepairArray +
+            costOfRepairArray.quantity * costOfRepairArray.pricePerPiece;
+        }
+        let costTotalOfRepairManArray = 0;
+        for (const informRepairManArray of repairAssetId.informRepairManArray) {
+          costTotalOfRepairManArray =
+            costTotalOfRepairManArray +
+            informRepairManArray.totalEarn +
+            informRepairManArray.amountExtra;
+        }
+        let total = costTotalOfRepairArray + costTotalOfRepairManArray;
+        repairAssetId.setDataValue("total", total);
+      }
 
       return res.json({ historyOfasset });
     } else if (packageAsset) {
@@ -1571,37 +1584,33 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
                 require: false,
                 model: CostOfRepair,
                 as: "costOfRepairArray",
-                // attributes: ["_id"],
               },
               {
                 require: false,
                 model: CostOfRepairMan,
                 as: "informRepairManArray",
-                // attributes: [
-                //   "_id",
-                //   [
-                //     sequelize.fn("SUM", sequelize.col("totalEarn")),
-                //     "totalEarn",
-                //   ],
-                // ],
               },
             ],
           },
         ],
-        // group: [
-        //   "TB_PACKAGE_ASSETS._id",
-        //   "repairPackageAssetId._id",
-        //   "repairPackageAssetId.costOfRepairArray._id",
-        //   "repairPackageAssetId.informRepairManArray._id",
-        // ],
       });
-
-      // const test = await CostOfRepairMan.findAll({
-      //   where: { repairId: 1 },
-      //   attributes: [
-      //     [sequelize.fn("SUM", sequelize.col("totalEarn")), "totalEarn"],
-      //   ],
-      // });
+      for (const repairAssetId of historyOfasset.repairAssetId) {
+        let costTotalOfRepairArray = 0;
+        for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
+          costTotalOfRepairArray =
+            costTotalOfRepairArray +
+            costOfRepairArray.quantity * costOfRepairArray.pricePerPiece;
+        }
+        let costTotalOfRepairManArray = 0;
+        for (const informRepairManArray of repairAssetId.informRepairManArray) {
+          costTotalOfRepairManArray =
+            costTotalOfRepairManArray +
+            informRepairManArray.totalEarn +
+            informRepairManArray.amountExtra;
+        }
+        let total = costTotalOfRepairArray + costTotalOfRepairManArray;
+        repairAssetId.setDataValue("total", total);
+      }
 
       return res.json({ historyOfasset });
     }

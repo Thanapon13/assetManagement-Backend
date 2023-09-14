@@ -1247,7 +1247,7 @@ exports.getBorrowById = async (req, res, next) => {
             attributes: ["_id", "brand", "unit", "pricePerUnit"],
           });
           subComponentBorrow.setDataValue("assets", assets);
-        }else{
+        } else {
           const assets = await PackageAsset.findOne({
             where: { assetNumber: subComponentBorrow.assetNumber },
             attributes: ["_id", "brand", "unit", "pricePerUnit"],
@@ -1464,7 +1464,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
 
             // console.log("/n/n");
             // console.log("packageAsset", packageAsset);
-            let assetArray = await Asset.fineOne({
+            let assetArray = await Asset.findOne({
               where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
