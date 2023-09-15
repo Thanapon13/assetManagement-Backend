@@ -2832,8 +2832,8 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     const existArrayImageArray = JSON.parse(existArrayImage);
     console.log("existArrayImageArray:", existArrayImageArray);
 
-    const assetIdArray = inputObject.assetIdArray;
-    const packageAssetIdArray = inputObject.packageAssetIdArray;
+    const assetIdArray = inputObject.assetIdArray || [];
+    const packageAssetIdArray = inputObject.packageAssetIdArray || [];
 
     const arrayImage = req?.files?.arrayImage || [];
     // const arrayImage = req?.files?.arrayImage || [];

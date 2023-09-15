@@ -1594,7 +1594,7 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
           },
         ],
       });
-      for (const repairAssetId of historyOfasset.repairAssetId) {
+      for (const repairAssetId of historyOfasset.repairPackageAssetId) {
         let costTotalOfRepairArray = 0;
         for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
           costTotalOfRepairArray =
