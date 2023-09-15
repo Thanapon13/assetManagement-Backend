@@ -8,7 +8,7 @@ const {
   transfer,
   borrow,
   transferHasAsset,
-  borrowHasAsset,
+  borrowHasAsset
 } = require("../models");
 const Type = require("../models").type;
 const AssetImage = require("../models").assetImage;
@@ -25,7 +25,7 @@ const sapFixedAssetDepreciation = require("../services/sap/FixedAssetDepreciatio
 const { parse } = require("path");
 
 function delete_file(path) {
-  fs.unlink(path, (err) => {
+  fs.unlink(path, err => {
     if (err) throw err;
     console.log(path + " was deleted");
   });
@@ -48,7 +48,7 @@ exports.createAsset = async (req, res, next) => {
       duplicatedArrayImage,
       baseArrayImage,
       baseArrayDocument,
-      duplicatedArrayDocument,
+      duplicatedArrayDocument
     } = req.body;
 
     console.log("req.body:", req.body);
@@ -123,7 +123,7 @@ exports.createAsset = async (req, res, next) => {
       room, // note วันที่ย้ายเข้า - ย้ายออก
       name_recorder,
       name_courier,
-      name_approver,
+      name_approver
     } = inputObject;
     let otherInputObject = {};
 
@@ -131,9 +131,10 @@ exports.createAsset = async (req, res, next) => {
 
     const baseArrayImageObj = JSON.parse(baseArrayImage);
     const baseArrayDocumentObj = JSON.parse(baseArrayDocument);
+    console.log("baseArrayDocumentObj---", baseArrayDocumentObj);
     const arrayImage = req?.files?.arrayImage || [];
     const arrayDocument = req?.files?.arrayDocument || [];
-
+    console.log("xx", arrayImage);
     // subComponentAsset
     console.log("genDataJSON:", genDataJSON);
 
@@ -143,7 +144,7 @@ exports.createAsset = async (req, res, next) => {
     let newestRealAssetId;
     let newestAsset = await asset.findOne({
       attributes: ["realAssetId"],
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]]
     });
     console.log("newestAsset : ", newestAsset);
 
@@ -158,8 +159,10 @@ exports.createAsset = async (req, res, next) => {
     if (status == "saveDraft") {
       const createdAsset = await asset.create({
         ...inputObject,
-        realAssetId: parseInt(newestRealAssetId) + 1,
+        realAssetId: parseInt(newestRealAssetId) + 1
       });
+      console.log("------------------");
+      // return;
 
       const newAssetId = createdAsset.dataValues._id;
       console.log("newAssetId:", newAssetId);
@@ -170,18 +173,19 @@ exports.createAsset = async (req, res, next) => {
         // console.log("roomImage:", roomImage);
         await assetImage.create({
           image: roomImage.filename,
-          assetId: newAssetId,
+          assetId: newAssetId
         });
         // console.log("Uploaded roomImage:", roomImage);
       }
 
+      console.log("baseArrayDocumentObj:", baseArrayDocumentObj);
       for (let d = 0; d < baseArrayDocumentObj.length; d++) {
         const documentArray = arrayDocument[d];
 
-        // console.log("documentArray:", documentArray);
+        console.log("documentArray:");
         await assetDocument.create({
           document: documentArray.filename,
-          assetId: newAssetId,
+          assetId: newAssetId
         });
         // console.log("Uploaded documentArray:", documentArray);
       }
@@ -191,7 +195,7 @@ exports.createAsset = async (req, res, next) => {
         const subComponentData = genDataArray[i];
         await subComponentAsset.create({
           ...subComponentData,
-          assetId: newAssetId,
+          assetId: newAssetId
         });
       }
     } else {
@@ -211,8 +215,8 @@ exports.createAsset = async (req, res, next) => {
       for (let i = 0; i < quantity; i++) {
         let dataQuery = {
           params: {
-            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
-          },
+            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`
+          }
         };
         const responseCheckAlreadyAsset = await sapAssetMasterService.read(
           dataQuery,
@@ -223,6 +227,7 @@ exports.createAsset = async (req, res, next) => {
             .status(409)
             .json({ message: "This assetNumber already exists" });
         }
+        console.log("genDataArray:I", i, genDataArray[i]);
         const createdAsset = await asset.create({
           assetNumber: genDataArray[i].assetNumber,
           serialNumber: genDataArray[i].serialNumber,
@@ -232,7 +237,7 @@ exports.createAsset = async (req, res, next) => {
           ...inputObject,
           depreciationStartDate: depreciationStartDate,
           reserved: false,
-          realAssetId: parseInt(newestRealAssetId) + 1,
+          realAssetId: parseInt(newestRealAssetId) + 1
         });
         const newAssetId = createdAsset.dataValues._id;
         console.log("newAssetId:", newAssetId);
@@ -242,16 +247,16 @@ exports.createAsset = async (req, res, next) => {
           console.log("roomImage:", roomImage);
           await assetImage.create({
             image: roomImage.filename,
-            assetId: newAssetId,
+            assetId: newAssetId
           });
         }
-
+        console.log("baseArrayDocumentObj01:", baseArrayDocumentObj);
         for (let j = 0; j < baseArrayDocumentObj.length; j++) {
           const documentArray = arrayDocument[quantity * j + i];
-
+          console.log("arrayDoc2:", documentArray);
           await assetDocument.create({
             document: documentArray.filename,
-            assetId: newAssetId,
+            assetId: newAssetId
           });
         }
 
@@ -259,7 +264,7 @@ exports.createAsset = async (req, res, next) => {
           ItemCode: genDataArray[i].assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
-          AssetClass: AssetClass,
+          AssetClass: AssetClass
         };
         console.log("dataInsertAssetMaster", dataInsertAssetMaster);
         const responseCreateAssetMaster = await sapAssetMasterService.create(
@@ -283,15 +288,15 @@ exports.createAsset = async (req, res, next) => {
               {
                 AssetNumber: genDataArray[i].assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(price),
-              },
+                TotalLC: parseInt(price)
+              }
             ],
             AssetDocumentAreaJournalCollection: [
               {
                 DepreciationArea: "TFRS",
-                JournalRemarks: "Capitalization-Test",
-              },
-            ],
+                JournalRemarks: "Capitalization-Test"
+              }
+            ]
           };
           console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -306,12 +311,12 @@ exports.createAsset = async (req, res, next) => {
           );
           await asset.update(
             {
-              sapDocEntry: responseCreateCapitalization.data.DocEntry,
+              sapDocEntry: responseCreateCapitalization.data.DocEntry
             },
             {
               where: {
-                _id: newAssetId,
-              },
+                _id: newAssetId
+              }
             }
           );
         }
@@ -326,9 +331,9 @@ exports.createAsset = async (req, res, next) => {
             Remarks: " Retirement By Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: genDataArray[i].assetNumber,
-              },
-            ],
+                AssetNumber: genDataArray[i].assetNumber
+              }
+            ]
           };
           const responseCreateRetirement = await sapRetirementService.create(
             dataInsertRetirement,
@@ -339,8 +344,8 @@ exports.createAsset = async (req, res, next) => {
             { status: "distributed" },
             {
               where: {
-                _id: newAssetId,
-              },
+                _id: newAssetId
+              }
             }
           );
         }
@@ -357,8 +362,8 @@ exports.deleteAsset = async (req, res, next) => {
   try {
     const remove = await asset.findOne({
       where: {
-        _id: req.params.assetId,
-      },
+        _id: req.params.assetId
+      }
     });
     if (!remove) {
       createError("this post was not found", 400);
@@ -397,8 +402,8 @@ exports.deleteSubComponentAsset = async (req, res, next) => {
   try {
     const removeSubComponentAsset = await subComponentAsset.findOne({
       where: {
-        _id: req.body.id,
-      },
+        _id: req.body.id
+      }
     });
 
     if (removeSubComponentAsset) {
@@ -437,10 +442,10 @@ exports.getAllBuilding = async (req, res, next) => {
       where: {
         [Op.and]: [
           { deletedAt: { [Op.ne]: null } },
-          { building: { [Op.ne]: null } },
-        ],
+          { building: { [Op.ne]: null } }
+        ]
       },
-      attributes: ["building"],
+      attributes: ["building"]
     });
 
     res.json({ building: buildingData });
@@ -490,7 +495,7 @@ exports.getBySearch = async (req, res, next) => {
 
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
       });
     }
     if (status !== "") {
@@ -498,16 +503,16 @@ exports.getBySearch = async (req, res, next) => {
     } else {
       queryArray.push({
         status: {
-          [Op.like]: `%${status}%`,
-        },
+          [Op.like]: `%${status}%`
+        }
       });
     }
     if (dateFrom !== "") {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -517,8 +522,8 @@ exports.getBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -531,7 +536,7 @@ exports.getBySearch = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
     // for show how many pages
     const total = await asset.count({ where: { [Op.and]: queryArray } });
@@ -561,23 +566,23 @@ exports.getAssetById = async (req, res, next) => {
 
     const assetData = await asset.findOne({
       where: {
-        _id: assetId,
+        _id: assetId
       },
       include: [
         {
           model: assetImage,
           require: false,
-          as: "assetImages",
+          as: "assetImages"
         },
         {
           model: assetDocument,
           require: false,
-          as: "assetDocuments",
+          as: "assetDocuments"
         },
         {
           model: subComponentAsset,
           require: false,
-          as: "subComponentAssets",
+          as: "subComponentAssets"
         },
         {
           model: borrowHasAsset,
@@ -586,9 +591,9 @@ exports.getAssetById = async (req, res, next) => {
           include: [
             {
               model: borrow,
-              as: "TB_BORROW",
-            },
-          ],
+              as: "TB_BORROW"
+            }
+          ]
         },
         {
           model: transferHasAsset,
@@ -597,11 +602,11 @@ exports.getAssetById = async (req, res, next) => {
           include: [
             {
               model: transfer,
-              as: "TB_TRANSFER",
-            },
-          ],
-        },
-      ],
+              as: "TB_TRANSFER"
+            }
+          ]
+        }
+      ]
       // include: [
       //   {
       //     model: assetDocument,
@@ -627,16 +632,16 @@ exports.getSectorForSearch = async (req, res, next) => {
         [Op.and]: [
           { deletedAt: { [Op.eq]: null } },
           { sector: { [Op.ne]: null } },
-          { sector: { [Op.ne]: "" } },
-        ],
+          { sector: { [Op.ne]: "" } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["sector", "sector"],
-        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
+        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"]
       ],
       group: "sector",
-      raw: true,
+      raw: true
     });
     res.json({ sector });
   } catch (err) {
@@ -659,25 +664,25 @@ exports.getByProductSelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
     }
 
@@ -696,27 +701,27 @@ exports.getByProductSelector = async (req, res, next) => {
       where: { [Op.and]: queryAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("*")), "quantity"],
+        [sequelize.fn("COUNT", sequelize.col("*")), "quantity"]
       ],
-      group: "productName",
+      group: "productName"
     });
 
     let packageAssetData = await pkAsset.findAll({
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
-        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"], //
+        [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"] //
       ],
-      group: "productName",
+      group: "productName"
     });
     assetData = assetData.concat(packageAssetData);
     if (assetData.length != 0) {
       for (let i = 0; i < assetData.length; i++) {
         let assetData2 = await asset.findAll({
-          where: { [Op.and]: queryAssetArray },
+          where: { [Op.and]: queryAssetArray }
         });
         let packageAssetData2 = await pkAsset.findAll({
-          where: { [Op.and]: queryPackageAssetArray },
+          where: { [Op.and]: queryPackageAssetArray }
         });
         assetData2 = assetData2.concat(packageAssetData2);
         assetData[i].setDataValue("results", assetData2);
@@ -744,25 +749,25 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
     }
     queryAssetArray.push({ deletedAt: { [Op.eq]: null } });
@@ -780,19 +785,19 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
     console.log(queryAssetArray, "queryAssetArray");
     console.log(queryPackageAssetArray, "queryPackageAssetArray");
     let assetData = await asset.findAll({
-      where: { [Op.and]: queryAssetArray },
+      where: { [Op.and]: queryAssetArray }
     });
     let packageAssetData = await pkAsset.findAll({
-      where: { [Op.and]: queryPackageAssetArray },
+      where: { [Op.and]: queryPackageAssetArray }
     });
 
-    assetData = assetData.map((data) => ({
+    assetData = assetData.map(data => ({
       ...data.dataValues,
-      isPackage: false,
+      isPackage: false
     }));
-    packageAssetData = packageAssetData.map((data) => ({
+    packageAssetData = packageAssetData.map(data => ({
       ...data.dataValues,
-      isPackage: true,
+      isPackage: true
     }));
     assetData = assetData.concat(packageAssetData);
 
@@ -819,25 +824,25 @@ exports.getQuantitySelector = async (req, res, next) => {
     if (assetNumber !== "") {
       queryAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
       queryPackageAssetArray.push({
         assetNumber: {
-          [Op.like]: `%${assetNumber}%`,
-        },
+          [Op.like]: `%${assetNumber}%`
+        }
       });
     }
     if (productName !== "") {
       queryAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
       queryPackageAssetArray.push({
         productName: {
-          [Op.like]: `%${productName}%`,
-        },
+          [Op.like]: `%${productName}%`
+        }
       });
     }
 
@@ -857,17 +862,17 @@ exports.getQuantitySelector = async (req, res, next) => {
     let quantity = 0;
 
     let assetData = await asset.findAll({
-      where: { [Op.and]: queryAssetArray },
+      where: { [Op.and]: queryAssetArray }
     });
     let packageAssetData = await pkAsset.findAll({
-      where: { [Op.and]: queryPackageAssetArray },
+      where: { [Op.and]: queryPackageAssetArray }
     });
     if (assetData.length > 0) {
       // for show how many quantity of this product
       quantity = await asset.count({ where: { [Op.and]: queryAssetArray } });
     } else if (packageAssetData.length > 0) {
       quantity = await pkAsset.count({
-        where: { [Op.and]: queryPackageAssetArray },
+        where: { [Op.and]: queryPackageAssetArray }
       });
     }
 
@@ -966,7 +971,7 @@ exports.updateAsset = async (req, res, next) => {
       room, // note วันที่ย้ายเข้า - ย้ายออก
       name_recorder,
       name_courier,
-      name_approver,
+      name_approver
     } = inputObject;
     let existArrayImageArray = [];
     let existArrayDocumentArray = [];
@@ -1013,8 +1018,8 @@ exports.updateAsset = async (req, res, next) => {
       for (let i = 0; i < quantity; i++) {
         let dataQuery = {
           params: {
-            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
-          },
+            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`
+          }
         };
         const responseCheckAlreadyAsset = await sapAssetMasterService.read(
           dataQuery,
@@ -1035,13 +1040,13 @@ exports.updateAsset = async (req, res, next) => {
           asset01: genDataArray[i].asset01,
           sector: genDataArray[i].sector,
           ...inputObject,
-          reserved: false,
+          reserved: false
         });
         for (let j = 0; j < existArrayImageArray.length; j++) {
           if (i == 0) {
             await assetImage.create({
               image: existArrayImageArray[j].image,
-              assetId: assetCreated.dataValues._id,
+              assetId: assetCreated.dataValues._id
             });
           } else {
             // console.log(existArrayImageArray[j].image);
@@ -1057,7 +1062,7 @@ exports.updateAsset = async (req, res, next) => {
             }
             await assetImage.create({
               image: newImageName,
-              assetId: assetCreated.dataValues._id,
+              assetId: assetCreated.dataValues._id
             });
             // console.log("ImageName", existArrayImageArray[j].image);
             // console.log("newImageName", newImageName);
@@ -1071,7 +1076,7 @@ exports.updateAsset = async (req, res, next) => {
           if (i == 0) {
             await assetDocument.create({
               document: existArrayDocumentArray[j].document,
-              assetId: assetCreated.dataValues._id,
+              assetId: assetCreated.dataValues._id
             });
           } else {
             // console.log(existArrayDocumentArray[j].document);
@@ -1088,7 +1093,7 @@ exports.updateAsset = async (req, res, next) => {
             }
             await assetDocument.create({
               document: newDocumentName,
-              assetId: assetCreated.dataValues._id,
+              assetId: assetCreated.dataValues._id
             });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
             // console.log("newDocumentName", newDocumentName);
@@ -1101,13 +1106,13 @@ exports.updateAsset = async (req, res, next) => {
         for (let j = 0; j < lengthOfBaseImageArray; j++) {
           await assetImage.create({
             image: arrayImage[quantity * j + i].filename,
-            assetId: assetCreated.dataValues._id,
+            assetId: assetCreated.dataValues._id
           });
         }
         for (let j = 0; j < lengthOfBaseDocumentArray; j++) {
           await assetDocument.create({
             document: arrayDocument[quantity * j + i].filename,
-            assetId: assetCreated.dataValues._id,
+            assetId: assetCreated.dataValues._id
           });
         }
 
@@ -1117,7 +1122,7 @@ exports.updateAsset = async (req, res, next) => {
           ItemCode: genDataArray[i].assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
-          AssetClass: AssetClass,
+          AssetClass: AssetClass
         };
         console.log("dataInsertAssetMaster", dataInsertAssetMaster);
         const responseCreateAssetMaster = await sapAssetMasterService.create(
@@ -1139,15 +1144,15 @@ exports.updateAsset = async (req, res, next) => {
               {
                 AssetNumber: genDataArray[i].assetNumber,
                 Quantity: 1,
-                TotalLC: parseInt(price),
-              },
+                TotalLC: parseInt(price)
+              }
             ],
             AssetDocumentAreaJournalCollection: [
               {
                 DepreciationArea: "TFRS",
-                JournalRemarks: "Capitalization-Test",
-              },
-            ],
+                JournalRemarks: "Capitalization-Test"
+              }
+            ]
           };
           console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -1162,12 +1167,12 @@ exports.updateAsset = async (req, res, next) => {
           );
           await asset.update(
             {
-              sapDocEntry: responseCreateCapitalization.data.DocEntry,
+              sapDocEntry: responseCreateCapitalization.data.DocEntry
             },
             {
               where: {
-                _id: assetCreated.dataValues._id,
-              },
+                _id: assetCreated.dataValues._id
+              }
             }
           );
         }
@@ -1181,9 +1186,9 @@ exports.updateAsset = async (req, res, next) => {
             Remarks: "Test Retirement By Postman",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: genDataArray[i].assetNumber,
-              },
-            ],
+                AssetNumber: genDataArray[i].assetNumber
+              }
+            ]
           };
           const responseCreateRetirement = await sapRetirementService.create(
             dataInsertRetirement,
@@ -1194,8 +1199,8 @@ exports.updateAsset = async (req, res, next) => {
             { status: "distributed" },
             {
               where: {
-                _id: assetCreated.dataValues._id,
-              },
+                _id: assetCreated.dataValues._id
+              }
             }
           );
         }
@@ -1226,10 +1231,10 @@ exports.updateAsset = async (req, res, next) => {
     }
 
     const oldImageArray = await assetImage.findAll({
-      where: { assetId: assetId },
+      where: { assetId: assetId }
     });
     const oldDocumentArray = await assetDocument.findAll({
-      where: { assetId: assetId },
+      where: { assetId: assetId }
     });
 
     console.log("oldImageArray", oldImageArray);
@@ -1239,7 +1244,7 @@ exports.updateAsset = async (req, res, next) => {
       for (el of arrayImage) {
         await assetImage.create({
           image: el.filename,
-          assetId: assetId,
+          assetId: assetId
         });
       }
     }
@@ -1248,7 +1253,7 @@ exports.updateAsset = async (req, res, next) => {
       for (el of arrayDocument) {
         await assetDocument.create({
           document: el.filename,
-          assetId: assetId,
+          assetId: assetId
         });
       }
     }
@@ -1257,7 +1262,7 @@ exports.updateAsset = async (req, res, next) => {
     let notExistArrayDocument = [];
 
     function getNotExistImage(existArray, oldImageArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.image + obj._id);
+      const existObjects = existArray.map(obj => obj.image + obj._id);
 
       for (let i = 0; i < oldImageArray.length; i++) {
         if (
@@ -1276,7 +1281,7 @@ exports.updateAsset = async (req, res, next) => {
     );
 
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.document + obj._id);
+      const existObjects = existArray.map(obj => obj.document + obj._id);
 
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
@@ -1307,7 +1312,7 @@ exports.updateAsset = async (req, res, next) => {
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
         await assetDocument.destroy({
-          where: { _id: notExistArrayDocument[i]._id },
+          where: { _id: notExistArrayDocument[i]._id }
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
@@ -1386,7 +1391,7 @@ exports.updateAsset = async (req, res, next) => {
         const subComponentData = genDataArray[i];
         await subComponentAsset.create({
           ...subComponentData,
-          assetId: assetId,
+          assetId: assetId
         });
       }
     }
@@ -1413,15 +1418,15 @@ exports.updateAsset = async (req, res, next) => {
           {
             AssetNumber: assetById.assetNumber,
             Quantity: 1,
-            TotalLC: parseInt(price),
-          },
+            TotalLC: parseInt(price)
+          }
         ],
         AssetDocumentAreaJournalCollection: [
           {
             DepreciationArea: "TFRS",
-            JournalRemarks: "Capitalization-Test",
-          },
-        ],
+            JournalRemarks: "Capitalization-Test"
+          }
+        ]
       };
       console.log("dataInsertCapitalization", dataInsertCapitalization);
 
@@ -1436,12 +1441,12 @@ exports.updateAsset = async (req, res, next) => {
       );
       await asset.update(
         {
-          sapDocEntry: responseCreateCapitalization.data.DocEntry,
+          sapDocEntry: responseCreateCapitalization.data.DocEntry
         },
         {
           where: {
-            _id: assetId,
-          },
+            _id: assetId
+          }
         }
       );
     }
@@ -1461,9 +1466,9 @@ exports.updateAsset = async (req, res, next) => {
         Remarks: "Retirement on Asset Management System",
         AssetDocumentLineCollection: [
           {
-            AssetNumber: assetById.assetNumber,
-          },
-        ],
+            AssetNumber: assetById.assetNumber
+          }
+        ]
       };
       const responseCreateRetirement = await sapRetirementService.create(
         dataInsertRetirement,
@@ -1474,8 +1479,8 @@ exports.updateAsset = async (req, res, next) => {
         { status: "distributed" },
         {
           where: {
-            _id: assetId,
-          },
+            _id: assetId
+          }
         }
       );
     }
@@ -1498,8 +1503,8 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
     const sessionId = responseLogin.data.SessionId;
     let dataQueryCheckAlreadyAsset = {
       params: {
-        $filter: `ItemCode eq '${assetNumber}'`,
-      },
+        $filter: `ItemCode eq '${assetNumber}'`
+      }
     };
     const responseCheckAlreadyAsset = await sapAssetMasterService.read(
       dataQueryCheckAlreadyAsset,
@@ -1521,8 +1526,8 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
           "depreciationStartDate",
           "depreciationRegisterDate",
           "depreciationReceivedDate",
-          "depreciationYearUsed",
-        ],
+          "depreciationYearUsed"
+        ]
       });
       if (assetByAssetNumber === null) {
         const pkAssetByAssetNumber = await pkAsset.findOne({
@@ -1537,8 +1542,8 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
             "depreciationStartDate",
             "depreciationRegisterDate",
             "depreciationReceivedDate",
-            "depreciationYearUsed",
-          ],
+            "depreciationYearUsed"
+          ]
         });
 
         if (pkAssetByAssetNumber === null) {
@@ -1562,19 +1567,19 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
         dataQuery = {
           params: {
             periodCat: `'${parseInt(AssetValuedate.getFullYear() + (i + 1))}'`,
-            itemCode: `'${assetNumber}'`,
-          },
+            itemCode: `'${assetNumber}'`
+          }
         };
         const responsegetDepreciation =
           await sapFixedAssetDepreciation.sqlQuery(dataQuery, sessionId);
         dataDepreciationValueArray = [
           ...dataDepreciationValueArray,
-          ...responsegetDepreciation.data.value,
+          ...responsegetDepreciation.data.value
         ];
       }
     } else {
       dataQuery = {
-        params: { periodCat: `'${year}'`, itemCode: `'${assetNumber}'` },
+        params: { periodCat: `'${year}'`, itemCode: `'${assetNumber}'` }
       };
       const responsegetDepreciation = await sapFixedAssetDepreciation.sqlQuery(
         dataQuery,
@@ -1618,7 +1623,7 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
       depreciationCumulativePrice,
       depreciationYearPrice,
 
-      depreciationBookValue,
+      depreciationBookValue
     });
   } catch (err) {
     next(err);
@@ -1631,7 +1636,7 @@ exports.getAllAssetForRepairDropdown = async (req, res, next) => {
     "withdrawn",
     "borrowed",
     "transfered",
-    "broken",
+    "broken"
   ];
   const currentDate = new Date();
 
@@ -1645,13 +1650,13 @@ exports.getAllAssetForRepairDropdown = async (req, res, next) => {
         "insuranceExpiredDate",
         "sector",
         "productName",
-        "asset01",
-      ],
+        "asset01"
+      ]
     });
 
     const packageAssets = await pkAsset.findAll({
       where: {
-        status: { [Op.in]: queryStatus },
+        status: { [Op.in]: queryStatus }
       },
       attributes: [
         "assetNumber",
@@ -1660,14 +1665,14 @@ exports.getAllAssetForRepairDropdown = async (req, res, next) => {
         "insuranceExpiredDate",
         "sector",
         "productName",
-        "asset01",
-      ],
+        "asset01"
+      ]
     });
 
     assets = assets.concat(packageAssets);
 
     // Process each asset
-    const processedAssets = assets.map((asset) => {
+    const processedAssets = assets.map(asset => {
       // Check if the current date is within the insurance dates
       const isInsurance =
         currentDate >= asset.insuranceStartDate &&
@@ -1690,14 +1695,14 @@ exports.getAssetNumberByDropdowmSearch = async (req, res, next) => {
       where: {
         assetNumber: { [Op.like]: `${textSearch}%` },
         deletedAt: { [Op.eq]: null },
-        distributeStatus: { [Op.eq]: false },
+        distributeStatus: { [Op.eq]: false }
       },
-      attributes: ["_id", "assetNumber"],
+      attributes: ["_id", "assetNumber"]
     });
 
     let pkAssetData = await pkAsset.findAll({
       where: { assetNumber: { [Op.like]: `${textSearch}%` } },
-      attributes: ["_id", "assetNumber"],
+      attributes: ["_id", "assetNumber"]
     });
     assetData = assetData.concat(pkAssetData);
     assetData.sort((a, b) => {
@@ -1736,19 +1741,19 @@ exports.getRunningAssetNumber = async (req, res, next) => {
     let countAsset = await asset.count({
       where: {
         assetNumber: {
-          [Op.and]: [{ [Op.notLike]: `%)` }, { [Op.like]: `${assetNumber}/%` }],
-        },
-      },
+          [Op.and]: [{ [Op.notLike]: `%)` }, { [Op.like]: `${assetNumber}/%` }]
+        }
+      }
     });
     let countPkAsset = await pkAsset.count({
-      where: { assetNumber: { [Op.like]: `${assetNumber}/%` } },
+      where: { assetNumber: { [Op.like]: `${assetNumber}/%` } }
     });
 
     let count = countAsset + countPkAsset;
     count++;
 
     res.json({
-      assetNumber: `${count.toString().padStart(4, "0")}`,
+      assetNumber: `${count.toString().padStart(4, "0")}`
     });
   } catch (err) {
     next(err);

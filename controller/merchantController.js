@@ -5,11 +5,11 @@ const {
   merchant,
   merchantAddress,
   merchantRelation,
-  merchantDocumentArray,
+  merchantDocumentArray
 } = require("../models");
 
 function delete_file(path) {
-  fs.unlink(path, (err) => {
+  fs.unlink(path, err => {
     if (err) throw err;
     console.log(path + " was deleted");
   });
@@ -21,18 +21,18 @@ exports.getAllMerchant = async (req, res, next) => {
       include: [
         {
           model: merchantAddress,
-          as: "merchantAddress",
+          as: "merchantAddress"
         },
         {
           model: merchantRelation,
-          as: "merchantRelation",
+          as: "merchantRelation"
         },
         {
           model: merchantDocumentArray,
-          as: "merchantDocumentArray",
-        },
+          as: "merchantDocumentArray"
+        }
       ],
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
 
     res.status(200).json({ merchantData });
@@ -70,19 +70,19 @@ exports.getBySearch = async (req, res, next) => {
       include: [
         {
           model: merchantAddress,
-          as: "merchantAddress",
+          as: "merchantAddress"
         },
         {
           model: merchantRelation,
-          as: "merchantRelation",
+          as: "merchantRelation"
         },
         {
           model: merchantDocumentArray,
-          as: "merchantDocumentArray",
-        },
+          as: "merchantDocumentArray"
+        }
       ],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     const merchants = merchantData.rows;
@@ -123,19 +123,19 @@ exports.getBySearchViewOnly = async (req, res, next) => {
       include: [
         {
           model: merchantAddress,
-          as: "merchantAddress",
+          as: "merchantAddress"
         },
         {
           model: merchantRelation,
-          as: "merchantRelation",
+          as: "merchantRelation"
         },
         {
           model: merchantDocumentArray,
-          as: "merchantDocumentArray",
-        },
+          as: "merchantDocumentArray"
+        }
       ],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     const merchants = merchantData.rows;
@@ -152,10 +152,10 @@ exports.getMerchantDropdown = async (req, res, next) => {
     const merchants = await merchant.findAll({
       where: {
         status: { [Op.ne]: "saveDraft" },
-        deletedAt: { [Op.eq]: null },
+        deletedAt: { [Op.eq]: null }
       },
       attributes: ["_id", "realMerchantId", "companyName", "name"],
-      order: [["realMerchantId", "DESC"]],
+      order: [["realMerchantId", "DESC"]]
     });
     res.status(200).json({ merchant: merchants });
   } catch (err) {
@@ -173,17 +173,17 @@ exports.getMerchantById = async (req, res, next) => {
       include: [
         {
           model: merchantAddress,
-          as: "merchantAddress",
+          as: "merchantAddress"
         },
         {
           model: merchantRelation,
-          as: "merchantRelation",
+          as: "merchantRelation"
         },
         {
           model: merchantDocumentArray,
-          as: "merchantDocumentArray",
-        },
-      ],
+          as: "merchantDocumentArray"
+        }
+      ]
     });
     if (merchantData == 0) {
       return res.status(404).json({ message: "This merchant not found" });
@@ -198,20 +198,27 @@ exports.createMerchant = async (req, res, next) => {
   try {
     let { input, merchantAddressData, merchantRelationData } = req.body;
 
+    console.log("------------------------------------------------");
+    console.log("input:", input);
+    console.log("merchantAddressData:", merchantAddressData);
+    console.log("merchantRelationData:", merchantRelationData);
+    console.log(" req?.files?.arrayDocument:", req?.files?.arrayDocument);
+    console.log("------------------------------------------------");
+
     const inputData = JSON.parse(input);
     const arrayDocument = req?.files?.arrayDocument || [];
     const merchantAddressArray = JSON.parse(merchantAddressData);
     const merchantRelationArray = JSON.parse(merchantRelationData);
 
-    // console.log("------------------------------------------------");
-    // console.log("inputData:", inputData);
-    // console.log("------------------------------------------------");
-    // console.log("arrayDocument:", arrayDocument);
-    // console.log("------------------------------------------------");
-    // console.log("merchantAddressArray:", merchantAddressArray);
-    // console.log("------------------------------------------------");
-    // console.log("merchantRelationArray:", merchantRelationArray);
-    // console.log("------------------------------------------------");
+    console.log("------------------------------------------------");
+    console.log("inputData:", inputData);
+    console.log("------------------------------------------------");
+    console.log("arrayDocument:", arrayDocument);
+    console.log("------------------------------------------------");
+    console.log("merchantAddressArray:", merchantAddressArray);
+    console.log("------------------------------------------------");
+    console.log("merchantRelationArray:", merchantRelationArray);
+    console.log("------------------------------------------------");
 
     let {
       // ข้อมูลผู้ค้า
@@ -239,11 +246,11 @@ exports.createMerchant = async (req, res, next) => {
       // กลุ่มประเภท
       creditorCategory, // เจ้าหนี้
 
-      status,
+      status
     } = inputData;
 
     const checkCompanyNameDup = await merchant.findOne({
-      where: { companyName: companyName },
+      where: { companyName: companyName }
     });
     console.log("checkCompanyNameDup:", checkCompanyNameDup);
 
@@ -265,7 +272,7 @@ exports.createMerchant = async (req, res, next) => {
         taxpayerNumber,
         idCardNumber,
         creditorCategory,
-        status,
+        status
       });
       //   console.log("merchantData:", merchantData);
 
@@ -276,7 +283,7 @@ exports.createMerchant = async (req, res, next) => {
         for (el of arrayDocument) {
           await merchantDocumentArray.create({
             document: el.filename,
-            merchantId,
+            merchantId
           });
         }
       }
@@ -284,14 +291,14 @@ exports.createMerchant = async (req, res, next) => {
       for (const address of merchantAddressArray) {
         await merchantAddress.create({
           ...address,
-          merchantId,
+          merchantId
         });
       }
 
       for (const relation of merchantRelationArray) {
         await merchantRelation.create({
           ...relation,
-          merchantId,
+          merchantId
         });
       }
 
@@ -311,8 +318,14 @@ exports.updateMerchant = async (req, res, next) => {
       input,
       merchantAddressData,
       merchantRelationData,
-      existArrayDocument,
+      existArrayDocument
     } = req.body;
+
+    console.log("input:", input);
+    console.log("merchantAddressData:", merchantAddressData);
+    console.log("merchantRelationData:", merchantRelationData);
+    console.log("existArrayDocument:", existArrayDocument);
+
     const merchantAddressArray = JSON.parse(merchantAddressData);
     const merchantRelationArray = JSON.parse(merchantRelationData);
     const inputObject = JSON.parse(input);
@@ -352,11 +365,11 @@ exports.updateMerchant = async (req, res, next) => {
       taxpayerNumber,
       idCardNumber,
       creditorCategory,
-      status,
+      status
     } = inputObject;
 
     const merchantInfo = await merchantDocumentArray.findAll({
-      where: { merchantId: merchantId },
+      where: { merchantId: merchantId }
     });
     // console.log("merchantInfo:", merchantInfo);
 
@@ -368,7 +381,7 @@ exports.updateMerchant = async (req, res, next) => {
       for (el of arrayDocument) {
         await merchantDocumentArray.create({
           document: el.filename,
-          merchantId: merchantId,
+          merchantId: merchantId
         });
       }
     }
@@ -376,7 +389,7 @@ exports.updateMerchant = async (req, res, next) => {
 
     let notExistArrayDocument = [];
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.document + obj._id);
+      const existObjects = existArray.map(obj => obj.document + obj._id);
       // console.log("existObjects:", existObjects);
       // console.log("oldDocumentArray----:", oldDocumentArray);
       for (let i = 0; i < oldDocumentArray.length; i++) {
@@ -408,8 +421,8 @@ exports.updateMerchant = async (req, res, next) => {
         await merchantDocumentArray.destroy({
           where: {
             _id: notExistArrayDocument[i]._id,
-            merchantId: merchantId,
-          },
+            merchantId: merchantId
+          }
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
@@ -417,23 +430,27 @@ exports.updateMerchant = async (req, res, next) => {
 
     await merchant.update(
       {
-        ...inputObject,
+        ...inputObject
       },
       {
-        where: { _id: merchantId },
+        where: { _id: merchantId }
       }
     );
     const oldMerchantAddress = await merchantAddress.findAll({
-      where: { merchantId: merchantId },
+      where: { merchantId: merchantId }
     });
+    console.log("oldMerchantAddress:", oldMerchantAddress);
+
     const oldMerchantRelation = await merchantRelation.findAll({
-      where: { merchantId: merchantId },
+      where: { merchantId: merchantId }
     });
+    console.log("oldMerchantRelation:", oldMerchantRelation);
+
     let notExistArrayMerchantAddress = [];
     let notExistArrayMerchantRelation = [];
 
     function getNotExist(existArray, oldDataArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj._id);
+      const existObjects = existArray.map(obj => obj._id);
 
       for (let i = 0; i < oldDataArray.length; i++) {
         if (!existObjects.includes(oldDataArray[i]._id)) {
@@ -465,8 +482,8 @@ exports.updateMerchant = async (req, res, next) => {
       for (let i = 0; i < notExistArrayMerchantAddress.length; i++) {
         await merchantAddress.destroy({
           where: {
-            _id: notExistArrayMerchantAddress[i]._id,
-          },
+            _id: notExistArrayMerchantAddress[i]._id
+          }
         });
       }
     }
@@ -474,14 +491,15 @@ exports.updateMerchant = async (req, res, next) => {
       for (let i = 0; i < notExistArrayMerchantRelation.length; i++) {
         await merchantRelation.destroy({
           where: {
-            _id: notExistArrayMerchantRelation[i]._id,
-          },
+            _id: notExistArrayMerchantRelation[i]._id
+          }
         });
       }
     }
     // console.log("merchantAddressArray", merchantAddressArray);
 
     for (let i = 0; i < merchantAddressArray.length; i++) {
+      console.log("merchantAddressArray---", merchantAddressArray);
       const merchantAddressInfo = await merchantAddress.findByPk(
         merchantAddressArray[i]._id
       );
@@ -497,7 +515,7 @@ exports.updateMerchant = async (req, res, next) => {
           district: merchantAddressArray[i].district,
           subDistrict: merchantAddressArray[i].subDistrict,
           postalCode: merchantAddressArray[i].postalCode,
-          merchantId: merchantId,
+          merchantId: merchantId
         });
       } else {
         await merchantAddress.update(
@@ -510,7 +528,7 @@ exports.updateMerchant = async (req, res, next) => {
             province: merchantAddressArray[i].province,
             district: merchantAddressArray[i].district,
             subDistrict: merchantAddressArray[i].subDistrict,
-            postalCode: merchantAddressArray[i].postalCode,
+            postalCode: merchantAddressArray[i].postalCode
           },
           { where: { _id: merchantAddressArray[i]._id } }
         );
@@ -524,13 +542,13 @@ exports.updateMerchant = async (req, res, next) => {
         await merchantRelation.create({
           companyCategory: merchantRelationArray[i].companyCategory,
           remark: merchantRelationArray[i].remark,
-          merchantId: merchantId,
+          merchantId: merchantId
         });
       } else {
         await merchantRelation.update(
           {
             companyCategory: merchantRelationArray[i].companyCategory,
-            remark: merchantRelationArray[i].remark,
+            remark: merchantRelationArray[i].remark
           },
           { where: { _id: merchantRelationArray[i]._id } }
         );
@@ -538,7 +556,7 @@ exports.updateMerchant = async (req, res, next) => {
     }
 
     res.status(200).json({
-      message: "update merchant successfully",
+      message: "update merchant successfully"
     });
   } catch (err) {
     next(err);
@@ -576,9 +594,9 @@ exports.deleteAll = async (req, res, next) => {
     const merchantDate = await merchant.destroy({
       where: {
         name: {
-          [Op.ne]: null,
-        },
-      },
+          [Op.ne]: null
+        }
+      }
     });
 
     res.status(200).json({ merchantDate });
