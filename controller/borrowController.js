@@ -420,7 +420,7 @@ exports.updateBorrow = async (req, res, next) => {
     } = inputObject;
     let deleteAssetArrayObject;
 
-    // console.log("inputObject", inputObject);
+    console.log("inputObject", inputObject);
     // console.log(
     //   "saveAssetWithdrawTableArrayObject",
     //   saveAssetWithdrawTableArrayObject
@@ -1189,6 +1189,11 @@ exports.getBorrowById = async (req, res, next) => {
       where: { _id: borrowId },
       include: [
         {
+          model: SubComponentBorrow,
+          as: "subComponentBorrows",
+          require: false,
+        },
+        {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
           require: false,
@@ -1198,11 +1203,11 @@ exports.getBorrowById = async (req, res, next) => {
               include: [
                 {
                   model: assetImage,
-                  as: "assetImages"
-                }
-              ]
-            }
-          ]
+                  as: "assetImages",
+                },
+              ],
+            },
+          ],
         },
         {
           model: BorrowHasPkAsset,
@@ -1213,69 +1218,49 @@ exports.getBorrowById = async (req, res, next) => {
               include: [
                 {
                   model: pkAssetImage,
-                  as: "packageAssetImages"
-                }
-              ]
-            }
+                  as: "packageAssetImages",
+                },
+              ],
+            },
           ],
-          as: "borrowHasPkAssets"
+          as: "borrowHasPkAssets",
         },
         {
           model: BorrowImage,
           require: false,
 
-          as: "borrowImages"
-        }
-      ]
+          as: "borrowImages",
+        },
+      ],
     });
-    // const borrow = await Borrow.aggregate([
-    //   { $match: { _id: ObjectID(borrowId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       let: { assetIds: "$assetIdArray.assetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $in: ["$_id", "$$assetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "assets",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "packageassets",
-    //       let: { packageAssetIds: "$packageAssetIdArray.packageAssetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $in: ["$_id", "$$packageAssetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "packageAssets",
-    //     },
-    //   },
-    // ]);
 
+    if (borrow == null) {
+      return res.status(404).json({ message: "this borrow not found" });
+    }
+
+    if (borrow && borrow.subComponentBorrows) {
+      const subComponentBorrows = borrow.subComponentBorrows;
+      for (const subComponentBorrow of subComponentBorrows) {
+        if (subComponentBorrow.isPackage == false) {
+          const assets = await Asset.findOne({
+            where: { assetNumber: subComponentBorrow.assetNumber },
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+          });
+          subComponentBorrow.setDataValue("assets", assets);
+        }else{
+          const assets = await PackageAsset.findOne({
+            where: { assetNumber: subComponentBorrow.assetNumber },
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+          });
+          subComponentBorrow.setDataValue("assets", assets);
+        }
+      }
+    }
     res.json({ borrow: borrow });
   } catch (err) {
     next(err);
   }
 };
-
 // For BorrowApprove page
 exports.getAllSectorFromBorrow = async (req, res, next) => {
   try {
@@ -1324,15 +1309,25 @@ exports.getAllFirstFetchBorrowApprove = async (req, res, next) => {
 exports.approveAllWaitingBorrow = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
-    console.log(topApproveList);
+    // console.log("req.body:",req.body)
+    // console.log("topApproveList:",topApproveList);
     // convert JSON to object
-    const topApproveListObject = JSON.parse(topApproveList);
+    // const topApproveListObject = JSON.parse(topApproveList);
+    const topApproveListObject = topApproveList;
+
+    console.log("topApproveListObject:",topApproveListObject)
 
     for (let i = 0; i < topApproveListObject.length; i++) {
       if (topApproveListObject[i].checked) {
         let borrowId = topApproveListObject[i]._id;
         let assetIdArray = topApproveListObject[i].assetIdArray;
         let packageAssetIdArray = topApproveListObject[i].packageAssetIdArray;
+
+        // let assetIdArray = topApproveListObject[i].borrowHasAssets;
+        // let packageAssetIdArray = topApproveListObject[i].borrowHasPkAssets;
+
+        console.log("assetIdArray:",assetIdArray)
+        console.log("packageAssetIdArray:",packageAssetIdArray)
 
         await Borrow.update(
           { status: "approve", dateTime_approver: new Date() },
@@ -1410,7 +1405,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
     console.log("topApproveList:", topApproveList);
-
+    // const topApproveListObject = topApproveList;
     // convert JSON to object
     const topApproveListObject = JSON.parse(topApproveList);
     console.log("topApproveListObject:", topApproveListObject);
@@ -1426,7 +1421,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
           {
             status: "reject",
             dateTime_approver: new Date(),
-            reason: topApproveListObject[i].reason
+            reason: topApproveListObject[i].reason,
             // assetIdArray,
             // packageAssetIdArray,
           },
@@ -1436,7 +1431,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
           await BorrowHasAsset.update(
             {
               reason: assetIdArray[i].reason,
-              return: assetIdArray[i].return
+              return: assetIdArray[i].return,
             },
             { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
           );
@@ -1445,13 +1440,13 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
           await BorrowHasPkAsset.update(
             {
               reason: packageAssetIdArray[i].reason,
-              return: packageAssetIdArray[i].return
+              return: packageAssetIdArray[i].return,
             },
             {
               where: {
                 packageAssetId: packageAssetIdArray[i].packageAssetId,
-                borrowId: borrowId
-              }
+                borrowId: borrowId,
+              },
             }
           );
         }
@@ -1477,8 +1472,8 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
 
             // console.log("/n/n");
             // console.log("packageAsset", packageAsset);
-            let assetArray = await Asset.fineOne({
-              where: { packageAssetId: packageAssetId }
+            let assetArray = await Asset.findOne({
+              where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
               let assetId = assetArray[l]._id;
@@ -2651,13 +2646,21 @@ exports.getBorrowCheckById = async (req, res, next) => {
           where: { reason: "" },
           require: false
         },
-        {
+ {
           model: BorrowHasPkAsset,
           as: "borrowHasPkAssets",
           where: { reason: "" },
 
-          require: false
-        }
+   
+
+          require: false,
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2683,8 +2686,15 @@ exports.getBorrowCheckById = async (req, res, next) => {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
           where: { reason: "" },
-          require: false
-        }
+          require: false,
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
+
       ];
       matchedAssets = await Asset.findAll({
         include: [
@@ -2702,8 +2712,15 @@ exports.getBorrowCheckById = async (req, res, next) => {
           as: "borrowHasPkAssets",
           where: { reason: "" },
 
-          require: false
-        }
+          require: false,
+        },
+        {
+          model: BorrowImage,
+          require: false,
+
+          as: "borrowImages",
+        },
+
       ];
       matchedPackageAssets = await PackageAsset.findAll({
         include: [
@@ -2835,8 +2852,8 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     // }
 
     // console.log("borrowId", borrowId);
-    // console.log("assetIdArray", assetIdArray);
-    // console.log("packageAssetIdArray", packageAssetIdArray);
+    console.log("assetIdArray", assetIdArray);
+    console.log("packageAssetIdArray", packageAssetIdArray);
 
     // for check all checked is true
     // const assetIdArrayReturn = assetIdArray.every(
@@ -2970,45 +2987,47 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
     const packageAssetIdArrayReturn = packageAssetIdArray.every(
       asset => asset.return === "done"
     );
-
+    
     // console.log("assetIdArrayReturn", assetIdArrayReturn);
     // console.log("packageAssetIdArrayReturn", packageAssetIdArrayReturn);
-
+    
     if (assetIdArrayReturn && packageAssetIdArrayReturn) {
       // console.log(111111);
-
+      
       const assetDates = inputObject.assetIdArray.map(
         asset => new Date(asset.returnDate)
-      );
-      const packageDates = inputObject.packageAssetIdArray.map(
-        packageAsset => new Date(packageAsset.returnDate)
-      );
-      const allDates = assetDates.concat(packageDates);
-      const maxDate = new Date(Math.max.apply(null, allDates));
-
-      // console.log(maxDate);
-
-      // return all
-      await Borrow.update(
-        {
-          status: "done",
-          borrowReturnDate: new Date(maxDate)
-          // assetIdArray,
-          // packageAssetIdArray,
-        },
-        { where: { _id: borrowId } }
-      );
-      // update borrow has asset
-      for (let i = 0; i < assetIdArray.length; i++) {
-        const updateBorrowHasAsset = await BorrowHasAsset.update(
-          {
-            reason: assetIdArray[i].reason,
-            return: assetIdArray[i].return,
-            returnDate: assetIdArray[i].returnDate
-          },
-          { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
         );
-      }
+        const packageDates = inputObject.packageAssetIdArray.map(
+          packageAsset => new Date(packageAsset.returnDate)
+          );
+          const allDates = assetDates.concat(packageDates);
+          const maxDate = new Date(Math.max.apply(null, allDates));
+          
+          // console.log(maxDate);
+          
+          // return all
+          await Borrow.update(
+            {
+              status: "done",
+              borrowReturnDate: new Date(maxDate)
+              // assetIdArray,
+              // packageAssetIdArray,
+            },
+            { where: { _id: borrowId } }
+            );
+            // update borrow has asset
+            console.log("111111")
+            for (let i = 0; i < assetIdArray.length; i++) {
+              console.log("assetIdArray--",assetIdArray)
+              const updateBorrowHasAsset = await BorrowHasAsset.update(
+                {
+                  reason: assetIdArray[i].reason,
+                  return: assetIdArray[i].return,
+                  returnDate: assetIdArray[i].returnDate
+                },
+                { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
+                );
+              }
       // update borrow has pkAsset
       for (let i = 0; i < packageAssetIdArray.length; i++) {
         const updateBorrowHasPackageAsset = await BorrowHasPkAsset.update(

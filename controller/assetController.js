@@ -31,6 +31,14 @@ function delete_file(path) {
   });
 }
 
+
+function duplicate_file(pathRead, pathWrite) {
+  var inStr = fs.createReadStream(pathRead);
+  var outStr = fs.createWriteStream(pathWrite);
+
+  inStr.pipe(outStr);
+}
+
 exports.createAsset = async (req, res, next) => {
   // เหลือ create transfer
 
@@ -192,8 +200,11 @@ exports.createAsset = async (req, res, next) => {
         });
       }
     } else {
+      console.log("type : ", type);
       const getAssetClass = await Type.findOne({ name: type });
       let AssetClass;
+      console.log("getAssetClass : ", getAssetClass);
+
       if (getAssetClass == null) {
         AssetClass = "1206160101.101";
       } else {
@@ -1780,10 +1791,33 @@ exports.getRunningAssetNumber = async (req, res, next) => {
 
     let count = countAsset + countPkAsset;
     count++;
+
     res.json({
-      assetNumber: `${assetNumber}/${count.toString().padStart(4, "0")}`,
+      assetNumber: `${count.toString().padStart(4, "0")}`,
     });
   } catch (err) {
     next(err);
   }
 };
+
+// let runningAssetNumber;
+// const responseLogin = await sapAuthService.login();
+// const sessionId = responseLogin.data.SessionId;
+// for (let i = 0; i < 1; i++) {
+//   runningAssetNumber = `${assetNumber}/${count
+//     .toString()
+//     .padStart(4, "0")}`;
+//   let dataQuery = {
+//     params: {
+//       $filter: `ItemCode eq '${runningAssetNumber}'`,
+//     },
+//   };
+//   const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+//     dataQuery,
+//     sessionId
+//   );
+//   if (responseCheckAlreadyAsset.data.value.length > 0) {
+//     count++;
+//     i--;
+//   }
+// }
