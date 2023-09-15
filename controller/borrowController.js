@@ -1244,13 +1244,25 @@ exports.getBorrowById = async (req, res, next) => {
         if (subComponentBorrow.isPackage == false) {
           const assets = await Asset.findOne({
             where: { assetNumber: subComponentBorrow.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit"]
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+            include: [
+              {
+                model: assetImage,
+                as: "assetImages"
+              }
+            ]
           });
           subComponentBorrow.setDataValue("assets", assets);
         } else {
           const assets = await PackageAsset.findOne({
             where: { assetNumber: subComponentBorrow.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit"]
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+            include: [
+              {
+                model: pkAssetImage,
+                as: "packageAssetImages"
+              }
+            ]
           });
           subComponentBorrow.setDataValue("assets", assets);
         }
