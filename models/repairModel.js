@@ -344,6 +344,11 @@ module.exports = (sequelize, Sequelize) => {
       //     key: "_id",
       //   },
       // },
+      problemDetail: {
+        type: Sequelize.STRING(1000),
+        allowNull: true,
+        field: "problemDetail",
+      },
     },
     {
       tableName: "TB_REPAIRS",

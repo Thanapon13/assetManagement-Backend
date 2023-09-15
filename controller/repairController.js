@@ -71,7 +71,7 @@ exports.createRepair = async (req, res, next) => {
     });
     console.log("asset:", asset);
 
-    const packageAssetArray = await PackageAsset.findAll({
+    const packageAssetArray = await PackageAsset.findOne({
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
       include: [
@@ -508,7 +508,7 @@ exports.deleteRepair = async (req, res, next) => {
         // for (let i = 0; i < transfer.packageAssetIdArray.length; i++) {
         let packageAssetId = repair.packageAssetId;
         // console.log(packageAssetId)
-        let packageAsset = await PackageAsset.findAll({
+        let packageAsset = await PackageAsset.findOne({
           where: { _id: packageAssetId },
           include: [{ model: Asset, as: "assets", attributes: ["_id"] }],
         });
@@ -534,7 +534,7 @@ exports.deleteRepair = async (req, res, next) => {
         );
         console.log("findForUpdatePackageAsset", findForUpdatePackageAsset);
 
-        let assetInPackageArray = packageAsset[0].asset;
+        let assetInPackageArray = packageAsset.assets;
         // console.log("assetInPackageArray",i)
         // console.log(assetInPackageArray)
         if (assetInPackageArray.length > 0) {
@@ -1014,8 +1014,12 @@ exports.recordRepairDetail = async (req, res, next) => {
   try {
     const repairId = req.params.repairId;
     let { input, status, informRepairManArray, costOfRepairArray } = req.body;
+    console.log("input00",input);
 
     let { repairMan, workDate, arriveAtPlaceDate, repairedDate } = input;
+
+console.log("input--",input)
+    
     const oldCostOfRepairMan = await CostOfRepairMan.findAll({
       where: { repairId: repairId },
     });
@@ -1296,6 +1300,9 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
 exports.rejectAllWaitingRepair = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
+    
+    console.log("topApproveList:",topApproveList)
+   
 
     for (let i = 0; i < topApproveList.length; i++) {
       if (topApproveList[i].checked == true) {
@@ -1319,7 +1326,6 @@ exports.rejectAllWaitingRepair = async (req, res, next) => {
             { where: { _id: assetId } }
           );
         }
-
         if (packageAssetId) {
           // console.log("packageAssetId", packageAssetId);
           let packageAsset = await PackageAsset.update(
@@ -1584,8 +1590,9 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
     let assetInfo = {};
     if (asset.length > 0) {
       assetInfo = asset[0];
-      const historyOfasset = await Asset.findAll({
+      let historyOfasset = await Asset.findOne({
         where: { _id: assetInfo._id },
+
         include: [
           {
             model: Repair,
@@ -1601,17 +1608,31 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
                 require: false,
                 model: CostOfRepairMan,
                 as: "informRepairManArray",
-                attributes: [
-                  [
-                    sequelize.fn("SUM", sequelize.col("totalEarn")),
-                    "totalPrice",
-                  ],
-                ],
               },
             ],
           },
         ],
       });
+
+console.log("historyOfasset--",historyOfasset.repairAssetId)
+
+      for (const repairAssetId of historyOfasset.repairAssetId) {
+        let costTotalOfRepairArray = 0;
+        for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
+          costTotalOfRepairArray =
+            costTotalOfRepairArray +
+            costOfRepairArray.quantity * costOfRepairArray.pricePerPiece;
+        }
+        let costTotalOfRepairManArray = 0;
+        for (const informRepairManArray of repairAssetId.informRepairManArray) {
+          costTotalOfRepairManArray =
+            costTotalOfRepairManArray +
+            informRepairManArray.totalEarn +
+            informRepairManArray.amountExtra;
+        }
+        let total = costTotalOfRepairArray + costTotalOfRepairManArray;
+        repairAssetId.setDataValue("total", total);
+      }
 
       return res.json({ historyOfasset });
     } else if (packageAsset) {
@@ -1630,37 +1651,33 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
                 require: false,
                 model: CostOfRepair,
                 as: "costOfRepairArray",
-                // attributes: ["_id"],
               },
               {
                 require: false,
                 model: CostOfRepairMan,
                 as: "informRepairManArray",
-                // attributes: [
-                //   "_id",
-                //   [
-                //     sequelize.fn("SUM", sequelize.col("totalEarn")),
-                //     "totalEarn",
-                //   ],
-                // ],
               },
             ],
           },
         ],
-        // group: [
-        //   "TB_PACKAGE_ASSETS._id",
-        //   "repairPackageAssetId._id",
-        //   "repairPackageAssetId.costOfRepairArray._id",
-        //   "repairPackageAssetId.informRepairManArray._id",
-        // ],
       });
-
-      // const test = await CostOfRepairMan.findAll({
-      //   where: { repairId: 1 },
-      //   attributes: [
-      //     [sequelize.fn("SUM", sequelize.col("totalEarn")), "totalEarn"],
-      //   ],
-      // });
+      for (const repairAssetId of historyOfasset.repairPackageAssetId) {
+        let costTotalOfRepairArray = 0;
+        for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
+          costTotalOfRepairArray =
+            costTotalOfRepairArray +
+            costOfRepairArray.quantity * costOfRepairArray.pricePerPiece;
+        }
+        let costTotalOfRepairManArray = 0;
+        for (const informRepairManArray of repairAssetId.informRepairManArray) {
+          costTotalOfRepairManArray =
+            costTotalOfRepairManArray +
+            informRepairManArray.totalEarn +
+            informRepairManArray.amountExtra;
+        }
+        let total = costTotalOfRepairArray + costTotalOfRepairManArray;
+        repairPackageAssetId.setDataValue("total", total);
+      }
 
       return res.json({ historyOfasset });
     }
@@ -1732,6 +1749,11 @@ exports.outSourceRepairRecord = async (req, res, next) => {
     const repairId = req.params.repairId;
     const { input, status, costOfRepairArray, existArrayDocument } = req.body;
     const arrayDocument = req?.files?.arrayDocument || [];
+
+    console.log("existArrayDocument : ", existArrayDocument);
+    console.log("arrayDocument : ", arrayDocument);
+
+
     let existArrayDocumentArray = [];
     let costOfRepairArrayObject = [];
     existArrayDocumentArray = JSON.parse(existArrayDocument);
@@ -1777,8 +1799,14 @@ exports.outSourceRepairRecord = async (req, res, next) => {
       checkJobWarrantyPeriod,
       purchaseAmount,
     } = inputObject;
-    console.log("inputObject", inputObject);
+
+    console.log("-----------------------------------")
+    console.log("inputObject:", inputObject);
     console.log("status : ", status);
+    console.log("costOfRepairArrayObject : ", costOfRepairArrayObject);
+    console.log("-----------------------------------")
+    
+
     let queryInsert = {};
     queryInsert["statusOfDetailRecord"] = status;
     if (status == "waitingApproval") {

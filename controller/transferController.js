@@ -6,7 +6,8 @@ const {
   asset,
   transferHasAsset,
   transferHasPkAsset,
-  assetImage
+  assetImage,
+  pkAssetImage
 } = require("../models");
 const moment = require("moment/moment");
 
@@ -1126,6 +1127,7 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
   }
 };
 
+
 exports.approveAllWaitingTransfer = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
@@ -1134,9 +1136,9 @@ exports.approveAllWaitingTransfer = async (req, res, next) => {
     for (let i = 0; i < topApproveList.length; i++) {
       if (topApproveList[i].checked) {
         let transferId = topApproveList[i]._id;
-        let assetIdArray = topApproveList[i].transferHasAssets;
-        let packageAssetIdArray = topApproveList[i].transferHasPkAssets;
-
+        let assetIdArray = topApproveList[i].assetIdArray;
+        let packageAssetIdArray = topApproveList[i].packageAssetIdArray;
+        
         console.log("transferId:", transferId);
         console.log("assetIdArray:", assetIdArray);
         console.log("packageAssetIdArray:", packageAssetIdArray);
@@ -2056,6 +2058,73 @@ exports.getTransferHistorySector = async (req, res, next) => {
   }
 };
 
+// exports.getTransferById = async (req, res, next) => {
+//   try {
+//     const transferId = req.params.transferId;
+//     console.log("transferId:", transferId);
+
+//     const transferById = await transfer.findOne({
+//       where: { _id: transferId },
+//       include: [
+//         {
+//           model: transferHasAsset,
+//           as: "transferHasAssets",
+//           include: [
+//             {
+//               model: asset,
+//               as: "TB_ASSET",
+//               where: { deletedAt: null },
+//               attributes: [
+//                 "_id",
+//                 "assetNumber",
+//                 "productName",
+//                 "serialNumber",
+//                 "sector"
+//                 // "imageArray"
+//               ],
+//               include: [
+//                 {
+//                   model: assetImage,
+//                   as: "assetImages",
+//                   attributes: ["image"]
+//                 }
+//               ]
+//             }
+//           ]
+//         },
+//         {
+//           model: transferHasPkAsset,
+//           as: "transferHasPkAssets",
+//           include: [
+//             {
+//               model: pkAsset,
+//               as: "TB_PACKAGE_ASSET",
+//               where: { deletedAt: null },
+//               attributes: [
+//                 "_id",
+//                 "assetNumber",
+//                 "productName",
+//                 // "serialNumber",
+//                 "sector"
+//                 // "imageArray"
+//               ]
+//             }
+//           ]
+//         },
+//         {
+//           model: subComponentTransfer,
+//           as: "subComponentTransfers",
+//           require: false
+//         }
+//       ]
+//     });
+
+//     res.status(200).json({ transferById });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.getTransferById = async (req, res, next) => {
   try {
     const transferId = req.params.transferId;
@@ -2077,18 +2146,18 @@ exports.getTransferById = async (req, res, next) => {
                 "assetNumber",
                 "productName",
                 "serialNumber",
-                "sector"
+                "sector",
                 // "imageArray"
               ],
               include: [
                 {
                   model: assetImage,
                   as: "assetImages",
-                  attributes: ["image"]
-                }
-              ]
-            }
-          ]
+                  attributes: ["image"],
+                },
+              ],
+            },
+          ],
         },
         {
           model: transferHasPkAsset,
@@ -2103,18 +2172,25 @@ exports.getTransferById = async (req, res, next) => {
                 "assetNumber",
                 "productName",
                 // "serialNumber",
-                "sector"
+                "sector",
                 // "imageArray"
-              ]
-            }
-          ]
+              ],
+              include: [
+                {
+                  model: pkAssetImage,
+                  as: "packageAssetImages",
+                  attributes: ["image"],
+                },
+              ],
+            },
+          ],
         },
         {
           model: subComponentTransfer,
           as: "subComponentTransfers",
-          require: false
-        }
-      ]
+          require: false,
+        },
+      ],
     });
 
     res.status(200).json({ transferById });
