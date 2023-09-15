@@ -5,9 +5,11 @@ exports.createCompanyPrefix = async (req, res, next) => {
   try {
     const { companyPrefixArray } = req.body;
     // const companyPrefixArrayObject = companyPrefixArray;
+    const companyPrefixArrayObject = JSON.parse(companyPrefixArray);
+
     const resCompanyPrefix = [];
 
-    for (let el of companyPrefixArray) {
+    for (let el of companyPrefixArrayObject) {
       try {
         let companyPrefix = await CompanyPrefix.create({
           name: el.name,
@@ -32,10 +34,12 @@ exports.createCompanyPrefix = async (req, res, next) => {
 exports.updateCompanyPrefix = async (req, res, next) => {
   try {
     const { companyPrefixArray } = req.body;
+    const companyPrefixArrayObject = JSON.parse(companyPrefixArray);
+
     const resCompanyPrefix = [];
 
-    for (let i = 0; i < companyPrefixArray.length; i++) {
-      const { _id, name } = companyPrefixArray[i];
+    for (let i = 0; i < companyPrefixArrayObject.length; i++) {
+      const { _id, name } = companyPrefixArrayObject[i];
       const companyPrefix = await CompanyPrefix.findByPk(_id);
 
       if (!companyPrefix) {
@@ -47,7 +51,7 @@ exports.updateCompanyPrefix = async (req, res, next) => {
       });
       // console.log("existingNameCompanyPrefix", existingNameCompanyPrefix);
       // console.log("existingNameCompanyPrefix.id", existingNameCompanyPrefix.id);
-      if (existingNameCompanyPrefix && existingNameCompanyPrefix.id !== _id) {
+      if (existingNameCompanyPrefix && existingNameCompanyPrefix._id !== _id) {
         throw createError(
           `CompanyPrefix with name '${name}' already exists`,
           400

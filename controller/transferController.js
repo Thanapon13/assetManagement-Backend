@@ -7,7 +7,11 @@ const {
   transferHasAsset,
   transferHasPkAsset,
   assetImage,
+<<<<<<< HEAD
   pkAssetImage
+=======
+  pkAssetImage,
+>>>>>>> 00a076e2a69afadbe46bf1e90c2c2855e072242a
 } = require("../models");
 const moment = require("moment/moment");
 
@@ -1110,7 +1114,7 @@ exports.getBySearchTopTransferApprove = async (req, res, next) => {
       where: { status: "approve", deletedAt: null }
     });
     const totalReject = await transfer.count({
-      where: { status: "reject", deletedAt: null }
+      where: { status: "reject", deletedAt: null },
     });
     const totalAll = totalWaiting + totalApprove + totalReject;
 
@@ -1850,6 +1854,9 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
         }
       ]
     });
+    if (transferArray == 0) {
+      return res.status(404).json({ message: "This transfer not found" });
+    }
 
     res.json({ transferArray });
   } catch (err) {
@@ -2192,7 +2199,9 @@ exports.getTransferById = async (req, res, next) => {
         },
       ],
     });
-
+    if (transferById == null) {
+      return res.status(404).json({ message: "this transfer not found" });
+    }
     res.status(200).json({ transferById });
   } catch (err) {
     next(err);

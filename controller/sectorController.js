@@ -5,11 +5,11 @@ exports.createSector = async (req, res, next) => {
   try {
     const { sectorArray } = req.body;
     const resSector = [];
-
-    for (let el of sectorArray) {
+    const sectorArrayObject = JSON.parse(sectorArray);
+    for (let el of sectorArrayObject) {
       try {
         let sector = await Sector.create({
-          name: el.name
+          name: el.name,
         });
         resSector.push(sector);
       } catch (err) {
@@ -45,11 +45,11 @@ exports.updateSector = async (req, res, next) => {
       }
 
       const existingNameSector = await Sector.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       // console.log("existingNameSector", existingNameSector);
       // console.log("existingNameSector.id", existingNameSector.id);
-      if (existingNameSector && existingNameSector.id !== _id) {
+      if (existingNameSector && existingNameSector._id !== _id) {
         throw createError(`Sector with name '${name}' already exists`, 400);
       }
 
@@ -67,7 +67,7 @@ exports.updateSector = async (req, res, next) => {
 exports.getAllSector = async (req, res, next) => {
   try {
     const sector = await Sector.findAll({
-      attributes: ["_id", "name"]
+      attributes: ["_id", "name"],
     });
     res.json({ sector });
   } catch (err) {
@@ -80,8 +80,8 @@ exports.deleteSector = async (req, res, next) => {
     const _id = req.params.sectorId;
     let sector = await Sector.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
 
     res.json({ message: "delete sector successfully", sector });

@@ -50,7 +50,7 @@ exports.updateBorrowPurpose = async (req, res, next) => {
       });
       // console.log("existingNameBorrowPurpose", existingNameBorrowPurpose);
       // console.log("existingNameBorrowPurpose.id", existingNameBorrowPurpose.id);
-      if (existingNameBorrowPurpose && existingNameBorrowPurpose.id !== _id) {
+      if (existingNameBorrowPurpose && existingNameBorrowPurpose._id !== _id) {
         throw createError(
           `BorrowPurpose with name '${name}' already exists`,
           400

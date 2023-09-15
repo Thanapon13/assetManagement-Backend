@@ -4,10 +4,11 @@ const createError = require("../utils/createError");
 exports.createBrand = async (req, res, next) => {
   try {
     const { brandArray } = req.body;
+    const brandArrayObject = JSON.parse(brandArray);
 
     const resBrand = [];
 
-    for (let el of brandArray) {
+    for (let el of brandArrayObject) {
       try {
         let brand = await Brand.create({
           name: el.name,

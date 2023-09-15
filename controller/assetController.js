@@ -31,7 +31,6 @@ function delete_file(path) {
   });
 }
 
-
 function duplicate_file(pathRead, pathWrite) {
   var inStr = fs.createReadStream(pathRead);
   var outStr = fs.createWriteStream(pathWrite);
@@ -225,7 +224,7 @@ exports.createAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         console.log("genDataArray:I", i, genDataArray[i]);
@@ -617,7 +616,7 @@ exports.getAssetById = async (req, res, next) => {
       // ],
     });
     if (assetData == null) {
-      return res.json({ message: "This asset not found" });
+      return res.status(404).json({ message: "This asset not found" });
     }
     // const asset = await Asset.findById({ _id: assetId });
     res.json({ asset: assetData });
@@ -706,67 +705,28 @@ exports.getByProductSelector = async (req, res, next) => {
       ],
       group: "productName"
     });
-    console.log(2342, assetData);
 
-    // attributes: [
-    //   'productName',
-    //   [sequelize.fn('COUNT', sequelize.col('*')), 'quantity'],
-    //   [sequelize.fn('GROUP_CONCAT', sequelize.col('*')), 'results'], // Note: This will concatenate all fields; adjust as needed
-    // ],
     let packageAssetData = await pkAsset.findAll({
       where: { [Op.and]: queryPackageAssetArray },
       attributes: [
         ["productName", "_id"],
         [sequelize.fn("COUNT", sequelize.col("productName")), "quantity"] //
-        // [sequelize.fn("GROUP_CONCAT", sequelize.col("productName")), "results"], // Note: This will concatenate all fields; adjust as needed
       ],
       group: "productName"
     });
-    // assetData = assetData.map((data) => ({
-    //   ...data.dataValues,
-    //   isPackage: false,
-    // }));
-    // packageAssetData = packageAssetData.map((data) => ({
-    //   ...data.dataValues,
-    //   isPackage: true,
-    // }));
-    // let asset = await Asset.aggregate([
-    //   { $match: query },
-    //   {
-    //     $group: {
-    //       _id: "$productName",
-    //       quantity: { $sum: 1 },
-    //       results: { $push: "$$ROOT" },
-    //     },
-    //   },
-    //   // {
-    //   //   $sort: {
-    //   //     createdAt: -1,
-    //   //   },
-    //   // },
-    // ]);
-
-    // let packageAsset = await PackageAsset.aggregate([
-    //   { $match: queryPackageAsset },
-    //   {
-    //     $group: {
-    //       _id: "$productName",
-    //       quantity: { $sum: 1 },
-    //       results: { $push: "$$ROOT" },
-    //     },
-    //   },
-    //   // {
-    //   //   $sort: {
-    //   //     createdAt: -1,
-    //   //   },
-    //   // },
-    // ]);
-
     assetData = assetData.concat(packageAssetData);
-
-    console.log(assetData.length);
-    // console.log(asset.length);
-
+    if (assetData.length != 0) {
+      for (let i = 0; i < assetData.length; i++) {
+        let assetData2 = await asset.findAll({
+          where: { [Op.and]: queryAssetArray }
+        });
+        let packageAssetData2 = await pkAsset.findAll({
+          where: { [Op.and]: queryPackageAssetArray }
+        });
+        assetData2 = assetData2.concat(packageAssetData2);
+        assetData[i].setDataValue("results", assetData2);
+      }
+    }
     res.json({ asset: assetData });
   } catch (err) {
     next(err);
@@ -1067,7 +1027,7 @@ exports.updateAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         newestRealAssetId = newestRealAssetId + 1;
@@ -1781,19 +1741,19 @@ exports.getRunningAssetNumber = async (req, res, next) => {
     let countAsset = await asset.count({
       where: {
         assetNumber: {
-          [Op.and]: [{ [Op.notLike]: `%)` }, { [Op.like]: `${assetNumber}/%` }],
-        },
-      },
+          [Op.and]: [{ [Op.notLike]: `%)` }, { [Op.like]: `${assetNumber}/%` }]
+        }
+      }
     });
     let countPkAsset = await pkAsset.count({
-      where: { assetNumber: { [Op.like]: `${assetNumber}/%` } },
+      where: { assetNumber: { [Op.like]: `${assetNumber}/%` } }
     });
 
     let count = countAsset + countPkAsset;
     count++;
 
     res.json({
-      assetNumber: `${count.toString().padStart(4, "0")}`,
+      assetNumber: `${count.toString().padStart(4, "0")}`
     });
   } catch (err) {
     next(err);

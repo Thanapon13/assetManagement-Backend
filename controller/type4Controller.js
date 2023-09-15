@@ -4,14 +4,15 @@ const createError = require("../utils/createError");
 exports.createType4 = async (req, res, next) => {
   try {
     const { type4Array } = req.body;
+    const type4ArrayObject = JSON.parse(type4Array);
 
     const resType4 = [];
 
-    for (let el of type4Array) {
+    for (let el of type4ArrayObject) {
       try {
         let type4 = await Type4.create({
           name: el.name,
-          value: el.value
+          value: el.value,
         });
         resType4.push(type4);
       } catch (err) {
@@ -52,20 +53,20 @@ exports.updateType4 = async (req, res, next) => {
       }
 
       const existingNameType4 = await Type4.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       console.log("existingNameType4", existingNameType4);
       // console.log("existingNameType4.id", existingNameType4.id);
-      if (existingNameType4 && existingNameType4.id !== _id) {
+      if (existingNameType4 && existingNameType4._id !== _id) {
         throw createError(`Type4 with name '${name}' already exists`, 400);
       }
 
       const existingValueType4 = await Type4.findOne({
-        where: { value: value }
+        where: { value: value },
       });
       // console.log("existingValueType4", existingValueType4);
 
-      if (existingValueType4 && existingValueType4.id !== _id) {
+      if (existingValueType4 && existingValueType4._id !== _id) {
         const error = new Error(`Value '${value}' already exists.`);
         error.statusCode = 400;
         throw error;
@@ -86,7 +87,7 @@ exports.updateType4 = async (req, res, next) => {
 exports.getAllType4 = async (req, res, next) => {
   try {
     const type4 = await Type4.findAll({
-      attributes: ["_id", "name", "value"]
+      attributes: ["_id", "name", "value"],
     });
     res.json({ type4 });
   } catch (err) {
@@ -99,8 +100,8 @@ exports.deleteType4 = async (req, res, next) => {
     const _id = req.params.type4Id;
     let type4 = await Type4.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
 
     res.json({ message: "delete type4 successfully", type4 });

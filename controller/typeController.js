@@ -4,10 +4,10 @@ const createError = require("../utils/createError");
 exports.createType = async (req, res, next) => {
   try {
     const { typeArray } = req.body;
-    // const typeArrayObject = typeArray;
+    const typeArrayObject = JSON.parse(typeArray);
     const resType = [];
 
-    for (let el of typeArray) {
+    for (let el of typeArrayObject) {
       try {
         let type = await Type.create({
           name: el.name,
@@ -39,11 +39,11 @@ exports.createType = async (req, res, next) => {
 exports.updateType = async (req, res, next) => {
   try {
     const { typeArray } = req.body;
-    // const typeArrayObject = typeArray;
+    const typeArrayObject = JSON.parse(typeArray);
     const resType = [];
 
-    for (let i = 0; i < typeArray.length; i++) {
-      const { _id, name, value } = typeArray[i];
+    for (let i = 0; i < typeArrayObject.length; i++) {
+      const { _id, name, value } = typeArrayObject[i];
       const type = await Type.findByPk(_id);
 
       if (!type) {
@@ -55,7 +55,7 @@ exports.updateType = async (req, res, next) => {
       });
       // console.log("existingNameType", existingNameType);
       // console.log("existingNameType.id", existingNameType.id);
-      if (existingNameType && existingNameType.id !== _id) {
+      if (existingNameType && existingNameType._id !== _id) {
         throw createError(`Type with name '${name}' already exists`, 400);
       }
 
@@ -64,7 +64,7 @@ exports.updateType = async (req, res, next) => {
       });
       // console.log("existingValueType", existingValueType);
 
-      if (existingValueType && existingValueType.id !== _id) {
+      if (existingValueType && existingValueType._id !== _id) {
         const error = new Error(`Value '${value}' already exists.`);
         error.statusCode = 400;
         throw error;

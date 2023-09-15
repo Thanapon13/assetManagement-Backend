@@ -50,7 +50,7 @@ exports.updateEngPrefix = async (req, res, next) => {
       });
       // console.log("existingNameEngPrefix", existingNameEngPrefix);
       // console.log("existingNameEngPrefix.id", existingNameEngPrefix.id);
-      if (existingNameEngPrefix && existingNameEngPrefix.id !== _id) {
+      if (existingNameEngPrefix && existingNameEngPrefix._id !== _id) {
         throw createError(`EngPrefix with name '${name}' already exists`, 400);
       }
 

@@ -12,7 +12,7 @@ const fs = require("fs");
 const moment = require("moment/moment");
 
 function delete_file(path) {
-  fs.unlink(path, (err) => {
+  fs.unlink(path, err => {
     if (err) throw err;
     console.log(path + " was deleted");
   });
@@ -50,7 +50,7 @@ exports.createRepair = async (req, res, next) => {
       typeOfRepair,
       repairSector,
       problemDetail,
-      status,
+      status
     } = input;
     console.log("input", input);
     console.log("status", status);
@@ -59,7 +59,7 @@ exports.createRepair = async (req, res, next) => {
       console.log("saveDraft");
       const repair = await Repair.create({
         ...input,
-        status: "saveDraft",
+        status: "saveDraft"
       });
 
       return res.json({ message: "create repair successfully", repair });
@@ -67,7 +67,7 @@ exports.createRepair = async (req, res, next) => {
 
     let asset = await Asset.findAll({
       where: { assetNumber },
-      attributes: ["_id", "assetNumber"],
+      attributes: ["_id", "assetNumber"]
     });
     console.log("asset:", asset);
 
@@ -75,8 +75,8 @@ exports.createRepair = async (req, res, next) => {
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
       include: [
-        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] },
-      ],
+        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] }
+      ]
     });
     console.log("packageAssetArray", packageAssetArray);
 
@@ -88,15 +88,15 @@ exports.createRepair = async (req, res, next) => {
         { reserved: true },
         {
           where: {
-            assetNumber,
-          },
+            assetNumber
+          }
         }
       );
       const repair = await Repair.create({
         ...input,
         status: status,
         statusOfDetailRecord: status,
-        assetId: asset[0]._id,
+        assetId: asset[0]._id
       });
 
       res.json({ message: "create repair successfully", repair });
@@ -106,8 +106,8 @@ exports.createRepair = async (req, res, next) => {
         { reserved: true },
         {
           where: {
-            assetNumber,
-          },
+            assetNumber
+          }
         }
       );
 
@@ -122,7 +122,7 @@ exports.createRepair = async (req, res, next) => {
         ...input,
         status,
         statusOfDetailRecord: status,
-        packageAssetId: packageAssetArray._id,
+        packageAssetId: packageAssetArray._id
       });
 
       res.json({ message: "create repair successfully", repair });
@@ -172,7 +172,7 @@ exports.getBySearch = async (req, res, next) => {
 
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
       });
     }
 
@@ -206,9 +206,10 @@ exports.getBySearch = async (req, res, next) => {
             "waitingForCheck",
             "inProgress",
             "complete",
-            "cancel",
-          ],
-        },
+            "reject",
+            "cancel"
+          ]
+        }
       });
     } else {
       queryArray.push({ status: status });
@@ -217,8 +218,8 @@ exports.getBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -228,8 +229,8 @@ exports.getBySearch = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -242,7 +243,7 @@ exports.getBySearch = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     // console.log(asset)
@@ -262,7 +263,7 @@ exports.getSectorForSearch = async (req, res, next) => {
       "waitingForCheck",
       "saveDraft",
       "complete",
-      "cancel",
+      "cancel"
     ];
     const courierSector = await Repair.findAll({
       where: {
@@ -270,19 +271,19 @@ exports.getSectorForSearch = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { status: { [Op.in]: status } },
-        ],
+          { status: { [Op.in]: status } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["courierSector", "courierSector"],
         [
           sequelize.fn("COUNT", sequelize.col("courierSector")),
-          "numberOfzipcodes",
-        ],
+          "numberOfzipcodes"
+        ]
       ],
       group: "courierSector",
-      raw: true,
+      raw: true
     });
 
     res.json({ courierSector });
@@ -300,7 +301,7 @@ exports.getSectorForSearchDetailRecord = async (req, res, next) => {
       "inProgressOfDetailRecord",
       "completeOfDetailRecord",
       "cancelOfDetailRecord",
-      "reject",
+      "reject"
     ];
     const courierSector = await Repair.findAll({
       where: {
@@ -308,19 +309,19 @@ exports.getSectorForSearchDetailRecord = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { statusOfDetailRecord: { [Op.in]: statusOfDetailRecord } },
-        ],
+          { statusOfDetailRecord: { [Op.in]: statusOfDetailRecord } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["courierSector", "courierSector"],
         [
           sequelize.fn("COUNT", sequelize.col("courierSector")),
-          "numberOfzipcodes",
-        ],
+          "numberOfzipcodes"
+        ]
       ],
       group: "courierSector",
-      raw: true,
+      raw: true
     });
 
     res.json({ courierSector });
@@ -338,19 +339,19 @@ exports.getSectorForSearchHistory = async (req, res, next) => {
           { deletedAt: { [Op.eq]: null } },
           { courierSector: { [Op.ne]: null } },
           { courierSector: { [Op.ne]: "" } },
-          { status: { [Op.in]: status } },
-        ],
+          { status: { [Op.in]: status } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["courierSector", "courierSector"],
         [
           sequelize.fn("COUNT", sequelize.col("courierSector")),
-          "numberOfzipcodes",
-        ],
+          "numberOfzipcodes"
+        ]
       ],
       group: "courierSector",
-      raw: true,
+      raw: true
     });
     res.json({ courierSector });
   } catch (err) {
@@ -365,20 +366,20 @@ exports.getAllRepair = async (req, res, next) => {
         {
           model: RepairDocument,
           as: "repairDocuments",
-          require: false,
+          require: false
         },
         {
           model: CostOfRepair,
           as: "costOfRepairArray",
-          require: false,
+          require: false
         },
         {
           model: CostOfRepairMan,
           as: "informRepairManArray",
-          require: false,
-        },
+          require: false
+        }
       ],
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
     res.json({ repair });
   } catch (err) {
@@ -394,80 +395,21 @@ exports.getRepairById = async (req, res, next) => {
       include: [
         {
           model: RepairDocument,
-          as: "repairDocuments",
+          as: "repairDocuments"
         },
         {
           model: CostOfRepair,
-          as: "costOfRepairArray",
+          as: "costOfRepairArray"
         },
         {
           model: CostOfRepairMan,
-          as: "informRepairManArray",
-        },
-      ],
+          as: "informRepairManArray"
+        }
+      ]
     });
-    // const repair = await Repair.aggregate([
-    //   { $match: { _id: ObjectID(RepairId) } },
-    //   {
-    //     $lookup: {
-    //       from: "assets",
-    //       let: { assetIds: "$assetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$_id", "$$assetIds"] },
-    //                 // { $in: ["$_id", "$$assetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             _id: 1,
-    //             assetNumber: 1,
-    //             productName: 1,
-    //             serialNumber: 1,
-    //             sector: 1,
-    //             imageArray: 1,
-    //           },
-    //         }, // Specify the fields you want to retrieve
-    //       ],
-    //       as: "assets",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "packageassets",
-    //       let: { packageAssetIds: "$packageAssetId" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$_id", "$$packageAssetIds"] },
-    //                 { $not: { $gt: ["$deletedAt", null] } },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             _id: 1,
-    //             assetNumber: 1,
-    //             productName: 1,
-    //             serialNumber: 1,
-    //             sector: 1,
-    //             imageArray: 1,
-    //           },
-    //         }, // Specify the fields you want to retrieve
-    //       ],
-    //       as: "packageAssets",
-    //     },
-    //   },
-    // ]);
+    if (repair == null) {
+      return res.status(404).json({ message: "This repair not found" });
+    }
 
     res.json({ repair: repair });
   } catch (err) {
@@ -496,8 +438,8 @@ exports.deleteRepair = async (req, res, next) => {
           { reserved: false },
           {
             where: {
-              _id: assetId,
-            },
+              _id: assetId
+            }
           }
         );
         // console.log(asset)
@@ -510,7 +452,7 @@ exports.deleteRepair = async (req, res, next) => {
         // console.log(packageAssetId)
         let packageAsset = await PackageAsset.findOne({
           where: { _id: packageAssetId },
-          include: [{ model: Asset, as: "assets", attributes: ["_id"] }],
+          include: [{ model: Asset, as: "assets", attributes: ["_id"] }]
         });
         // let packageAsset = await PackageAsset.aggregate([
         //   { $match: { _id: ObjectID(packageAssetId) } },
@@ -528,8 +470,8 @@ exports.deleteRepair = async (req, res, next) => {
           { reserved: false },
           {
             where: {
-              _id: packageAssetId,
-            },
+              _id: packageAssetId
+            }
           }
         );
         console.log("findForUpdatePackageAsset", findForUpdatePackageAsset);
@@ -544,8 +486,8 @@ exports.deleteRepair = async (req, res, next) => {
               { reserved: false },
               {
                 where: {
-                  _id: assetInPackageArray[j]._id,
-                },
+                  _id: assetInPackageArray[j]._id
+                }
               }
             );
           }
@@ -601,7 +543,7 @@ exports.updateRepair = async (req, res, next) => {
       //สถานะ
       status,
       statusOfDetailRecord,
-      statusOutsourceRepair,
+      statusOutsourceRepair
     } = input;
     const repairInfo = await Repair.findOne({ where: { _id: repairId } });
     if (
@@ -656,8 +598,8 @@ exports.updateRepair = async (req, res, next) => {
           where: { assetNumber: repairInfo.assetNumber },
           attributes: ["_id", "assetNumber"],
           include: [
-            { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] },
-          ],
+            { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] }
+          ]
         });
         await PackageAsset.update(
           { reserved: false },
@@ -676,8 +618,8 @@ exports.updateRepair = async (req, res, next) => {
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
       include: [
-        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] },
-      ],
+        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] }
+      ]
     });
     // const packageAssetArray = await PackageAsset.aggregate([
     //   { $match: { assetNumber } },
@@ -705,8 +647,8 @@ exports.updateRepair = async (req, res, next) => {
         { reserved: true },
         {
           where: {
-            assetNumber,
-          },
+            assetNumber
+          }
         }
       );
 
@@ -714,7 +656,7 @@ exports.updateRepair = async (req, res, next) => {
         {
           ...input,
           assetId: asset[0]._id,
-          packageAssetId: null,
+          packageAssetId: null
         },
         { where: { _id: repairId } }
       );
@@ -726,8 +668,8 @@ exports.updateRepair = async (req, res, next) => {
         { reserved: true },
         {
           where: {
-            assetNumber,
-          },
+            assetNumber
+          }
         }
       );
 
@@ -746,7 +688,7 @@ exports.updateRepair = async (req, res, next) => {
         {
           ...input,
           assetId: null,
-          packageAssetId: packageAsset._id,
+          packageAssetId: packageAsset._id
         },
         { where: { _id: repairId } }
       );
@@ -808,8 +750,8 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -819,8 +761,8 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -833,7 +775,7 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
     console.log(query, "query");
     const topApproveList = await Repair.findAll({
       where: { [Op.and]: queryArray },
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
     queryArray.pop();
 
@@ -842,7 +784,7 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
     console.log("bottom", queryArray);
     const bottomApproveList = await Repair.findAll({
       where: { [Op.and]: queryArray },
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "DESC"]]
     });
 
     // console.log(asset)
@@ -853,20 +795,20 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
     const totalWaiting = await Repair.count({
       where: {
         statusOfDetailRecord: "waitingApproval",
-        deletedAt: { [Op.eq]: null },
-      },
+        deletedAt: { [Op.eq]: null }
+      }
     });
     const totalApprove = await Repair.count({
       where: {
         statusOfDetailRecord: "inProgressOfDetailRecord",
-        deletedAt: { [Op.eq]: null },
-      },
+        deletedAt: { [Op.eq]: null }
+      }
     });
     const totalReject = await Repair.count({
       where: {
         statusOfDetailRecord: "reject",
-        deletedAt: { [Op.eq]: null },
-      },
+        deletedAt: { [Op.eq]: null }
+      }
     });
     const totalAll = +totalWaiting + +totalApprove + +totalReject;
 
@@ -876,7 +818,7 @@ exports.getBySearchTopRepairApprove = async (req, res, next) => {
       totalAll,
       totalWaiting,
       totalApprove,
-      totalReject,
+      totalReject
     });
   } catch (err) {
     next(err);
@@ -923,7 +865,7 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
 
     if (textSearch !== "") {
       queryArray.push({
-        [typeTextSearch]: { [Op.like]: `%${textSearch}%` },
+        [typeTextSearch]: { [Op.like]: `%${textSearch}%` }
       });
     }
     if (
@@ -941,9 +883,9 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
             "inProgressOfDetailRecord",
             "completeOfDetailRecord",
             "cancelOfDetailRecord",
-            "reject",
-          ],
-        },
+            "reject"
+          ]
+        }
       });
     } else {
       queryArray.push({ status: status });
@@ -972,8 +914,8 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -983,8 +925,8 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -997,7 +939,7 @@ exports.getBySearchOfDetailRecord = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     // console.log(asset)
@@ -1014,17 +956,17 @@ exports.recordRepairDetail = async (req, res, next) => {
   try {
     const repairId = req.params.repairId;
     let { input, status, informRepairManArray, costOfRepairArray } = req.body;
-    console.log("input00",input);
+    console.log("input00", input);
 
     let { repairMan, workDate, arriveAtPlaceDate, repairedDate } = input;
 
-console.log("input--",input)
-    
+    console.log("input--", input);
+
     const oldCostOfRepairMan = await CostOfRepairMan.findAll({
-      where: { repairId: repairId },
+      where: { repairId: repairId }
     });
     const oldCostOfRepair = await CostOfRepair.findAll({
-      where: { repairId: repairId },
+      where: { repairId: repairId }
     });
     if (!status) {
       status = "waitingRecord";
@@ -1033,7 +975,7 @@ console.log("input--",input)
     let notExistArrayCostOfRepair = [];
 
     function getNotExist(existArray, oldDataArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj._id);
+      const existObjects = existArray.map(obj => obj._id);
 
       for (let i = 0; i < oldDataArray.length; i++) {
         if (!existObjects.includes(oldDataArray[i]._id)) {
@@ -1064,8 +1006,8 @@ console.log("input--",input)
       for (let i = 0; i < notExistArrayCostOfRepairMan.length; i++) {
         await CostOfRepairMan.destroy({
           where: {
-            _id: notExistArrayCostOfRepairMan[i]._id,
-          },
+            _id: notExistArrayCostOfRepairMan[i]._id
+          }
         });
       }
     }
@@ -1073,15 +1015,15 @@ console.log("input--",input)
       for (let i = 0; i < notExistArrayCostOfRepair.length; i++) {
         await CostOfRepair.destroy({
           where: {
-            _id: notExistArrayCostOfRepair[i]._id,
-          },
+            _id: notExistArrayCostOfRepair[i]._id
+          }
         });
       }
     }
     const repair = await Repair.update(
       {
         ...input,
-        statusOfDetailRecord: status, // - waitingApproval / - waitingRecord
+        statusOfDetailRecord: status // - waitingApproval / - waitingRecord
         // $set: {
         //   informRepairManArray: informRepairManArray,
         //   costOfRepairArray: costOfRepairArray,
@@ -1101,7 +1043,7 @@ console.log("input--",input)
           ratePerHour: informRepairManArray[i].ratePerHour,
           totalEarn: informRepairManArray[i].totalEarn,
           amountExtra: informRepairManArray[i].amountExtra,
-          repairId: repairId,
+          repairId: repairId
         });
       } else {
         await CostOfRepairMan.update(
@@ -1110,7 +1052,7 @@ console.log("input--",input)
             workPerHour: informRepairManArray[i].workPerHour,
             ratePerHour: informRepairManArray[i].ratePerHour,
             totalEarn: informRepairManArray[i].totalEarn,
-            amountExtra: informRepairManArray[i].amountExtra,
+            amountExtra: informRepairManArray[i].amountExtra
           },
           { where: { _id: informRepairManArray[i]._id } }
         );
@@ -1127,7 +1069,7 @@ console.log("input--",input)
           quantity: costOfRepairArray[i].quantity,
           unit: costOfRepairArray[i].unit,
           pricePerPiece: costOfRepairArray[i].pricePerPiece,
-          repairId: repairId,
+          repairId: repairId
         });
       } else {
         await CostOfRepair.update(
@@ -1136,7 +1078,7 @@ console.log("input--",input)
             quantity: costOfRepairArray[i].quantity,
             unit: costOfRepairArray[i].unit,
             pricePerPiece: costOfRepairArray[i].pricePerPiece,
-            amountExtra: costOfRepairArray[i].amountExtra,
+            amountExtra: costOfRepairArray[i].amountExtra
           },
           { where: { _id: costOfRepairArray[i]._id } }
         );
@@ -1172,16 +1114,16 @@ exports.updateStatusForGetJobRepair = async (req, res, next) => {
               {
                 model: Asset,
                 as: "assets",
-                attributes: ["_id", "assetNumber"],
-              },
-            ],
+                attributes: ["_id", "assetNumber"]
+              }
+            ]
           });
           await PackageAsset.update(
             { reserved: false },
             {
               where: {
-                assetNumber,
-              },
+                assetNumber
+              }
             }
           );
 
@@ -1196,8 +1138,8 @@ exports.updateStatusForGetJobRepair = async (req, res, next) => {
             { reserved: false },
             {
               where: {
-                _id: assetId,
-              },
+                _id: assetId
+              }
             }
           );
         }
@@ -1225,7 +1167,7 @@ exports.offWorkRepair = async (req, res, next) => {
         ...input,
         ...queryInsert,
         status: "waitingForCheck",
-        statusOfDetailRecord: "completeOfDetailRecord",
+        statusOfDetailRecord: "completeOfDetailRecord"
       },
       { where: { _id: repairId }, returning: true, plain: true }
     );
@@ -1254,7 +1196,7 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
           {
             ...queryInsert,
             statusOfDetailRecord: "inProgressOfDetailRecord",
-            dateTime_approver: new Date(),
+            dateTime_approver: new Date()
           },
           { where: { _id: repairId } }
         );
@@ -1277,7 +1219,7 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
           // console.log("/n/n");
           // console.log("packageAsset", packageAsset);
           let assetArray = await Asset.findAll({
-            where: { packageAssetId: packageAssetId },
+            where: { packageAssetId: packageAssetId }
           });
           for (let l = 0; l < assetArray.length; l++) {
             let assetId = assetArray[l]._id;
@@ -1300,9 +1242,8 @@ exports.approveAllWaitingRepair = async (req, res, next) => {
 exports.rejectAllWaitingRepair = async (req, res, next) => {
   try {
     const { topApproveList } = req.body;
-    
-    console.log("topApproveList:",topApproveList)
-   
+
+    console.log("topApproveList:", topApproveList);
 
     for (let i = 0; i < topApproveList.length; i++) {
       if (topApproveList[i].checked == true) {
@@ -1315,7 +1256,7 @@ exports.rejectAllWaitingRepair = async (req, res, next) => {
             status: "reject",
             statusOfDetailRecord: "reject",
             dateTime_approver: new Date(),
-            reason: reason,
+            reason: reason
           },
           { where: { _id: repairId } }
         );
@@ -1372,7 +1313,7 @@ exports.rejectIndividualWaitingRepair = async (req, res, next) => {
         status: "reject",
         statusOfDetailRecord: "reject",
         dateTime_approver: new Date(),
-        reason: reason,
+        reason: reason
       },
       { where: { _id: repairId } }
     );
@@ -1393,7 +1334,7 @@ exports.rejectIndividualWaitingRepair = async (req, res, next) => {
       );
 
       let assetArray = await Asset.findAll({
-        where: { packageAssetId: packageAssetId },
+        where: { packageAssetId: packageAssetId }
       });
       for (let l = 0; l < assetArray.length; l++) {
         let assetId = assetArray[l]._id;
@@ -1424,7 +1365,7 @@ exports.approveIndividualWaitingRepair = async (req, res, next) => {
       {
         ...queryInsert,
         statusOfDetailRecord: "inProgressOfDetailRecord",
-        dateTime_approver: new Date(),
+        dateTime_approver: new Date()
       },
       { where: { _id: repairId } }
     );
@@ -1446,7 +1387,7 @@ exports.approveIndividualWaitingRepair = async (req, res, next) => {
       // console.log("/n/n");
       // console.log("packageAsset", packageAsset);
       let assetArray = await Asset.findAll({
-        where: { packageAssetId: packageAssetId },
+        where: { packageAssetId: packageAssetId }
       });
       for (let l = 0; l < assetArray.length; l++) {
         let assetId = assetArray[l]._id;
@@ -1511,8 +1452,8 @@ exports.getBySearchOfHistory = async (req, res, next) => {
     if (informRepairIdDocTextSearch !== "") {
       queryArray.push({
         ["informRepairIdDoc"]: {
-          [Op.like]: `%${informRepairIdDocTextSearch}%`,
-        },
+          [Op.like]: `%${informRepairIdDocTextSearch}%`
+        }
       });
     }
 
@@ -1522,7 +1463,7 @@ exports.getBySearchOfHistory = async (req, res, next) => {
 
     if (assetNumberTextSearch !== "") {
       queryArray.push({
-        ["assetNumber"]: { [Op.like]: `%${assetNumberTextSearch}%` },
+        ["assetNumber"]: { [Op.like]: `%${assetNumberTextSearch}%` }
       });
     }
 
@@ -1532,8 +1473,8 @@ exports.getBySearchOfHistory = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -1543,8 +1484,8 @@ exports.getBySearchOfHistory = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
     if (sector !== "") {
@@ -1559,7 +1500,7 @@ exports.getBySearchOfHistory = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     // console.log(asset)
@@ -1582,8 +1523,8 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
       where: { assetNumber: assetNumber },
       attributes: ["_id", "assetNumber"],
       include: [
-        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] },
-      ],
+        { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] }
+      ]
     });
     console.log("packageAssetArray", packageAssetArray);
     const packageAsset = packageAssetArray[0];
@@ -1602,19 +1543,36 @@ exports.getHistoryThisAssetByAssetNumber = async (req, res, next) => {
               {
                 require: false,
                 model: CostOfRepair,
-                as: "costOfRepairArray",
+                as: "costOfRepairArray"
               },
               {
                 require: false,
                 model: CostOfRepairMan,
-                as: "informRepairManArray",
-              },
-            ],
-          },
-        ],
+                as: "informRepairManArray"
+              }
+            ]
+          }
+        ]
       });
+      for (const repairAssetId of historyOfasset.repairAssetId) {
+        let costTotalOfRepairArray = 0;
+        for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
+          costTotalOfRepairArray =
+            costTotalOfRepairArray +
+            costOfRepairArray.quantity * costOfRepairArray.pricePerPiece;
+        }
+        let costTotalOfRepairManArray = 0;
+        for (const informRepairManArray of repairAssetId.informRepairManArray) {
+          costTotalOfRepairManArray =
+            costTotalOfRepairManArray +
+            informRepairManArray.totalEarn +
+            informRepairManArray.amountExtra;
+        }
+        let total = costTotalOfRepairArray + costTotalOfRepairManArray;
+        repairAssetId.setDataValue("total", total);
+      }
 
-console.log("historyOfasset--",historyOfasset.repairAssetId)
+      console.log("historyOfasset--", historyOfasset.repairAssetId);
 
       for (const repairAssetId of historyOfasset.repairAssetId) {
         let costTotalOfRepairArray = 0;
@@ -1650,18 +1608,18 @@ console.log("historyOfasset--",historyOfasset.repairAssetId)
               {
                 require: false,
                 model: CostOfRepair,
-                as: "costOfRepairArray",
+                as: "costOfRepairArray"
               },
               {
                 require: false,
                 model: CostOfRepairMan,
-                as: "informRepairManArray",
-              },
-            ],
-          },
-        ],
+                as: "informRepairManArray"
+              }
+            ]
+          }
+        ]
       });
-      for (const repairAssetId of historyOfasset.repairPackageAssetId) {
+      for (const repairAssetId of historyOfasset.repairAssetId) {
         let costTotalOfRepairArray = 0;
         for (const costOfRepairArray of repairAssetId.costOfRepairArray) {
           costTotalOfRepairArray =
@@ -1676,7 +1634,7 @@ console.log("historyOfasset--",historyOfasset.repairAssetId)
             informRepairManArray.amountExtra;
         }
         let total = costTotalOfRepairArray + costTotalOfRepairManArray;
-        repairPackageAssetId.setDataValue("total", total);
+        repairAssetId.setDataValue("total", total);
       }
 
       return res.json({ historyOfasset });
@@ -1697,7 +1655,7 @@ exports.updateStatusForCheckJobRepair = async (req, res, next) => {
 
     const repair_update = await Repair.update(
       {
-        status: "complete",
+        status: "complete"
       },
       { where: { _id: repairId } }
     );
@@ -1706,8 +1664,8 @@ exports.updateStatusForCheckJobRepair = async (req, res, next) => {
         { status: "inStock", reserved: false },
         {
           where: {
-            _id: assetId,
-          },
+            _id: assetId
+          }
         }
       );
     } else if (packageAssetId) {
@@ -1715,8 +1673,8 @@ exports.updateStatusForCheckJobRepair = async (req, res, next) => {
         where: { _id: packageAssetId },
         attributes: ["_id", "assetNumber"],
         include: [
-          { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] },
-        ],
+          { model: Asset, as: "assets", attributes: ["_id", "assetNumber"] }
+        ]
       });
 
       const packageAsset = packageAssetArray[0];
@@ -1724,8 +1682,8 @@ exports.updateStatusForCheckJobRepair = async (req, res, next) => {
         { status: "inStock", reserved: false },
         {
           where: {
-            _id: packageAssetId,
-          },
+            _id: packageAssetId
+          }
         }
       );
 
@@ -1752,7 +1710,6 @@ exports.outSourceRepairRecord = async (req, res, next) => {
 
     console.log("existArrayDocument : ", existArrayDocument);
     console.log("arrayDocument : ", arrayDocument);
-
 
     let existArrayDocumentArray = [];
     let costOfRepairArrayObject = [];
@@ -1797,15 +1754,14 @@ exports.outSourceRepairRecord = async (req, res, next) => {
       receiveWorkOrderDate,
       checkJobInsuranceEndDate,
       checkJobWarrantyPeriod,
-      purchaseAmount,
+      purchaseAmount
     } = inputObject;
 
-    console.log("-----------------------------------")
+    console.log("-----------------------------------");
     console.log("inputObject:", inputObject);
     console.log("status : ", status);
     console.log("costOfRepairArrayObject : ", costOfRepairArrayObject);
-    console.log("-----------------------------------")
-    
+    console.log("-----------------------------------");
 
     let queryInsert = {};
     queryInsert["statusOfDetailRecord"] = status;
@@ -1816,25 +1772,25 @@ exports.outSourceRepairRecord = async (req, res, next) => {
     const repair = await Repair.update(
       {
         ...inputObject,
-        ...queryInsert,
+        ...queryInsert
       },
       { where: { _id: repairId } }
     );
     // about manage document
     let notExistArrayDocument = [];
     const oldDocumentArray = await RepairDocument.findAll({
-      where: { repairId: repairId },
+      where: { repairId: repairId }
     });
     if (arrayDocument.length > 0) {
       for (el of arrayDocument) {
         await RepairDocument.create({
           document: el.filename,
-          repairId: repairId,
+          repairId: repairId
         });
       }
     }
     function getNotExistDocument(existArray, oldDocumentArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj.document + obj._id);
+      const existObjects = existArray.map(obj => obj.document + obj._id);
 
       for (let i = 0; i < oldDocumentArray.length; i++) {
         if (
@@ -1856,7 +1812,7 @@ exports.outSourceRepairRecord = async (req, res, next) => {
     if (notExistArrayDocument.length > 0) {
       for (let i = 0; i < notExistArrayDocument.length; i++) {
         await RepairDocument.destroy({
-          where: { _id: notExistArrayDocument[i]._id },
+          where: { _id: notExistArrayDocument[i]._id }
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
@@ -1865,11 +1821,11 @@ exports.outSourceRepairRecord = async (req, res, next) => {
     // about manage CostOfRepair
 
     const oldCostOfRepair = await CostOfRepair.findAll({
-      where: { repairId: repairId },
+      where: { repairId: repairId }
     });
     let notExistArrayCostOfRepair = [];
     function getNotExist(existArray, oldDataArray, notExistArray) {
-      const existObjects = existArray.map((obj) => obj._id);
+      const existObjects = existArray.map(obj => obj._id);
 
       for (let i = 0; i < oldDataArray.length; i++) {
         if (!existObjects.includes(oldDataArray[i]._id)) {
@@ -1892,8 +1848,8 @@ exports.outSourceRepairRecord = async (req, res, next) => {
       for (let i = 0; i < notExistArrayCostOfRepair.length; i++) {
         await CostOfRepair.destroy({
           where: {
-            _id: notExistArrayCostOfRepair[i]._id,
-          },
+            _id: notExistArrayCostOfRepair[i]._id
+          }
         });
       }
     }
@@ -1907,7 +1863,7 @@ exports.outSourceRepairRecord = async (req, res, next) => {
           quantity: costOfRepairArrayObject[i].quantity,
           unit: costOfRepairArrayObject[i].unit,
           pricePerPiece: costOfRepairArrayObject[i].pricePerPiece,
-          repairId: repairId,
+          repairId: repairId
         });
       } else {
         await CostOfRepair.update(
@@ -1916,7 +1872,7 @@ exports.outSourceRepairRecord = async (req, res, next) => {
             quantity: costOfRepairArrayObject[i].quantity,
             unit: costOfRepairArrayObject[i].unit,
             pricePerPiece: costOfRepairArrayObject[i].pricePerPiece,
-            amountExtra: costOfRepairArrayObject[i].amountExtra,
+            amountExtra: costOfRepairArrayObject[i].amountExtra
           },
           { where: { _id: costOfRepairArrayObject[i]._id } }
         );
@@ -1972,44 +1928,44 @@ exports.getBySearchOfOutsourceRapair = async (req, res, next) => {
     if (informRepairIdDocTextSearch !== "") {
       query["informRepairIdDoc"] = {
         $regex: informRepairIdDocTextSearch,
-        $options: "i",
+        $options: "i"
       };
     }
     if (outSourceRepairNumberTextSearch !== "") {
       query["outSourceRepairNumber"] = {
         $regex: outSourceRepairNumberTextSearch,
-        $options: "i",
+        $options: "i"
       };
     }
     if (statusOutsourceRepairTextSearch !== "") {
       query["statusOutsourceRepair"] = {
         $regex: statusOutsourceRepairTextSearch,
-        $options: "i",
+        $options: "i"
       };
     }
     if (building !== "") {
       queryArray.push({
-        building: { [Op.eq]: building },
+        building: { [Op.eq]: building }
       });
     }
     if (floor !== "") {
       queryArray.push({
-        floor: { [Op.eq]: floor },
+        floor: { [Op.eq]: floor }
       });
     }
     queryArray.push({
-      outsourceFlag: { [Op.eq]: "Y" },
+      outsourceFlag: { [Op.eq]: "Y" }
     });
     queryArray.push({
-      statusOutsourceRepair: { [Op.not]: null },
+      statusOutsourceRepair: { [Op.not]: null }
     });
 
     if (dateFrom !== "") {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: moment().endOf("day").toDate(),
-        },
+          [Op.lte]: moment().endOf("day").toDate()
+        }
       });
     }
     if (dateTo !== "") {
@@ -2019,8 +1975,8 @@ exports.getBySearchOfOutsourceRapair = async (req, res, next) => {
       queryArray.push({
         createdAt: {
           [Op.gte]: new Date(modifiedDateFrom),
-          [Op.lte]: new Date(modifiedDateTo),
-        },
+          [Op.lte]: new Date(modifiedDateTo)
+        }
       });
     }
 
@@ -2032,7 +1988,7 @@ exports.getBySearchOfOutsourceRapair = async (req, res, next) => {
       // include: [{ model: Asset, require: false, as: "assets" }],
       order: [["updatedAt", "DESC"]],
       offset: page * limit,
-      limit: limit,
+      limit: limit
     });
 
     // console.log(asset)
@@ -2052,39 +2008,39 @@ exports.getAssetNumberSelector = async (req, res, next) => {
     let asset = await Asset.aggregate([
       {
         $match: {
-          $and: [{ deletedAt: { $eq: null } }, { assetNumber: { $ne: null } }],
-        },
+          $and: [{ deletedAt: { $eq: null } }, { assetNumber: { $ne: null } }]
+        }
       },
       {
         $group: {
-          _id: "$assetNumber",
-        },
+          _id: "$assetNumber"
+        }
       },
       {
         $project: {
           assetNumber: "$_id",
-          _id: 0,
-        },
-      },
+          _id: 0
+        }
+      }
     ]);
 
     let pkasset = await PackageAsset.aggregate([
       {
         $match: {
-          $and: [{ deletedAt: { $eq: null } }, { assetNumber: { $ne: null } }],
-        },
+          $and: [{ deletedAt: { $eq: null } }, { assetNumber: { $ne: null } }]
+        }
       },
       {
         $group: {
-          _id: "$assetNumber",
-        },
+          _id: "$assetNumber"
+        }
       },
       {
         $project: {
           assetNumber: "$_id",
-          _id: 0,
-        },
-      },
+          _id: 0
+        }
+      }
     ]);
     console.log("asset", asset);
     console.log("pkasset", pkasset);
@@ -2125,20 +2081,20 @@ exports.getRepairTypeOutsourceForSearchOutsource = async (req, res, next) => {
           { outsourceFlag: { [Op.eq]: "Y" } },
           { deletedAt: { [Op.eq]: null } },
           { typeOfRepair: { [Op.ne]: null } },
-          { typeOfRepair: { [Op.ne]: "" } },
-        ],
+          { typeOfRepair: { [Op.ne]: "" } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["typeOfRepair", "typeOfRepair"],
         [
           sequelize.fn("COUNT", sequelize.col("typeOfRepair")),
-          "numberOfzipcodes",
-        ],
+          "numberOfzipcodes"
+        ]
       ],
       group: "typeOfRepair",
       raw: true,
-      order: [["typeOfRepair", "ASC"]],
+      order: [["typeOfRepair", "ASC"]]
     });
     res.json({ typeOfRepair });
   } catch (err) {
@@ -2154,17 +2110,17 @@ exports.getBuildingOutsourceForSearchOutsource = async (req, res, next) => {
           { outsourceFlag: { [Op.eq]: "Y" } },
           { deletedAt: { [Op.eq]: null } },
           { building: { [Op.ne]: null } },
-          { building: { [Op.ne]: "" } },
-        ],
+          { building: { [Op.ne]: "" } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["building", "building"],
-        [sequelize.fn("COUNT", sequelize.col("building")), "numberOfzipcodes"],
+        [sequelize.fn("COUNT", sequelize.col("building")), "numberOfzipcodes"]
       ],
       group: "building",
       raw: true,
-      order: [["building", "ASC"]],
+      order: [["building", "ASC"]]
     });
 
     res.json({ building });
@@ -2181,17 +2137,17 @@ exports.getFloorForSearchOutsource = async (req, res, next) => {
           { outsourceFlag: { [Op.eq]: "Y" } },
           { deletedAt: { [Op.eq]: null } },
           { floor: { [Op.ne]: null } },
-          { floor: { [Op.ne]: "" } },
-        ],
+          { floor: { [Op.ne]: "" } }
+        ]
       },
       attributes: [
         // ["_id", "_id"],
         ["floor", "floor"],
-        [sequelize.fn("COUNT", sequelize.col("floor")), "numberOfzipcodes"],
+        [sequelize.fn("COUNT", sequelize.col("floor")), "numberOfzipcodes"]
       ],
       group: "floor",
       raw: true,
-      order: [["floor", "ASC"]],
+      order: [["floor", "ASC"]]
     });
 
     res.json({ floor });

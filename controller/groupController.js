@@ -4,12 +4,14 @@ const createError = require("../utils/createError");
 exports.createGroup = async (req, res, next) => {
   try {
     const { groupArray } = req.body;
+    const groupArrayObject = JSON.parse(groupArray);
+
     const resGroup = [];
 
-    for (let el of groupArray) {
+    for (let el of groupArrayObject) {
       try {
         let group = await Group.create({
-          name: el.name
+          name: el.name,
         });
         resGroup.push(group);
       } catch (err) {
@@ -45,11 +47,11 @@ exports.updateGroup = async (req, res, next) => {
       }
 
       const existingNameGroup = await Group.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       // console.log("existingNameGroup", existingNameGroup);
       // console.log("existingNameGroup.id", existingNameGroup.id);
-      if (existingNameGroup && existingNameGroup.id !== _id) {
+      if (existingNameGroup && existingNameGroup._id !== _id) {
         throw createError(`Group with name '${name}' already exists`, 400);
       }
 
@@ -67,7 +69,7 @@ exports.updateGroup = async (req, res, next) => {
 exports.getAllGroup = async (req, res, next) => {
   try {
     const group = await Group.findAll({
-      attributes: ["_id", "name"]
+      attributes: ["_id", "name"],
     });
     res.json({ group });
   } catch (err) {
@@ -80,8 +82,8 @@ exports.deleteGroup = async (req, res, next) => {
     const _id = req.params.groupId;
     let group = await Group.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
 
     res.json({ message: "delete group successfully", group });

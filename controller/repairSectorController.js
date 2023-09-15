@@ -3,9 +3,10 @@ const RepairSector = require("../models").repairSector;
 exports.createRepairSector = async (req, res, next) => {
   try {
     const { repairSectorArray } = req.body;
+    const repairSectorArrayObject = JSON.parse(repairSectorArray);
     const resRepairSector = [];
 
-    for (el of repairSectorArray) {
+    for (el of repairSectorArrayObject) {
       try {
         let repairSector = await RepairSector.create({
           name: el.name,
@@ -52,7 +53,7 @@ exports.updateRepairSector = async (req, res, next) => {
         where: { name: name },
       });
       // console.log("existingNameType4.id", existingNameType4.id);
-      if (existingNameRepairSector && existingNameRepairSector.id !== _id) {
+      if (existingNameRepairSector && existingNameRepairSector._id !== _id) {
         throw createError(
           `countingUnit with name '${name}' already exists`,
           400

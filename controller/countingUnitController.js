@@ -47,7 +47,7 @@ exports.updateCountingUnit = async (req, res, next) => {
         where: { name: name },
       });
       // console.log("existingNameType4.id", existingNameType4.id);
-      if (existingNameCountingUnit && existingNameCountingUnit.id !== _id) {
+      if (existingNameCountingUnit && existingNameCountingUnit._id !== _id) {
         throw createError(
           `countingUnit with name '${name}' already exists`,
           400

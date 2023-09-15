@@ -217,7 +217,7 @@ exports.createPackageAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         let packageAsset = await PackageAsset.create({
@@ -857,7 +857,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         );
         if (responseCheckAlreadyAsset.data.value.length > 0) {
           return res
-            .status(400)
+            .status(409)
             .json({ message: "This assetNumber already exists" });
         }
         newestRealAssetId = newestRealAssetId + 1;
@@ -2160,6 +2160,9 @@ exports.getPackageAssetById = async (req, res, next) => {
         },
       ],
     });
+    if (packageAsset == null) {
+      return res.status(404).json({ message: "This PkAsset not found" });
+    }
     // console.log(asset);
     // const packageAsset = await PackageAsset.findById({ _id: packageAssetId });
     res.json({ packageAsset });

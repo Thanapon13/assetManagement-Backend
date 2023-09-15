@@ -5,15 +5,15 @@ exports.createKind = async (req, res, next) => {
   try {
     const { kindArray } = req.body;
     // const kindArrayObject = kindArray
-    console.log("kindArray:", kindArray);
+    const kindArrayObject = JSON.parse(kindArray);
 
     const resKind = [];
 
-    for (let el of kindArray) {
+    for (let el of kindArrayObject) {
       try {
         let kind = await Kind.create({
           name: el.name,
-          value: el.value
+          value: el.value,
         });
         resKind.push(kind);
       } catch (err) {
@@ -54,20 +54,20 @@ exports.updateKind = async (req, res, next) => {
       }
 
       const existingNameKind = await Kind.findOne({
-        where: { name: name }
+        where: { name: name },
       });
       // console.log("existingNameKind", existingNameKind);
       // console.log("existingNameKind.id", existingNameKind.id);
-      if (existingNameKind && existingNameKind.id !== _id) {
+      if (existingNameKind && existingNameKind._id !== _id) {
         throw createError(`Kind with name '${name}' already exists`, 400);
       }
 
       const existingValueKind = await Kind.findOne({
-        where: { value: value }
+        where: { value: value },
       });
       // console.log("existingValueKind", existingValueKind);
 
-      if (existingValueKind && existingValueKind.id !== _id) {
+      if (existingValueKind && existingValueKind._id !== _id) {
         const error = new Error(`Value '${value}' already exists.`);
         error.statusCode = 400;
         throw error;
@@ -88,7 +88,7 @@ exports.updateKind = async (req, res, next) => {
 exports.getAllKind = async (req, res, next) => {
   try {
     const kind = await Kind.findAll({
-      attributes: ["_id", "name", "value"]
+      attributes: ["_id", "name", "value"],
     });
     res.json({ kind });
   } catch (err) {
@@ -101,8 +101,8 @@ exports.deleteKind = async (req, res, next) => {
     const _id = req.params.kindId;
     let kind = await Kind.destroy({
       where: {
-        _id: _id
-      }
+        _id: _id,
+      },
     });
     res.json({ kind });
   } catch (err) {
