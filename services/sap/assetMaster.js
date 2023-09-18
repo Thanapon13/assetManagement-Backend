@@ -74,7 +74,7 @@ async function read(data, sessionId, routeId) {
   try {
     const response = await axios({
       method: "get",
-      url: "https://203.154.157.31:50000/b1s/v1/Items",
+      url: "https://203.154.157.31:50000/b1s/v1/Items/$count",
       // timeout: 5000,
       headers: {
         // Path=/bts/v1; Secure; HttpOnly;
@@ -86,6 +86,7 @@ async function read(data, sessionId, routeId) {
 
       // httpsAgent: agent,
     });
+
     return response;
   } catch (error) {
     console.error("Error Get AssetMaster data from API:", error);
