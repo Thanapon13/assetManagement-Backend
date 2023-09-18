@@ -1084,7 +1084,7 @@ exports.updateAsset = async (req, res, next) => {
               existArrayDocumentArray[j].document.split("-");
             let newDocumentName = "";
             // console.log("newImageSplit", newImageSplit.length);
-            for (let u = 0; u < newImageSplit.length; u++) {
+            for (let u = 0; u < newDocumentSplit.length; u++) {
               if (u == 0) {
                 newDocumentName = newDocumentName + `${Date.now()}-`;
               } else {
