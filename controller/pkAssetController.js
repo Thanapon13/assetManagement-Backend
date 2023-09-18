@@ -211,11 +211,11 @@ exports.createPackageAsset = async (req, res, next) => {
             $filter: `ItemCode eq '${el.assetNumber}'`,
           },
         };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
           dataQuery,
           sessionId
         );
-        if (responseCheckAlreadyAsset.data.value.length > 0) {
+        if (responseCheckAlreadyAsset.data > 0) {
           return res
             .status(409)
             .json({ message: "This assetNumber already exists" });
@@ -851,11 +851,11 @@ exports.updatePackageAsset = async (req, res, next) => {
             $filter: `ItemCode eq '${el.assetNumber}'`,
           },
         };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
           dataQuery,
           sessionId
         );
-        if (responseCheckAlreadyAsset.data.value.length > 0) {
+        if (responseCheckAlreadyAsset.data > 0) {
           return res
             .status(409)
             .json({ message: "This assetNumber already exists" });

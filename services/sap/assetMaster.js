@@ -74,6 +74,30 @@ async function read(data, sessionId, routeId) {
   try {
     const response = await axios({
       method: "get",
+      url: "https://203.154.157.31:50000/b1s/v1/Items",
+      // timeout: 5000,
+      headers: {
+        // Path=/bts/v1; Secure; HttpOnly;
+        // ROUTEID=.node0
+        "Content-Type": "application/json",
+        Cookie: `B1SESSION=${sessionId}; ROUTEID=.node4`,
+      },
+      params: data.params,
+
+      // httpsAgent: agent,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error Get AssetMaster data from API:", error);
+    throw error;
+  }
+}
+
+async function readCount(data, sessionId, routeId) {
+  try {
+    const response = await axios({
+      method: "get",
       url: "https://203.154.157.31:50000/b1s/v1/Items/$count",
       // timeout: 5000,
       headers: {
@@ -94,4 +118,4 @@ async function read(data, sessionId, routeId) {
   }
 }
 
-module.exports = { create, cancel, delete_assetMaster, read };
+module.exports = { create, cancel, delete_assetMaster, read,readCount };

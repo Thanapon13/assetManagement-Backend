@@ -218,11 +218,11 @@ exports.createAsset = async (req, res, next) => {
             $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
           },
         };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
           dataQuery,
           sessionId
         );
-        if (responseCheckAlreadyAsset.data.value.length > 0) {
+        if (responseCheckAlreadyAsset.data > 0) {
           return res
             .status(409)
             .json({ message: "This assetNumber already exists" });
@@ -1021,11 +1021,11 @@ exports.updateAsset = async (req, res, next) => {
             $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
           },
         };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
           dataQuery,
           sessionId
         );
-        if (responseCheckAlreadyAsset.data.value.length > 0) {
+        if (responseCheckAlreadyAsset.data > 0) {
           return res
             .status(409)
             .json({ message: "This assetNumber already exists" });
@@ -1506,11 +1506,11 @@ exports.getDepreciationByAssetNumber = async (req, res, next) => {
         $filter: `ItemCode eq '${assetNumber}'`,
       },
     };
-    const responseCheckAlreadyAsset = await sapAssetMasterService.read(
+    const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
       dataQueryCheckAlreadyAsset,
       sessionId
     );
-    if (responseCheckAlreadyAsset.data.value.length == 0) {
+    if (responseCheckAlreadyAsset.data == 0) {
       return res
         .status(204)
         .json({ message: "This assetNumber does not exist." });
@@ -1734,7 +1734,7 @@ exports.getRunningAssetNumber = async (req, res, next) => {
     const dataGetRunningAssetMaster = {
       params: { $filter: `startswith(ItemCode,'${assetNumber}/')` },
     };
-    const responseCreateAssetMaster = await sapAssetMasterService.read(
+    const responseCreateAssetMaster = await sapAssetMasterService.readCount(
       dataGetRunningAssetMaster,
       sessionId
     );

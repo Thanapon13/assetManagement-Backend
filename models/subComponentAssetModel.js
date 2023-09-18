@@ -14,27 +14,27 @@ module.exports = (sequelize, Sequelize) => {
       },
       assetNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "assetNumber",
       },
       serialNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "serialNumber",
       },
       replacedAssetNumber: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "replacedAssetNumber",
       },
       asset01: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "asset01",
       },
       sector: {
         type: Sequelize.STRING(50),
-        allowNull: false,
+        allowNull: true,
         field: "sector",
       },
       // floorId: {
