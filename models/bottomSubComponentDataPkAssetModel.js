@@ -14,32 +14,32 @@ module.exports = (sequelize, Sequelize) => {
       },
       serialNumber: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "serialNumber",
       },
       productName: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "productName",
       },
       assetNumber: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "assetNumber",
       },
       sector: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "sector",
       },
       price: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "price",
       },
       asset01: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: "asset01",
       },
     },

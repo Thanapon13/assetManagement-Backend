@@ -968,7 +968,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           }
         }
         for (let j = 0; j < existArrayDocumentArray.length; j++) {
-          if (i == 0) {
+          if (index == 0) {
             await PackageAssetDocument.create({
               document: existArrayDocumentArray[j].document,
               packageAssetId: packageAsset.dataValues._id,
