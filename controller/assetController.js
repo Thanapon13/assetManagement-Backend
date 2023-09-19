@@ -212,22 +212,21 @@ exports.createAsset = async (req, res, next) => {
       }
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
+      const dataGetRunningAssetMaster = {
+        params: { $filter: `startswith(ItemCode,'${assetGroupNumber}/')` },
+      };
+      const responseGetCountThisAssetGroupNumber =
+        await sapAssetMasterService.readCount(
+          dataGetRunningAssetMaster,
+          sessionId
+        );
+      let count = parseInt(responseGetCountThisAssetGroupNumber.data);
 
       for (let i = 0; i < quantity; i++) {
-        const dataGetRunningAssetMaster = {
-          params: { $filter: `startswith(ItemCode,'${assetGroupNumber}/')` },
-        };
-        const responseGetCountThisAssetGroupNumber =
-          await sapAssetMasterService.readCount(
-            dataGetRunningAssetMaster,
-            sessionId
-          );
-        let count = parseInt(responseGetCountThisAssetGroupNumber.data);
-        let assetNumber = `${assetGroupNumber}/0006`;
-        // let assetNumber = `${assetGroupNumber}/${(count + i + 1)
-        //   .toString()
-        //   .padStart(4, "0")}`;
-        console.log("assetNumber : ", assetNumber);
+        // let assetNumber = `${assetGroupNumber}/0006`;
+        let assetNumber = `${assetGroupNumber}/${(count + i + 1)
+          .toString()
+          .padStart(4, "0")}`;
         // let dataQuery = {
         //   params: {
         //     $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
@@ -1030,26 +1029,24 @@ exports.updateAsset = async (req, res, next) => {
       }
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
-      for (let i = 0; i < quantity; i++) {
-        let dataQuery = {
-          params: {
-            $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
-          },
-        };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
-          dataQuery,
+      const dataGetRunningAssetMaster = {
+        params: { $filter: `startswith(ItemCode,'${assetGroupNumber}/')` },
+      };
+      const responseGetCountThisAssetGroupNumber =
+        await sapAssetMasterService.readCount(
+          dataGetRunningAssetMaster,
           sessionId
         );
-        if (responseCheckAlreadyAsset.data > 0) {
-          return res
-            .status(409)
-            .json({ message: "This assetNumber already exists" });
-        }
+      let count = parseInt(responseGetCountThisAssetGroupNumber.data);
+      for (let i = 0; i < quantity; i++) {
+        let assetNumber = `${assetGroupNumber}/${(count + i + 1)
+          .toString()
+          .padStart(4, "0")}`;
         newestRealAssetId = newestRealAssetId + 1;
         console.log("depreciationStartDates : ", depreciationStartDate);
         const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
-          assetNumber: genDataArray[i].assetNumber,
+          assetNumber: assetNumber,
           serialNumber: genDataArray[i].serialNumber,
           replacedAssetNumber: genDataArray[i].replacedAssetNumber,
           asset01: genDataArray[i].asset01,
@@ -1134,7 +1131,7 @@ exports.updateAsset = async (req, res, next) => {
         // sap service
 
         let dataInsertAssetMaster = {
-          ItemCode: genDataArray[i].assetNumber,
+          ItemCode: assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
           AssetClass: AssetClass,
@@ -1157,7 +1154,7 @@ exports.updateAsset = async (req, res, next) => {
             Remarks: "Capitalization",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: genDataArray[i].assetNumber,
+                AssetNumber: assetNumber,
                 Quantity: 1,
                 TotalLC: parseInt(price),
               },
@@ -1201,7 +1198,7 @@ exports.updateAsset = async (req, res, next) => {
             Remarks: "Test Retirement By Postman",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: genDataArray[i].assetNumber,
+                AssetNumber: assetNumber,
               },
             ],
           };
