@@ -43,6 +43,8 @@ router.patch(
 
 router.get("/", protect, borrowController.getAllBorrow);
 router.get("/sectorForSearch", protect, borrowController.getSectorForSearch);
+router.get("/sectorForSearchBorrowApprove", protect, borrowController.getSectorForSearchBorrowApprove);
+
 router.get(
   "/sectorForSearchCheckReturnBorrow",
   protect,
