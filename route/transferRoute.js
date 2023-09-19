@@ -19,12 +19,11 @@ router.get(
   transferController.getTransferSectorForSearch
 );
 
-
 router.get(
   "/transferSectorForSearchTransferApprove",
   protect,
   transferController.getTransferSectorForSearchTransferApprove
-); 
+);
 router.get(
   "/transfereeSectorForSearch",
   protect,
