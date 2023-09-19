@@ -1389,7 +1389,7 @@ exports.approveAllWaitingBorrow = async (req, res, next) => {
 
             // console.log("/n/n");
             // console.log("packageAsset", packageAsset);
-            let assetArray = await Asset.findOne({
+            let assetArray = await Asset.findAll({
               where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
@@ -1482,7 +1482,7 @@ exports.rejectAllWaitingBorrow = async (req, res, next) => {
 
             // console.log("/n/n");
             // console.log("packageAsset", packageAsset);
-            let assetArray = await Asset.findOne({
+            let assetArray = await Asset.findAll({
               where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
@@ -1576,7 +1576,7 @@ exports.rejectIndividualWaitingBorrow = async (req, res, next) => {
           { where: { _id: packageAssetId } }
         );
 
-        let assetArray = await Asset.fineOne({
+        let assetArray = await Asset.findAll({
           where: { packageAssetId: packageAssetId },
         });
         for (let l = 0; l < assetArray.length; l++) {
@@ -1680,7 +1680,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
           { where: { _id: packageAssetId } }
         );
 
-        let assetArray = await Asset.findOne({
+        let assetArray = await Asset.findAll({
           where: { packageAssetId: packageAssetId },
         });
         for (let l = 0; l < assetArray.length; l++) {
@@ -1751,7 +1751,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
           { where: { _id: packageAssetId } }
         );
 
-        let assetArray = await Asset.findOne({
+        let assetArray = await Asset.findAll({
           where: { packageAssetId: packageAssetId },
         });
         for (let l = 0; l < assetArray.length; l++) {
@@ -1848,7 +1848,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               }
             );
 
-            let assetArray = await Asset.findOne({
+            let assetArray = await Asset.findAll({
               where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
@@ -1865,7 +1865,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
               { where: { _id: packageAssetId } }
             );
 
-            let assetArray = await Asset.findOne({
+            let assetArray = await Asset.findAll({
               where: { packageAssetId: packageAssetId },
             });
             for (let l = 0; l < assetArray.length; l++) {
@@ -1925,7 +1925,7 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
             { where: { _id: packageAssetId } }
           );
 
-          let assetArray = await Asset.fineOne({
+          let assetArray = await Asset.findAll({
             where: { packageAssetId: packageAssetId },
           });
           for (let l = 0; l < assetArray.length; l++) {
@@ -2017,7 +2017,7 @@ exports.rejectAllBorrowApproveDetail = async (req, res, next) => {
           { where: { _id: packageAssetId } }
         );
 
-        let assetArray = await Asset.findOne({
+        let assetArray = await Asset.findAll({
           where: { packageAssetId: packageAssetId },
         });
         for (let l = 0; l < assetArray.length; l++) {
