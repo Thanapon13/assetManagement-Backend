@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
 const fs = require("fs");
 var nodemailer = require("nodemailer");
-var verfifyAndTokenService = require("../services/authService.js/verifyAndTokenService");
+var verfifyAndTokenService = require("../services/authService/verifyAndTokenService");
 const jwt = require("jsonwebtoken");
 
 let refreshTokenArray = [];
