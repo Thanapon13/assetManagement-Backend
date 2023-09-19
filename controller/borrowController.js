@@ -3198,7 +3198,7 @@ exports.getViewBorrowHistoryByAssetId = async (req, res, next) => {
 exports.getViewBorrowHistoryByPackageAssetId = async (req, res, next) => {
   try {
     const packageAssetId = req.params.packageAssetId;
-    const borrows = await Borrow.findOne({
+    const borrows = await Borrow.findAll({
       include: {
         model: BorrowHasPkAsset,
         as: "borrowHasPkAssets",
