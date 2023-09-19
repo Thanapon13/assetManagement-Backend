@@ -1033,6 +1033,31 @@ exports.getSectorForSearch = async (req, res, next) => {
   }
 };
 
+
+exports.getSectorForSearchBorrowApprove = async (req, res, next) => {
+  try {
+    const sector = await Borrow.findAll({
+      where: {
+        [Op.and]: [
+          { deletedAt: { [Op.eq]: null } },
+          { sector: { [Op.ne]: null } },
+          { sector: { [Op.ne]: "" } },
+          { status: { [Op.eq]: "waiting" } },
+        ],
+      },
+      attributes: [
+        ["sector", "sector"],
+        [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
+      ],
+      group: "sector",
+      raw: true,
+    });
+    res.json({ sector });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getSectorForSearchCheckReturnBorrow = async (req, res, next) => {
   try {
     const sector = await Borrow.findAll({

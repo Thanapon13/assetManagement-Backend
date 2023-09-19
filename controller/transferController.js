@@ -992,6 +992,35 @@ exports.getTransferSectorForSearch = async (req, res, next) => {
   }
 };
 
+exports.getTransferSectorForSearchTransferApprove = async (req, res, next) => {
+  try {
+    const transferSector = await transfer.findAll({
+      attributes: [
+        [Sequelize.literal("transferSector"), "transferSector"],
+        [
+          Sequelize.fn("COUNT", Sequelize.col("transferSector")),
+          "numberOfzicodes",
+        ],
+      ],
+      where: {
+        deletedAt: null,
+        transferSector: {
+          [Op.not]: null,
+          [Op.not]: "",
+        },
+        status : "waiting"
+      },
+      group: ["transferSector"],
+      raw: true,
+      order: [[Sequelize.literal("transferSector"), "ASC"]],
+    });
+
+    res.status(200).json({ transferSector });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getTransfereeSectorForSearch = async (req, res, next) => {
   try {
     const transfereeSector = await transfer.findAll(
