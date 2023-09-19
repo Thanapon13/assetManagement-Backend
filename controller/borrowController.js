@@ -1033,7 +1033,6 @@ exports.getSectorForSearch = async (req, res, next) => {
   }
 };
 
-
 exports.getSectorForSearchBorrowApprove = async (req, res, next) => {
   try {
     const sector = await Borrow.findAll({
@@ -1836,11 +1835,13 @@ exports.partiallyApproveBorrowApproveDetail = async (req, res, next) => {
           let reason = el.reason;
 
           if (reason !== "") {
+            console.log(123123123);
             // reject
             await Asset.update(
               { status: "inStock", reserved: false },
               { where: { _id: assetId } }
             );
+            console.log(123123123);
           } else {
             // approve
             await Asset.update(
@@ -2685,18 +2686,18 @@ exports.getBorrowCheckById = async (req, res, next) => {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
           where: { reason: "" },
-          require: false,
+          required: false,
         },
         {
           model: BorrowHasPkAsset,
           as: "borrowHasPkAssets",
           where: { reason: "" },
 
-          require: false,
+          required: false,
         },
         {
           model: BorrowImage,
-          require: false,
+          required: false,
 
           as: "borrowImages",
         },
@@ -2725,11 +2726,11 @@ exports.getBorrowCheckById = async (req, res, next) => {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
           where: { reason: "" },
-          require: false,
+          required: false,
         },
         {
           model: BorrowImage,
-          require: false,
+          required: false,
 
           as: "borrowImages",
         },
@@ -2750,11 +2751,11 @@ exports.getBorrowCheckById = async (req, res, next) => {
           as: "borrowHasPkAssets",
           where: { reason: "" },
 
-          require: false,
+          required: false,
         },
         {
           model: BorrowImage,
-          require: false,
+          required: false,
 
           as: "borrowImages",
         },
@@ -2777,6 +2778,8 @@ exports.getBorrowCheckById = async (req, res, next) => {
       },
       ...queryInclude,
     });
+
+    console.log("borrow : ", borrow);
 
     if (borrow == null) {
       return res.status(404).json({ message: "this borrow not found" });
