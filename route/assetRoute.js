@@ -73,6 +73,12 @@ router.get(
 );
 
 router.get(
+  "/getAssetNumberAlreadyDistribution",
+  protect,
+  assetController.getAssetNumberAlreadyDistribution
+);
+
+router.get(
   "/getRunningAssetNumber",
   protect,
   assetController.getRunningAssetNumber

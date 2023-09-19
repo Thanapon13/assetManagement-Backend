@@ -419,6 +419,20 @@ exports.createPackageAsset = async (req, res, next) => {
         ) {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
+          if (
+            objSubComponentArray[i].replacedAssetNumber != null &&
+            objSubComponentArray[i].replacedAssetNumber != ""
+          ) {
+            const assetOfreplacedData = await Asset.update(
+              { replacedAssetFlag: true },
+              {
+                where: {
+                  assetNumber: objSubComponentArray[i].replacedAssetNumber,
+                },
+                returning: true,
+              }
+            );
+          }
           const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
@@ -429,7 +443,7 @@ exports.createPackageAsset = async (req, res, next) => {
             pricePerUnit: objSubComponentArray[i].price,
             asset01: objSubComponentArray[i].asset01,
 
-            // sector: el.sector,
+            sector: el.sector,
             replacedAssetNumber: objSubComponentArray[i].replacedAssetNumber,
             type: type,
             kind: kind,
@@ -862,6 +876,15 @@ exports.updatePackageAsset = async (req, res, next) => {
           .toString()
           .padStart(4, "0")}`;
         newestRealAssetId = newestRealAssetId + 1;
+        if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
+          const assetOfreplacedData = await PackageAsset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: el.replacedAssetNumber },
+              returning: true,
+            }
+          );
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId,
           assetNumber: assetNumber,
@@ -1146,6 +1169,22 @@ exports.updatePackageAsset = async (req, res, next) => {
         ) {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
+
+          if (
+            bottomSubComponentDataObject[i].replacedAssetNumber != null &&
+            bottomSubComponentDataObject[i].replacedAssetNumber != ""
+          ) {
+            const assetOfreplacedData = await Asset.update(
+              { replacedAssetFlag: true },
+              {
+                where: {
+                  assetNumber:
+                    bottomSubComponentDataObject[i].replacedAssetNumber,
+                },
+                returning: true,
+              }
+            );
+          }
           let assetCreate = await Asset.create({
             realAssetId: newestRealAssetId,
             serialNumber: bottomSubComponentDataObject[i].serialNumber,
@@ -1157,7 +1196,8 @@ exports.updatePackageAsset = async (req, res, next) => {
             asset01: bottomSubComponentDataObject[i].asset01,
 
             sector: el.sector,
-            replacedAssetNumber: el.replacedAssetNumber,
+            replacedAssetNumber:
+              bottomSubComponentDataObject[i].replacedAssetNumber,
             type: type,
             kind: kind,
             unit: unit,
@@ -2198,6 +2238,25 @@ exports.getAllSector = async (req, res, next) => {
       },
     ]);
     res.json({ sector });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAssetNumberAlreadyDistribution = async (req, res, next) => {
+  try {
+    const textSearch = req.query.textSearch || "";
+    let packageAssetData = await PackageAsset.findAll({
+      where: {
+        assetNumber: { [Op.like]: `${textSearch}%` },
+        deletedAt: { [Op.eq]: null },
+        distributeStatus: { [Op.eq]: true },
+        replacedAssetFlag: { [Op.eq]: false },
+      },
+      attributes: ["_id", "assetNumber"],
+    });
+
+    res.json({ packageAssets: packageAssetData });
   } catch (err) {
     next(err);
   }
