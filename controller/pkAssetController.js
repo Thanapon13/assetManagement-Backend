@@ -1538,6 +1538,16 @@ exports.updatePackageAsset = async (req, res, next) => {
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
+
+    if (replacedAssetNumber != null && replacedAssetNumber != "") {
+      const assetOfreplacedData = await PackageAsset.update(
+        { replacedAssetFlag: true },
+        {
+          where: { assetNumber: replacedAssetNumber },
+          returning: true,
+        }
+      );
+    }
     let oldDistributeStatus = packageAssetById.distributeStatus;
     packageAssetById.status = status ?? packageAssetById.status;
     packageAssetById.engProductName = engProductName;

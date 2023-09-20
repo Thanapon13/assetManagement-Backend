@@ -1359,6 +1359,25 @@ exports.updateAsset = async (req, res, next) => {
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
+
+    let assetOfreplaced = {};
+    if (replacedAssetNumber != null && replacedAssetNumber != "") {
+      const assetOfreplacedData = await asset.update(
+        { replacedAssetFlag: true },
+        {
+          where: { assetNumber: replacedAssetNumber },
+          returning: true,
+        }
+      );
+
+      if (assetOfreplacedData != null) {
+        assetOfreplaced = assetOfreplacedData[1][0].dataValues;
+      } else {
+        assetOfreplaced.packageAssetId = null;
+      }
+    } else {
+      assetOfreplaced.packageAssetId = null;
+    }
     let oldDistributeStatus = assetById.distributeStatus;
     assetById.status = status ?? assetById.status;
     assetById.engProductName = engProductName;
@@ -1385,6 +1404,7 @@ exports.updateAsset = async (req, res, next) => {
     assetById.asset01 = asset01;
     assetById.serialNumber = serialNumber;
     assetById.replacedAssetNumber = replacedAssetNumber;
+    assetById.packageAssetId = assetOfreplaced.packageAssetId || null;
 
     //สัญญาจัดซื้อ
     assetById.acquisitionMethod = acquisitionMethod;
