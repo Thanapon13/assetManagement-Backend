@@ -2615,9 +2615,9 @@ exports.getBorrowCheckSector = async (req, res, next) => {
           { sector: { [Op.ne]: null } },
           { sector: { [Op.ne]: "" } },
           {
-            sector: {
+            status: {
               [Op.in]: [
-                "watingReturnApprove",
+                "waitingReturnApprove",
                 "partiallyReturn",
                 "approveReturn",
               ],
@@ -2630,37 +2630,8 @@ exports.getBorrowCheckSector = async (req, res, next) => {
         [sequelize.fn("COUNT", sequelize.col("sector")), "numberOfzipcodes"],
       ],
       group: "sector",
-      raw: true,
     });
     res.json({ sector });
-    // const sectors = await Borrow.aggregate([
-    //   {
-    //     $match: {
-    //       sector: { $ne: null },
-    //       status: {
-    //         $in: [
-    //           // "approve",
-    //           // "partiallyApprove",
-    //           "waitingReturnApprove",
-    //           "partiallyReturn",
-    //           "approveReturn",
-    //         ],
-    //       },
-    //       deletedAt: { $eq: null },
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$sector",
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //       sector: "$_id",
-    //     },
-    //   },
-    // ]);
   } catch (err) {
     next(err);
   }
