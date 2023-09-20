@@ -150,7 +150,7 @@ exports.createPackageAsset = async (req, res, next) => {
     if (newestAsset == null) {
       newestRealAssetId = 0;
     } else {
-      newestRealAssetId = parseInt(newestAsset.realAssetId);
+      newestRealAssetId = newestAsset.realAssetId;
     }
     console.log("newestRealAssetId :", newestRealAssetId);
     if (status == "saveDraft") {
@@ -198,31 +198,29 @@ exports.createPackageAsset = async (req, res, next) => {
     } else {
       const responseLogin = await sapAuthService.login();
       const sessionId = responseLogin.data.SessionId;
+      const dataGetRunningAssetMaster = {
+        params: {
+          $filter: `startswith(ItemCode,'${assetGroupNumber}/') and not(endswith(ItemCode,')'))`,
+        },
+      };
+      const responseGetCountThisAssetGroupNumber =
+        await sapAssetMasterService.readCount(
+          dataGetRunningAssetMaster,
+          sessionId
+        );
+      let count = parseInt(responseGetCountThisAssetGroupNumber.data);
       for (let O = 0; O < objGenDataArray.length; O++) {
         let el = objGenDataArray[O];
         let index = O;
+        let assetNumber = `${assetGroupNumber}/${(count + index + 1)
+          .toString()
+          .padStart(4, "0")}`;
         // objGenDataArray.forEach(async (el, index) => {
         let bottomComponenetArray = [];
-        // console.log(`Package${index+1}`)
 
-        // console.log("saveDocumentArray",saveDocumentArray)
-        let dataQuery = {
-          params: {
-            $filter: `ItemCode eq '${el.assetNumber}'`,
-          },
-        };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
-          dataQuery,
-          sessionId
-        );
-        if (responseCheckAlreadyAsset.data > 0) {
-          return res
-            .status(409)
-            .json({ message: "This assetNumber already exists" });
-        }
         let packageAsset = await PackageAsset.create({
-          realAssetId: newestRealAssetId + 1,
-          assetNumber: el.assetNumber,
+          realAssetId: (newestRealAssetId + 1).toString(),
+          assetNumber: assetNumber,
           sector: el.sector,
           replacedAssetNumber: el.replacedAssetNumber,
           engProductName: engProductName,
@@ -320,7 +318,7 @@ exports.createPackageAsset = async (req, res, next) => {
           AssetClass = getAssetClass.value;
         }
         let dataInsertAssetMasterOfPkAsset = {
-          ItemCode: el.assetNumber,
+          ItemCode: assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
           AssetClass: AssetClass,
@@ -347,7 +345,7 @@ exports.createPackageAsset = async (req, res, next) => {
             Remarks: "Capitalization PackageAsset",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
+                AssetNumber: assetNumber,
                 Quantity: 1,
                 TotalLC: parseInt(price),
               },
@@ -394,7 +392,7 @@ exports.createPackageAsset = async (req, res, next) => {
             Remarks: "Retiremant on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
+                AssetNumber: assetNumber,
               },
             ],
           };
@@ -409,6 +407,7 @@ exports.createPackageAsset = async (req, res, next) => {
             }
           );
         }
+        let indexOfAsset = 0;
         for (
           let i =
             index * (objSubComponentArray.length / objGenDataArray.length);
@@ -439,7 +438,7 @@ exports.createPackageAsset = async (req, res, next) => {
             serialNumber: objSubComponentArray[i].serialNumber,
             // engProductName,
             productName: objSubComponentArray[i].productName,
-            assetNumber: objSubComponentArray[i].assetNumber,
+            assetNumber: assetNumberOfAsset,
             sector: objSubComponentArray[i].sector,
             pricePerUnit: objSubComponentArray[i].price,
             asset01: objSubComponentArray[i].asset01,
@@ -551,7 +550,7 @@ exports.createPackageAsset = async (req, res, next) => {
             AssetClass = getAssetClass.value;
           }
           let dataInsertAssetMaster = {
-            ItemCode: objSubComponentArray[i].assetNumber,
+            ItemCode: assetNumberOfAsset,
             ItemName: objSubComponentArray[i].productName,
             ItemType: "itFixedAssets",
             AssetClass: AssetClass,
@@ -574,7 +573,7 @@ exports.createPackageAsset = async (req, res, next) => {
               Remarks: "Capitalization Asset",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: objSubComponentArray[i].assetNumber,
+                  AssetNumber: assetNumberOfAsset,
                   Quantity: 1,
                   TotalLC: parseInt(objSubComponentArray[i].price),
                 },
@@ -618,7 +617,7 @@ exports.createPackageAsset = async (req, res, next) => {
               Remarks: "Retiremant on Asset Management System",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: objSubComponentArray[i].assetNumber,
+                  AssetNumber: assetNumberOfAsset,
                 },
               ],
             };
@@ -641,7 +640,7 @@ exports.createPackageAsset = async (req, res, next) => {
           }
           ////////////////// case สร้างเป็นชุด
           // let dataInsertAssetMaster = {
-          //   ItemCode: objSubComponentArray[i].assetNumber,
+          //   ItemCode: assetNumberOfAsset,
           //   ItemName: objSubComponentArray[i].productName,
           //   ItemType: "itFixedAssets",
           //   AssetClass: "1206160101.101",
@@ -652,7 +651,7 @@ exports.createPackageAsset = async (req, res, next) => {
           //   sessionId
           // );
           // bottomComponenetArray.push({
-          //   AssetNumber: objSubComponentArray[i].assetNumber,
+          //   AssetNumber: assetNumberOfAsset,
           //   Quantity: 1,
           //   TotalLC: parseInt(objSubComponentArray[i].price),
           // });
@@ -859,23 +858,23 @@ exports.updatePackageAsset = async (req, res, next) => {
       } else {
         AssetClass = getAssetClass.value;
       }
+      const dataGetRunningAssetMaster = {
+        params: {
+          $filter: `startswith(ItemCode,'${assetGroupNumber}/') and not(endswith(ItemCode,')'))`,
+        },
+      };
+      const responseGetCountThisAssetGroupNumber =
+        await sapAssetMasterService.readCount(
+          dataGetRunningAssetMaster,
+          sessionId
+        );
+      let count = parseInt(responseGetCountThisAssetGroupNumber.data);
       for (let O = 0; O < genDataArray.length; O++) {
         let el = genDataArray[O];
         let index = O;
-        let dataQuery = {
-          params: {
-            $filter: `ItemCode eq '${el.assetNumber}'`,
-          },
-        };
-        const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
-          dataQuery,
-          sessionId
-        );
-        if (responseCheckAlreadyAsset.data > 0) {
-          return res
-            .status(409)
-            .json({ message: "This assetNumber already exists" });
-        }
+        let assetNumber = `${assetGroupNumber}/${(count + index + 1)
+          .toString()
+          .padStart(4, "0")}`;
         newestRealAssetId = newestRealAssetId + 1;
         if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
           const assetOfreplacedData = await PackageAsset.update(
@@ -888,7 +887,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         }
         let packageAsset = await PackageAsset.create({
           realAssetId: newestRealAssetId,
-          assetNumber: el.assetNumber,
+          assetNumber: assetNumber,
           sector: el.sector,
           replacedAssetNumber: el.replacedAssetNumber,
           engProductName: engProductName,
@@ -1067,7 +1066,7 @@ exports.updatePackageAsset = async (req, res, next) => {
         // );
 
         let dataInsertAssetMasterOfPkAsset = {
-          ItemCode: el.assetNumber,
+          ItemCode: assetNumber,
           ItemName: productName,
           ItemType: "itFixedAssets",
           AssetClass: AssetClass,
@@ -1094,7 +1093,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Capitalization PackageAsset",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
+                AssetNumber: assetNumber,
                 Quantity: 1,
                 TotalLC: parseInt(price),
               },
@@ -1141,7 +1140,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             Remarks: "Retiremant on Asset Management System",
             AssetDocumentLineCollection: [
               {
-                AssetNumber: el.assetNumber,
+                AssetNumber: assetNumber,
               },
             ],
           };
@@ -1160,6 +1159,8 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
           );
         }
+        let indexOfAsset = 0;
+
         for (
           let i = index * lengthOfBaseBottomSubComponentData;
           i < (index + 1) * lengthOfBaseBottomSubComponentData &&
@@ -1189,7 +1190,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             serialNumber: bottomSubComponentDataObject[i].serialNumber,
             // engProductName,
             productName: bottomSubComponentDataObject[i].productName,
-            assetNumber: bottomSubComponentDataObject[i].assetNumber,
+            assetNumber: assetNumberOfAsset,
             sector: bottomSubComponentDataObject[i].sector,
             pricePerUnit: bottomSubComponentDataObject[i].price,
             asset01: bottomSubComponentDataObject[i].asset01,
@@ -1337,7 +1338,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           }
           //case1 สร้างแยก
           let dataInsertAssetMaster = {
-            ItemCode: bottomSubComponentDataObject[i].assetNumber,
+            ItemCode: assetNumberOfAsset,
             ItemName: bottomSubComponentDataObject[i].productName,
             ItemType: "itFixedAssets",
             AssetClass: AssetClass,
@@ -1360,7 +1361,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               Remarks: "Capitalization Asset",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                  AssetNumber: assetNumberOfAsset,
                   Quantity: 1,
                   TotalLC: parseInt(bottomSubComponentDataObject[i].price),
                 },
@@ -1404,7 +1405,7 @@ exports.updatePackageAsset = async (req, res, next) => {
               Remarks: "Retiremant on Asset Management System",
               AssetDocumentLineCollection: [
                 {
-                  AssetNumber: bottomSubComponentDataObject[i].assetNumber,
+                  AssetNumber: assetNumberOfAsset,
                 },
               ],
             };
