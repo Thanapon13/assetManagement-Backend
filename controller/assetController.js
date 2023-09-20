@@ -1045,27 +1045,7 @@ exports.updateAsset = async (req, res, next) => {
           .padStart(4, "0")}`;
         newestRealAssetId = newestRealAssetId + 1;
         console.log("depreciationStartDates : ", depreciationStartDate);
-        let assetOfreplaced = {};
-        if (
-          genDataArray[i].replacedAssetNumber != null &&
-          genDataArray[i].replacedAssetNumber != ""
-        ) {
-          const assetOfreplacedData = await asset.update(
-            { replacedAssetFlag: true },
-            {
-              where: { assetNumber: genDataArray[i].replacedAssetNumber },
-              returning: true,
-            }
-          );
-
-          if (assetOfreplacedData != null) {
-            assetOfreplaced = assetOfreplacedData[1][0].dataValues;
-          } else {
-            assetOfreplaced.packageAssetId = null;
-          }
-        } else {
-          assetOfreplaced.packageAssetId = null;
-        }
+        
         const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
           assetNumber: assetNumber,
@@ -1075,7 +1055,6 @@ exports.updateAsset = async (req, res, next) => {
           sector: genDataArray[i].sector,
           ...inputObject,
           reserved: false,
-          packageAssetId: assetOfreplaced.packageAssetId,
         });
         for (let j = 0; j < existArrayImageArray.length; j++) {
           if (i == 0) {
