@@ -419,20 +419,7 @@ exports.createPackageAsset = async (req, res, next) => {
         ) {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
-          if (
-            objSubComponentArray[i].replacedAssetNumber != null &&
-            objSubComponentArray[i].replacedAssetNumber != ""
-          ) {
-            const assetOfreplacedData = await Asset.update(
-              { replacedAssetFlag: true },
-              {
-                where: {
-                  assetNumber: objSubComponentArray[i].replacedAssetNumber,
-                },
-                returning: true,
-              }
-            );
-          }
+         
           const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
@@ -1162,21 +1149,7 @@ exports.updatePackageAsset = async (req, res, next) => {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
 
-          if (
-            bottomSubComponentDataObject[i].replacedAssetNumber != null &&
-            bottomSubComponentDataObject[i].replacedAssetNumber != ""
-          ) {
-            const assetOfreplacedData = await Asset.update(
-              { replacedAssetFlag: true },
-              {
-                where: {
-                  assetNumber:
-                    bottomSubComponentDataObject[i].replacedAssetNumber,
-                },
-                returning: true,
-              }
-            );
-          }
+        
           let assetCreate = await Asset.create({
             realAssetId: newestRealAssetId,
             serialNumber: bottomSubComponentDataObject[i].serialNumber,

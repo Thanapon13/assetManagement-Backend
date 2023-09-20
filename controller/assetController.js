@@ -252,7 +252,6 @@ exports.createAsset = async (req, res, next) => {
           depreciationStartDate: depreciationStartDate,
           reserved: false,
           realAssetId: parseInt(newestRealAssetId) + 1,
-          packageAssetId: assetOfreplaced.packageAssetId || null,
         });
         const newAssetId = createdAsset.dataValues._id;
         console.log("newAssetId:", newAssetId);

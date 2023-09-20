@@ -2869,12 +2869,12 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     console.log("packageAssetIdArray", packageAssetIdArray);
 
     // for check all checked is true
-    // const assetIdArrayReturn = assetIdArray.every(
-    //   (asset) => asset.return === "watingApprove"
-    // );
-    // const packageAssetIdArrayReturn = packageAssetIdArray.every(
-    //   (asset) => asset.return === "watingApprove"
-    // );
+    const assetIdArrayReturn = assetIdArray.every(
+      (asset) => asset.return === "waitingApprove"
+    );
+    const packageAssetIdArrayReturn = packageAssetIdArray.every(
+      (asset) => asset.return === "waitingApprove"
+    );
     const borrowById = await Borrow.findByPk(borrowId);
 
     const oldImageArray = await BorrowImage.findAll({
@@ -2921,15 +2921,27 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     }
 
     // return all for approve
-    await Borrow.update(
-      {
-        status: "waitingReturnApprove",
-        borrowReturnDate: borrowReturnDate,
-        // assetIdArray,
-        // packageAssetIdArray,
-      },
-      { where: { _id: borrowId } }
-    );
+    if(assetIdArrayReturn &&packageAssetIdArrayReturn){
+      await Borrow.update(
+        {
+          status: "waitingReturnApprove",
+          borrowReturnDate: borrowReturnDate,
+          // assetIdArray,
+          // packageAssetIdArray,
+        },
+        { where: { _id: borrowId } }
+      );
+    }else{
+      await Borrow.update(
+        {
+          borrowReturnDate: borrowReturnDate,
+          // assetIdArray,
+          // packageAssetIdArray,
+        },
+        { where: { _id: borrowId } }
+      );
+    }
+    
     for (let i = 0; i < assetIdArray?.length; i++) {
       const updateBorrowHasAsset = await BorrowHasAsset.update(
         {
