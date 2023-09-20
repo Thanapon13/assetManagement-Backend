@@ -217,7 +217,15 @@ exports.createPackageAsset = async (req, res, next) => {
           .padStart(4, "0")}`;
         // objGenDataArray.forEach(async (el, index) => {
         let bottomComponenetArray = [];
-
+        if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
+          const assetOfreplacedData = await PackageAsset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: el.replacedAssetNumber },
+              returning: true,
+            }
+          );
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: (newestRealAssetId + 1).toString(),
           assetNumber: assetNumber,
