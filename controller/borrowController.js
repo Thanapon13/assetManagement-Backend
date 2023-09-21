@@ -3064,7 +3064,7 @@ exports.updateBorrowCheckReturnApproveById = async (req, res, next) => {
           },
           {
             where: {
-              assetId: packageAssetIdArray[i].packageAssetId,
+              packageAssetId: packageAssetIdArray[i].packageAssetId,
               borrowId: borrowId,
             },
           }
