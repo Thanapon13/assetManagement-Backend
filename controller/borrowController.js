@@ -2539,7 +2539,7 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
       if (status == "all") {
         queryArray.push({
           status: {
-            [Op.in]: ["waitingReturnApprove", "done"],
+            [Op.in]: ["waitingReturnApprove", "partiallyReturn", "done"],
           },
         });
       } else {
@@ -2548,7 +2548,7 @@ exports.getBySearchBorrowCheck = async (req, res, next) => {
     } else {
       queryArray.push({
         status: {
-          [Op.in]: ["waitingReturnApprove", "done"],
+          [Op.in]: ["waitingReturnApprove", "partiallyReturn", "done"],
         },
       });
     }
@@ -2921,7 +2921,7 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
     }
 
     // return all for approve
-    if(assetIdArrayReturn &&packageAssetIdArrayReturn){
+    if (assetIdArrayReturn && packageAssetIdArrayReturn) {
       await Borrow.update(
         {
           status: "waitingReturnApprove",
@@ -2931,7 +2931,7 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
         },
         { where: { _id: borrowId } }
       );
-    }else{
+    } else {
       await Borrow.update(
         {
           borrowReturnDate: borrowReturnDate,
@@ -2941,7 +2941,7 @@ exports.updateBorrowCheckSavingById = async (req, res, next) => {
         { where: { _id: borrowId } }
       );
     }
-    
+
     for (let i = 0; i < assetIdArray?.length; i++) {
       const updateBorrowHasAsset = await BorrowHasAsset.update(
         {
