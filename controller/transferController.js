@@ -1008,7 +1008,7 @@ exports.getTransferSectorForSearchTransferApprove = async (req, res, next) => {
           [Op.not]: null,
           [Op.not]: "",
         },
-        status : "waiting"
+        status: "waiting",
       },
       group: ["transferSector"],
       raw: true,
@@ -2235,7 +2235,7 @@ exports.getTransferById = async (req, res, next) => {
         if (subComponentTransfer.isPackage == false) {
           const assets = await asset.findOne({
             where: { assetNumber: subComponentTransfer.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+            attributes: ["_id", "brand", "unit", "pricePerUnit", "sector"],
             include: [
               {
                 model: assetImage,

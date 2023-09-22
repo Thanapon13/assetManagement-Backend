@@ -427,7 +427,7 @@ exports.createPackageAsset = async (req, res, next) => {
         ) {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
-         
+
           const componentAssetOfPk = await Asset.create({
             realAssetId: newestRealAssetId++,
             serialNumber: objSubComponentArray[i].serialNumber,
@@ -1157,7 +1157,6 @@ exports.updatePackageAsset = async (req, res, next) => {
           indexOfAsset++;
           let assetNumberOfAsset = `${assetNumber}(${indexOfAsset})`;
 
-        
           let assetCreate = await Asset.create({
             realAssetId: newestRealAssetId,
             serialNumber: bottomSubComponentDataObject[i].serialNumber,
@@ -1265,8 +1264,9 @@ exports.updatePackageAsset = async (req, res, next) => {
             // console.log(existArrayDocumentArray[j].document);
             let newDocumentSplit =
               existArrayDocumentArray[j].document.split("-");
-            let newDocumentName = "";
+            // let newDocumentName = "";
             // console.log("newImageSplit", newImageSplit.length);
+
             for (let u = 0; u < newDocumentSplit.length; u++) {
               if (u == 0) {
                 newDocumentName = newDocumentName + `${Date.now()}-`;
@@ -1276,7 +1276,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             }
             await AssetDocument.create({
               document: newDocumentName,
-              asset: assetCreate.dataValues._id,
+              assetId: assetCreate.dataValues._id,
             });
             // saveSubDocumentArray.push({ document: newDocumentName });
             // console.log("DocumentName", existArrayDocumentArray[j].document);
@@ -2126,8 +2126,6 @@ exports.getPackageAssetById = async (req, res, next) => {
               model: AssetImage,
               as: "assetImages",
             },
-          ],
-          include: [
             {
               model: AssetDocument,
               as: "assetDocuments",
