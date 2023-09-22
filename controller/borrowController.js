@@ -704,8 +704,8 @@ exports.updateBorrow = async (req, res, next) => {
           });
 
           console.log(packageAssetById);
-          console.log(packageAssetById[0].asset);
-          let assetInPackageAssetArray = packageAssetById[0].asset;
+          console.log(packageAssetById[0].assets.length);
+          let assetInPackageAssetArray = packageAssetById[0].assets;
 
           // let packageAssetById = await PackageAsset.find({
           //   assetNumber: deleteAssetArrayObject[i].assetNumber,
@@ -723,7 +723,7 @@ exports.updateBorrow = async (req, res, next) => {
             }
           );
 
-          for (let j = 0; j < assetInPackageAssetArray.length; i++) {
+          for (let j = 0; j < assetInPackageAssetArray.length; j++) {
             await Asset.update(
               { reserved: false },
               {
