@@ -1554,33 +1554,18 @@ exports.rejectIndividualWaitingBorrow = async (req, res, next) => {
       },
       { where: { _id: borrowId } }
     );
-    for (let i = 0; i < assetIdArray; i++) {
-      await BorrowHasAsset.update(
-        {
-          reason: assetIdArray[i].reason,
-          return: assetIdArray[i].return,
-        },
-        { where: { assetId: assetIdArray[i].assetId, borrowId: borrowId } }
-      );
-    }
-    for (let i = 0; i < packageAssetIdArray; i++) {
-      await BorrowHasPkAsset.update(
-        {
-          reason: packageAssetIdArray[i].reason,
-          return: packageAssetIdArray[i].return,
-        },
-        {
-          where: {
-            packageAssetId: packageAssetIdArray[i].packageAssetId,
-            borrowId: borrowId,
-          },
-        }
-      );
-    }
 
     if (assetIdArray.length > 0) {
       for (let j = 0; j < assetIdArray.length; j++) {
         let assetId = assetIdArray[j].assetId;
+
+        await BorrowHasAsset.update(
+          {
+            reason: assetIdArray[j].reason,
+            return: assetIdArray[j].return,
+          },
+          { where: { assetId: assetId, borrowId: borrowId } }
+        );
         // console.log("assetId", assetId);
         let asset = await Asset.update(
           { status: "inStock", reserved: false },
@@ -1593,6 +1578,19 @@ exports.rejectIndividualWaitingBorrow = async (req, res, next) => {
     if (packageAssetIdArray.length > 0) {
       for (let k = 0; k < packageAssetIdArray.length; k++) {
         let packageAssetId = packageAssetIdArray[k].packageAssetId;
+
+        await BorrowHasPkAsset.update(
+          {
+            reason: packageAssetIdArray[k].reason,
+            return: packageAssetIdArray[k].return,
+          },
+          {
+            where: {
+              packageAssetId: packageAssetId,
+              borrowId: borrowId,
+            },
+          }
+        );
         // console.log("packageAssetId", packageAssetId);
         let packageAsset = await PackageAsset.update(
           { status: "inStock", reserved: false },
