@@ -386,8 +386,6 @@ exports.updateTransfer = async (req, res, next) => {
     // console.log("input:", input);
 
     // for store in transfer schema
-    let updateAssetIdArray = [];
-    let updatePackageAssetIdArray = [];
 
     //for  query
     let assetIdHasAssetNumberArray = [];
@@ -406,9 +404,17 @@ exports.updateTransfer = async (req, res, next) => {
       transferById.room = room;
       transferById.name_recorder = name_recorder;
       transferById.name_courier = name_courier;
-      transferById.assetTransferTableArray = saveTransferTableArray;
       await transferById.save();
-
+      await subComponentTransfer.destroy({ where: { transferId: transferId } });
+      for (let i = 0; i < saveTransferTableArray.length; i++) {
+        await subComponentTransfer.create({
+          transferId: transferId,
+          assetNumber: saveTransferTableArray[i].assetNumber,
+          isPackage: saveTransferTableArray[i].isPackage,
+          productName: saveTransferTableArray[i].productName,
+          amount: saveTransferTableArray[i].amount,
+        });
+      }
       return res
         .status(200)
         .json({ message: "This transfer id updated successfully" });
@@ -424,13 +430,13 @@ exports.updateTransfer = async (req, res, next) => {
               where: {
                 assetNumber: saveTransferTableArray[i].assetNumber,
                 // reserved: false
-                reserved: true,
+                reserved: false,
                 status: "inStock",
               },
               include: [
                 {
                   model: asset,
-                  as: "packageAssets",
+                  as: "assets",
                   required: true,
                   attributes: ["_id"],
                 },
@@ -456,16 +462,14 @@ exports.updateTransfer = async (req, res, next) => {
 
             const packageAssetId = packageAsset[0]._id;
             console.log("packageAssetId:", packageAssetId);
+            transferHasPkAsset.create({
+              packageAssetId: packageAssetId,
+              transferId: transferId,
+            });
 
-            updatePackageAssetIdArray.push({ packageAssetId });
-            console.log(
-              "updatePackageAssetIdArray:",
-              updatePackageAssetIdArray
-            );
-
-            if (packageAsset[0].packageAssets.length > 0) {
-              for (let k = 0; k < packageAsset[0].packageAssets.length; k++) {
-                let assetId = packageAsset[0].packageAssets[k]._id;
+            if (packageAsset[0].assets.length > 0) {
+              for (let k = 0; k < packageAsset[0].assets.length; k++) {
+                let assetId = packageAsset[0].assets[k]._id;
                 console.log("assetId:", assetId);
                 let a = await asset.update(
                   { reserved: true },
@@ -476,12 +480,12 @@ exports.updateTransfer = async (req, res, next) => {
                     },
                   }
                 );
-                console.log("a:", a);
               }
             }
             // console.log("packageAssetId:", packageAssetId);
           } else {
             // isPackage === false
+
             const assetUpdate = await asset.update(
               { reserved: true },
               {
@@ -501,6 +505,12 @@ exports.updateTransfer = async (req, res, next) => {
 
             const assetId = assetUpdate[1][0]._id;
             console.log("assetId:", assetId);
+            if (assetId) {
+              await transferHasAsset.create({
+                transferId: transferId,
+                assetId: assetId,
+              });
+            }
           }
         } else {
           // else not have specific assetNumber
@@ -514,7 +524,7 @@ exports.updateTransfer = async (req, res, next) => {
             let packageAssetData = await pkAsset.findAll({
               where: {
                 productName: saveTransferTableArray[i].productName,
-                reserved: true,
+                reserved: false,
                 status: "inStock",
                 _id: {
                   [Op.notIn]: packageAssetIdHasAssetNumberArray,
@@ -538,12 +548,6 @@ exports.updateTransfer = async (req, res, next) => {
               let eachPackageAsset = packageAssetData[j];
               let packageAssetId = eachPackageAsset._id;
 
-              updatePackageAssetIdArray.push({ packageAssetId });
-              // console.log(
-              //   "updatePackageAssetIdArray:",
-              //   updatePackageAssetIdArray
-              // );
-
               await pkAsset.update(
                 { reserved: true },
                 {
@@ -552,16 +556,17 @@ exports.updateTransfer = async (req, res, next) => {
                   },
                 }
               );
+              if (!packageAssetId) {
+                await transferHasPkAsset.create({
+                  packageAssetId: packageAssetId,
+                  transferId: transferId,
+                });
+              }
+              console.log("eachPackageAsset:", eachPackageAsset);
 
-              // console.log("packageAssetId:", packageAssetId);
-
-              if (eachPackageAsset.packageAssets.length > 0) {
-                for (
-                  let k = 0;
-                  k < eachPackageAsset.packageAssets.length;
-                  k++
-                ) {
-                  let assetId = eachPackageAsset.packageAssets[k]._id;
+              if (eachPackageAsset.assets.length > 0) {
+                for (let k = 0; k < eachPackageAsset.assets.length; k++) {
+                  let assetId = eachPackageAsset.assets[k]._id;
                   // console.log("assetId", assetId);
 
                   let assetUpdate = await asset.update(
@@ -577,12 +582,11 @@ exports.updateTransfer = async (req, res, next) => {
             }
           } else {
             // isPackage === false
-            // console.log("isPackage[i]:", saveTransferTableArray[i]);
 
             let assetData = await asset.findAll({
               where: {
                 productName: saveTransferTableArray[i].productName,
-                reserved: true,
+                reserved: false,
                 status: "inStock",
                 _id: {
                   [Op.notIn]: assetIdHasAssetNumberArray,
@@ -604,12 +608,12 @@ exports.updateTransfer = async (req, res, next) => {
                   },
                 }
               );
-              // console.log("-------------------------------------");
-              // console.log("ASSSET ID:", assetId);
-              // console.log("eachAsset", eachAsset);
-              // console.log("-------------------------------------");
-              updateAssetIdArray.push({ assetId });
-              console.log("updateAssetIdArray:", updateAssetIdArray);
+              if (!assetId) {
+                await transferHasAsset.create({
+                  assetId: assetId,
+                  transferId: transferId,
+                });
+              }
             }
           }
         }
@@ -624,25 +628,25 @@ exports.updateTransfer = async (req, res, next) => {
         if (deleteAssetArray[i].isPackage) {
           let packageAssetById = await pkAsset.findAll({
             where: {
-              productName: deleteAssetArray[i].productName,
+              assetNumber: deleteAssetArray[i].assetNumber,
               reserved: true,
               status: "inStock",
             },
             include: [
               {
                 model: asset,
-                as: "packageAssets",
-                required: true,
+                as: "assets",
+                required: false,
                 attributes: ["_id"],
               },
             ],
           });
-          // console.log("packageAssetById:", packageAssetById);
+          console.log("packageAssetById:", packageAssetById);
           // console.log(
           //   "packageAssetById[0].asset:",
           //   packageAssetById[0].packageAssets
           // );
-          let assetInPackageAssetArray = packageAssetById[0].packageAssets;
+          let assetInPackageAssetArray = packageAssetById[0].assets;
           console.log("assetInPackageAssetArray:", assetInPackageAssetArray);
 
           let packageAssetId = packageAssetById[0]._id;
@@ -667,18 +671,9 @@ exports.updateTransfer = async (req, res, next) => {
               }
             );
 
-            await transfer.update(
-              {
-                packageAssetIdArray: Sequelize.literal(
-                  `array_remove(packageAssetIdArray, ${packageAssetId})`
-                ),
-              },
-              {
-                where: {
-                  _id: transferId,
-                },
-              }
-            );
+            await transferHasPkAsset.destroy({
+              where: { packageAssetId: packageAssetId, transferId: transferId },
+            });
           }
         } else {
           let assetById = await asset.findOne({
@@ -700,64 +695,26 @@ exports.updateTransfer = async (req, res, next) => {
             }
           );
 
-          await transfer.update(
-            {
-              assetIdArray: Sequelize.literal(
-                `array_remove(assetIdArray, ${assetId})`
-              ),
-            },
-            {
-              where: {
-                _id: transferId,
-              },
-            }
-          );
+          await transferHasAsset.destroy({
+            where: { assetId: assetId, transferId: transferId },
+          });
         }
       }
     }
 
-    console.log("-----------------------------------------------------");
-    console.log("transferById", transferById);
     transferById.transferSector = transferSector;
-    console.log(" transferById.transferSector:", transferSector);
     transferById.subSector = subSector;
-    console.log("transferById.subSector:", subSector);
     transferById.handler = handler;
-    console.log("transferById.handler:", handler);
     transferById.transfereeSector = transfereeSector;
-    console.log("transferById.transfereeSectorr:", transfereeSector);
     transferById.building = building;
-    console.log("transferById.building:", building);
     transferById.floor = floor;
-    console.log("transferById.floor:", floor);
     transferById.room = room;
-    console.log("transferById.room :", room);
     transferById.name_recorder = name_recorder;
-    console.log(" transferById.name_recorder :", name_recorder);
     transferById.name_courier = name_courier;
-    console.log("transferById.name_courier :", name_courier);
-    console.log("-----------------------------------------------------");
 
     if (transferById.status == "saveDraft" && status == "waiting") {
       transferById.dateTime_recorder = new Date();
-      transferById.assetIdArray = updateAssetIdArray;
-      // console.log("updateAssetIdArray:", updateAssetIdArray);
-      transferById.packageAssetIdArray = updatePackageAssetIdArray;
-      // console.log("updatePackageAssetIdArray:", updatePackageAssetIdArray);
-      transferById.assetTransferTableArray = [];
-    } else {
-      const oldAssetIdArray = transferById.assetIdArray || [];
-      // console.log("oldAssetIdArray:", oldAssetIdArray);
-      const newAssetIdArray = oldAssetIdArray.concat(updateAssetIdArray);
-      // console.log("newAssetIdArray:", newAssetIdArray);
-      transferById.assetIdArray = newAssetIdArray;
-      const oldPackageAssetIdArray = transferById.packageAssetIdArray || [];
-      // console.log("oldPackageAssetIdArray:", oldPackageAssetIdArray);
-      const newPackageAssetIdArray = oldPackageAssetIdArray.concat(
-        updatePackageAssetIdArray
-      );
-      // console.log("newPackageAssetIdArray:", newPackageAssetIdArray);
-      transferById.packageAssetIdArray = newPackageAssetIdArray;
+      await subComponentTransfer.destroy({ where: { transferId: transferId } });
     }
 
     transferById.status = status || transferById.status;
