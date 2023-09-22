@@ -814,8 +814,18 @@ exports.getByAssetNumberSelector = async (req, res, next) => {
       isPackage: true,
     }));
     assetData = assetData.concat(packageAssetData);
+    assetData.sort((a, b) => {
+      const A = a.assetNumber.toLowerCase();
+      const B = b.assetNumber.toLowerCase();
 
-    console.log(assetData.length);
+      if (A < B) {
+        return -1;
+      }
+      if (A > B) {
+        return 1;
+      }
+      return 0;
+    });
 
     res.json({ asset: assetData });
   } catch (err) {
@@ -1044,7 +1054,7 @@ exports.updateAsset = async (req, res, next) => {
           .padStart(4, "0")}`;
         newestRealAssetId = newestRealAssetId + 1;
         console.log("depreciationStartDates : ", depreciationStartDate);
-        
+
         const assetCreated = await asset.create({
           realAssetId: newestRealAssetId,
           assetNumber: assetNumber,
