@@ -1264,7 +1264,7 @@ exports.updatePackageAsset = async (req, res, next) => {
             // console.log(existArrayDocumentArray[j].document);
             let newDocumentSplit =
               existArrayDocumentArray[j].document.split("-");
-            // let newDocumentName = "";
+            let newDocumentName = "";
             // console.log("newImageSplit", newImageSplit.length);
 
             for (let u = 0; u < newDocumentSplit.length; u++) {
