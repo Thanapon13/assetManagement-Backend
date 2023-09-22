@@ -217,7 +217,15 @@ exports.createPackageAsset = async (req, res, next) => {
           .padStart(4, "0")}`;
         // objGenDataArray.forEach(async (el, index) => {
         let bottomComponenetArray = [];
-
+        if (el.replacedAssetNumber != null && el.replacedAssetNumber != "") {
+          const assetOfreplacedData = await PackageAsset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: el.replacedAssetNumber },
+              returning: true,
+            }
+          );
+        }
         let packageAsset = await PackageAsset.create({
           realAssetId: (newestRealAssetId + 1).toString(),
           assetNumber: assetNumber,
@@ -1494,6 +1502,16 @@ exports.updatePackageAsset = async (req, res, next) => {
         });
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
+    }
+
+    if (replacedAssetNumber != null && replacedAssetNumber != "") {
+      const assetOfreplacedData = await PackageAsset.update(
+        { replacedAssetFlag: true },
+        {
+          where: { assetNumber: replacedAssetNumber },
+          returning: true,
+        }
+      );
     }
     let oldDistributeStatus = packageAssetById.distributeStatus;
     packageAssetById.status = status ?? packageAssetById.status;

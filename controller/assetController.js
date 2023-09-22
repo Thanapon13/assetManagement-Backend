@@ -227,20 +227,27 @@ exports.createAsset = async (req, res, next) => {
         let assetNumber = `${assetGroupNumber}/${(count + i + 1)
           .toString()
           .padStart(4, "0")}`;
-        // let dataQuery = {
-        //   params: {
-        //     $filter: `ItemCode eq '${genDataArray[i].assetNumber}'`,
-        //   },
-        // };
-        // const responseCheckAlreadyAsset = await sapAssetMasterService.readCount(
-        //   dataQuery,
-        //   sessionId
-        // );
-        // if (responseCheckAlreadyAsset.data > 0) {
-        //   return res
-        //     .status(409)
-        //     .json({ message: "This assetNumber already exists" });
-        // }
+        let assetOfreplaced = {};
+        if (
+          genDataArray[i].replacedAssetNumber != null &&
+          genDataArray[i].replacedAssetNumber != ""
+        ) {
+          const assetOfreplacedData = await asset.update(
+            { replacedAssetFlag: true },
+            {
+              where: { assetNumber: genDataArray[i].replacedAssetNumber },
+              returning: true,
+            }
+          );
+
+          if (assetOfreplacedData != null) {
+            assetOfreplaced = assetOfreplacedData[1][0].dataValues;
+          } else {
+            assetOfreplaced.packageAssetId = null;
+          }
+        } else {
+          assetOfreplaced.packageAssetId = null;
+        }
         console.log("genDataArray:I", i, genDataArray[i]);
         const createdAsset = await asset.create({
           assetNumber: assetNumber,
@@ -1340,6 +1347,25 @@ exports.updateAsset = async (req, res, next) => {
         delete_file(`./public/documents/${notExistArrayDocument[i].document}`);
       }
     }
+
+    let assetOfreplaced = {};
+    if (replacedAssetNumber != null && replacedAssetNumber != "") {
+      const assetOfreplacedData = await asset.update(
+        { replacedAssetFlag: true },
+        {
+          where: { assetNumber: replacedAssetNumber },
+          returning: true,
+        }
+      );
+
+      if (assetOfreplacedData != null) {
+        assetOfreplaced = assetOfreplacedData[1][0].dataValues;
+      } else {
+        assetOfreplaced.packageAssetId = null;
+      }
+    } else {
+      assetOfreplaced.packageAssetId = null;
+    }
     let oldDistributeStatus = assetById.distributeStatus;
     assetById.status = status ?? assetById.status;
     assetById.engProductName = engProductName;
@@ -1366,6 +1392,7 @@ exports.updateAsset = async (req, res, next) => {
     assetById.asset01 = asset01;
     assetById.serialNumber = serialNumber;
     assetById.replacedAssetNumber = replacedAssetNumber;
+    assetById.packageAssetId = assetOfreplaced.packageAssetId || null;
 
     //สัญญาจัดซื้อ
     assetById.acquisitionMethod = acquisitionMethod;
