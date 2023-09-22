@@ -428,7 +428,6 @@ exports.updateBorrow = async (req, res, next) => {
 
     // for store in borrow schema
 
-
     // for query
     let assetIdHasAssetNumberArray = [];
     let packageAssetIdHasAssetNumberArray = [];
@@ -2135,7 +2134,7 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
         {
           model: BorrowHasAsset,
           as: "borrowHasAssets",
-          require: false,
+          required: false,
           include: [
             {
               model: Asset,
@@ -2150,7 +2149,7 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
         },
         {
           model: BorrowHasPkAsset,
-          require: false,
+          required: false,
 
           as: "borrowHasPkAssets",
           include: [
@@ -2177,7 +2176,6 @@ exports.getViewBorrowApproveDetailById = async (req, res, next) => {
       return res.status(404).json({ message: "This borrow not found" });
     }
     const borrow = borrowArray;
-    console.log("borrow:", borrow);
     const approveArray = [];
     const rejectArray = [];
 

@@ -1793,42 +1793,39 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
     const transferId = req.params.transferId;
     console.log("transferId:", transferId);
 
-    const transferArray = await transfer.findAll({
+    const transferArray = await transfer.findOne({
       where: { _id: transferId },
       include: [
         {
           model: transferHasAsset,
           as: "transferHasAssets",
+          required: false,
           include: [
             {
               model: asset,
               as: "TB_ASSET",
-              attributes: [
-                "_id",
-                "assetNumber",
-                "productName",
-                // "serialNumber",
-                "sector",
-                // "imageArray"
+              include: [
+                {
+                  model: assetImage,
+                  as: "assetImages",
+                },
               ],
             },
           ],
         },
         {
           model: transferHasPkAsset,
+          required: false,
           as: "transferHasPkAssets",
           include: [
             {
               model: pkAsset,
               as: "TB_PACKAGE_ASSET",
-
-              attributes: [
-                "_id",
-                "assetNumber",
-                "productName",
-                // "serialNumber",
-                "sector",
-                // "imageArray"
+              include: [
+                {
+                  model: pkAssetImage,
+                  as: "packageAssetImages",
+                },
               ],
             },
           ],
@@ -1838,8 +1835,25 @@ exports.getViewTransferApproveDetailById = async (req, res, next) => {
     if (transferArray == 0) {
       return res.status(404).json({ message: "This transfer not found" });
     }
+    const approveArray = [];
+    const rejectArray = [];
 
-    res.json({ transferArray });
+    transferArray.transferHasAssets.forEach((asset) => {
+      if (asset.reason !== "") {
+        rejectArray.push(asset);
+      } else {
+        approveArray.push(asset);
+      }
+    });
+
+    transferArray.transferHasPkAssets.forEach((packageAsset) => {
+      if (packageAsset.reason !== "") {
+        rejectArray.push(packageAsset);
+      } else {
+        approveArray.push(packageAsset);
+      }
+    });
+    res.json({ transferArray, approveArray, rejectArray });
   } catch (err) {
     next(err);
   }
