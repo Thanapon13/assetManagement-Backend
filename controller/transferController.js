@@ -2151,7 +2151,6 @@ exports.getTransferById = async (req, res, next) => {
                 "productName",
                 "serialNumber",
                 "sector",
-                // "imageArray"
               ],
               include: [
                 {
@@ -2175,9 +2174,8 @@ exports.getTransferById = async (req, res, next) => {
                 "_id",
                 "assetNumber",
                 "productName",
-                // "serialNumber",
+                "serialNumber",
                 "sector",
-                // "imageArray"
               ],
               include: [
                 {
@@ -2201,12 +2199,18 @@ exports.getTransferById = async (req, res, next) => {
     }
 
     if (transferById && transferById.subComponentTransfers) {
-      const subComponentTransfers = transferById.subComponentTransfers;
-      for (const subComponentTransfer of subComponentTransfers) {
-        if (subComponentTransfer.isPackage == false) {
+      for (const subComponentTransfers of transferById.subComponentTransfers) {
+        if (subComponentTransfers.isPackage == false) {
           const assets = await asset.findOne({
-            where: { assetNumber: subComponentTransfer.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit", "sector"],
+            where: { assetNumber: subComponentTransfers.assetNumber },
+            attributes: [
+              "_id",
+              "serialNumber",
+              "brand",
+              "unit",
+              "pricePerUnit",
+              "sector",
+            ],
             include: [
               {
                 model: assetImage,
@@ -2214,11 +2218,17 @@ exports.getTransferById = async (req, res, next) => {
               },
             ],
           });
-          subComponentTransfer.setDataValue("assets", assets);
+          subComponentTransfers.setDataValue("assets", assets);
         } else {
           const assets = await pkAsset.findOne({
-            where: { assetNumber: subComponentTransfer.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+            where: { assetNumber: subComponentTransfers.assetNumber },
+            attributes: [
+              "_id",
+              "serialNumber",
+              "brand",
+              "unit",
+              "pricePerUnit",
+            ],
             include: [
               {
                 model: pkAssetImage,
@@ -2226,7 +2236,7 @@ exports.getTransferById = async (req, res, next) => {
               },
             ],
           });
-          subComponentTransfer.setDataValue("assets", assets);
+          subComponentTransfers.setDataValue("assets", assets);
         }
       }
     }
