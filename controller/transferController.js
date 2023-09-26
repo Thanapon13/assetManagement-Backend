@@ -2170,13 +2170,7 @@ exports.getTransferById = async (req, res, next) => {
               model: pkAsset,
               as: "TB_PACKAGE_ASSET",
               where: { deletedAt: null },
-              attributes: [
-                "_id",
-                "assetNumber",
-                "productName",
-                "serialNumber",
-                "sector",
-              ],
+              attributes: ["_id", "assetNumber", "productName", "sector"],
               include: [
                 {
                   model: pkAssetImage,
@@ -2222,13 +2216,7 @@ exports.getTransferById = async (req, res, next) => {
         } else {
           const assets = await pkAsset.findOne({
             where: { assetNumber: subComponentTransfers.assetNumber },
-            attributes: [
-              "_id",
-              "serialNumber",
-              "brand",
-              "unit",
-              "pricePerUnit",
-            ],
+            attributes: ["_id", "brand", "unit", "pricePerUnit"],
             include: [
               {
                 model: pkAssetImage,
