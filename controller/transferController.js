@@ -1229,13 +1229,15 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
               { status: "inStock", reserved: false },
               { where: { _id: assetId }, returning: true }
             );
-
             await transferHasAsset.update(
               {
-                reason: assetIdArray[i].reason,
-                return: assetIdArray[i].return,
+                reason: assetIdArray[j].reason,
+                return: assetIdArray[j].return,
               },
-              { where: { _id: assetIdArray[i]._id, transferId: transferId } }
+              {
+                where: { assetId: assetId, transferId: transferId },
+                returning: true,
+              }
             );
           }
         }
@@ -1264,12 +1266,12 @@ exports.rejectAllWaitingTransfer = async (req, res, next) => {
             }
             await transferHasPkAsset.update(
               {
-                reason: packageAssetIdArray[i].reason,
-                return: packageAssetIdArray[i].return,
+                reason: packageAssetIdArray[k].reason,
+                return: packageAssetIdArray[k].return,
               },
               {
                 where: {
-                  _id: packageAssetIdArray[i]._id,
+                  packageAssetId: packageAssetId,
                   transferId: transferId,
                 },
               }
@@ -1320,6 +1322,17 @@ exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
           { status: "inStock", reserved: false },
           { where: { _id: assetId }, returning: true }
         );
+
+        await transferHasAsset.update(
+          {
+            reason: assetIdArray[j].reason,
+            return: assetIdArray[j].return,
+          },
+          {
+            where: { assetId: assetId, transferId: transferId },
+            returning: true,
+          }
+        );
       }
     }
 
@@ -1330,6 +1343,18 @@ exports.rejectIndividualWaitingTransfer = async (req, res, next) => {
         await pkAsset.update(
           { status: "inStock", reserved: false },
           { where: { _id: packageAssetId }, returning: true }
+        );
+        await transferHasPkAsset.update(
+          {
+            reason: packageAssetIdArray[k].reason,
+            return: packageAssetIdArray[k].return,
+          },
+          {
+            where: {
+              packageAssetId: packageAssetId,
+              transferId: transferId,
+            },
+          }
         );
 
         let assetArray = await asset.findAll({
@@ -2216,7 +2241,7 @@ exports.getTransferById = async (req, res, next) => {
         } else {
           const assets = await pkAsset.findOne({
             where: { assetNumber: subComponentTransfers.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit"],
+            attributes: ["_id", "brand", "unit", "pricePerUnit", "sector"],
             include: [
               {
                 model: pkAssetImage,
