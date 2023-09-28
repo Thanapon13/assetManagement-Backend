@@ -1,19 +1,16 @@
 version: '3.7'
 services:
   backend:
-    container_name: asset-backend_c
+    build : ./
     image: asset-backend:v1
-    # volumes:
-    #   - dependencies: /node_modules
-    
-    # - db-data: var/opt/mssql/data
-    #   - mssql_log: /var/opt/mssql/log
-    #   - mssql_backup: /var/opt/mssql/backup
+    container_name: asset-backend_c
     ports:
       - 4000:4000
+    volumes:
+      - ./app:/src/app
+    
     environment:
       NODE_ENV: development
     restart: always
    
-# volumes:
-#   dependencies:
+

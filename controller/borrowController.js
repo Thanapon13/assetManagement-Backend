@@ -1259,7 +1259,15 @@ exports.getBorrowById = async (req, res, next) => {
         if (subComponentBorrow.isPackage == false) {
           const assets = await Asset.findOne({
             where: { assetNumber: subComponentBorrow.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit", "price"],
+            attributes: [
+              "_id",
+              "brand",
+              "unit",
+              "pricePerUnit",
+              "price",
+              "reserved",
+              "status",
+            ],
             include: [
               {
                 model: assetImage,
@@ -1271,7 +1279,15 @@ exports.getBorrowById = async (req, res, next) => {
         } else {
           const assets = await PackageAsset.findOne({
             where: { assetNumber: subComponentBorrow.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit", "price"],
+            attributes: [
+              "_id",
+              "brand",
+              "unit",
+              "pricePerUnit",
+              "price",
+              "reserved",
+              "status",
+            ],
             include: [
               {
                 model: pkAssetImage,
