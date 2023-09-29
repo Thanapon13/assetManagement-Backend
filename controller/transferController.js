@@ -2229,6 +2229,8 @@ exports.getTransferById = async (req, res, next) => {
               "unit",
               "pricePerUnit",
               "sector",
+              "reserved",
+              "status",
             ],
             include: [
               {
@@ -2241,7 +2243,15 @@ exports.getTransferById = async (req, res, next) => {
         } else {
           const assets = await pkAsset.findOne({
             where: { assetNumber: subComponentTransfers.assetNumber },
-            attributes: ["_id", "brand", "unit", "pricePerUnit", "sector"],
+            attributes: [
+              "_id",
+              "brand",
+              "unit",
+              "pricePerUnit",
+              "sector",
+              "reserved",
+              "status",
+            ],
             include: [
               {
                 model: pkAssetImage,
